@@ -2,9 +2,8 @@
 import os
 
 import ee
-import ee.data
 
-from buckets import (
+from unicef_geospatial.earth_engine.buckets import (
     create_bucket,
     upload_bucket_to_ee,
     upload_directory,

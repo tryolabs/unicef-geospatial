@@ -5,7 +5,12 @@ from typing import Literal, Optional
 
 import pandas as pd
 
-from unicef_api import get_data, get_data_json, get_dataflow_list
+from unicef_geospatial.data_warehouse.unicef_api import (
+    build_csv_from_json,
+    get_data,
+    get_data_json,
+    get_dataflow_list,
+)
 
 # %%
 all_dataflows = get_dataflow_list()
@@ -57,99 +62,6 @@ for dataflow_id in all_dataflows_ids:
     except Exception as e:
         print(f"Error for dataflow {dataflow_id}: {e}")
         continue
-
-    def build_csv_from_json(json_data: dict):
-        data_structure = json_data["structure"]
-
-        # Get dimension and attribute definitions upfront
-        dimensions = {
-            "observation": [
-                d["id"] for d in data_structure["dimensions"]["observation"]
-            ],
-            "series": [d["id"] for d in data_structure["dimensions"]["series"]],
-        }
-        attributes = {
-            "observation": [
-                a["id"] for a in data_structure["attributes"]["observation"]
-            ],
-            "series": [a["id"] for a in data_structure["attributes"]["series"]],
-        }
-
-        # Create lookup dictionaries for faster value retrieval
-        value_lookups = {
-            ("dimensions", "observation"): {
-                (i, val_pos): val["id"]
-                for i, dim in enumerate(data_structure["dimensions"]["observation"])
-                for val_pos, val in enumerate(dim["values"])
-            },
-            ("dimensions", "series"): {
-                (i, val_pos): val["id"]
-                for i, dim in enumerate(data_structure["dimensions"]["series"])
-                for val_pos, val in enumerate(dim["values"])
-            },
-            ("attributes", "observation"): {
-                (i, val_pos): val["id"]
-                for i, attr in enumerate(data_structure["attributes"]["observation"])
-                for val_pos, val in enumerate(attr["values"])
-            },
-            ("attributes", "series"): {
-                (i, val_pos): val["id"]
-                for i, attr in enumerate(data_structure["attributes"]["series"])
-                for val_pos, val in enumerate(attr["values"])
-            },
-        }
-
-        def get_values_fast(
-            ids: list[int], structure_type: str, dimension_type: str
-        ) -> list:
-            lookup = value_lookups[(structure_type, dimension_type)]
-            return [
-                lookup.get((i, id_val)) if id_val is not None else None
-                for i, id_val in enumerate(ids)
-            ]
-
-        data = json_data["dataSets"][0]["series"]
-        # Process all series at once using list comprehension
-        rows = [
-            (
-                # Observation dimensions
-                get_values_fast(
-                    [int(x) for x in obs_dims.split(":")], "dimensions", "observation"
-                )
-                + [None] * (len(dimensions["observation"]) - len(obs_dims.split(":")))
-                +
-                # Series dimensions
-                get_values_fast(
-                    [int(x) for x in series_id.split(":")], "dimensions", "series"
-                )
-                + [None] * (len(dimensions["series"]) - len(series_id.split(":")))
-                +
-                # Observation attributes
-                get_values_fast(obs_attrs[1:], "attributes", "observation")
-                + [None] * (len(attributes["observation"]) - len(obs_attrs[1:]))
-                +
-                # Series attributes
-                get_values_fast(series_data["attributes"], "attributes", "series")
-                + [None] * (len(attributes["series"]) - len(series_data["attributes"]))
-                +
-                # Observation value
-                [obs_attrs[0]]
-            )
-            for series_id, series_data in data.items()
-            if "observations" in series_data.keys()
-            and "attributes" in series_data.keys()
-            for obs_dims, obs_attrs in series_data["observations"].items()
-        ]
-
-        column_names = (
-            dimensions["observation"]
-            + dimensions["series"]
-            + attributes["observation"]
-            + attributes["series"]
-            + ["OBS_VALUE"]
-        )
-
-        return pd.DataFrame(rows, columns=column_names)
 
     # much faster doing this!
     start = time.time()
