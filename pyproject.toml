@@ -1,0 +1,233 @@
+[tool.pytest.ini_options]
+# Adding the current directory to the Python path so that pytest can find the modules to test.
+# Directories will be added to the head of sys.path
+# Docs relevant to this step: https://docs.pytest.org/en/7.1.x/reference/reference.html#confval-pythonpath
+pythonpath = "."
+testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_also = [
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "def __str__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+
+]
+
+omit = ["**/tests/*", "*/__init__.py", "**/logging_config.py"]
+
+include_namespace_packages = "true"
+
+[tool.ruff]
+line-length = 100
+extend-exclude = [".venv"]
+
+[tool.pyright]
+# Very optional: type checking. Values are off, basic and strict. See more at https://code.visualstudio.com/docs/python/settings-reference#_pylance-language-server.
+typeCheckingMode = "strict"
+
+exclude = [".venv"]
+
+reportMissingTypeStubs = false
+
+reportUnusedExpression = false
+
+reportUnknownVariableType = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownLambdaType = false
+
+reportUntypedFunctionDecorator = false
+
+reportMissingTypeArgument = false
+reportMissingParameterType = false
+reportArgumentType = false
+[tool.ruff.lint.extend-per-file-ignores]
+"**/tests/**/*.py" = [
+    "S101", # S101 - Checks for uses of the assert keyword. - necessary for testing.
+    "B018", # B018 - Found useless expression - necessary for testing exceptions are raised.
+    "D100", # D100 - Module dostrings not required in test files.
+    "D104", # D104 - Package dostrings not required in test files.
+    "ARG",  # ARG - Unused args are common in tests with mock patches and mock functions.
+]
+
+"**/notebooks/**/*.py" = ["B018", "ANN"]
+
+[tool.ruff.lint]
+select = [
+    "F",     # Pyflakes
+    "E",     # pycodestyle (error)
+    "W",     # pycodestyle (warning)
+    "D",     # pydocstyle - docstring style checker
+    "C901",  # Checks for functions with a high McCabe complexity.
+    "I",     # isort
+    "N",     # pep8-naming - Check PEP-8 naming conventions
+    "UP",    # pyupgade - automatically upgrade syntax for newer versions.
+    "YTT",   # Checks for misuse of `sys.version` or `sys.version_info`
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8 plugin for Trio-AnyIO-asyncio related problems.
+    "S",     # Automated security testing with bandit and flake8.
+    "BLE",   # flake8-blind-except - checks for blind except: statements
+    "FBT",   # flake8-boolean-trap - forbids boolean positional arguments
+    "B",     # flake8-bugbear - find likely bugs and design problems in your program
+    "A",     # flake8-builtins - Check for python builtins being used as variables or parameters
+    "COM",   # flake8 lint for trailing commas.
+    "C4",    # flake8-comprehensions - help you write better list/set/dict comprehensions.
+    "DTZ",   # flake8 - ban the usage of unsafe naive datetime class
+    "T10",   # ipdb/pdb statement checker plugin for flake8
+    "DJ",    # Catch bad style specific to Django Projects.
+    "EM",    # Flake checker for raw literals inside raises
+    "EXE",   # checking executable permissions and shebangs.
+    "ISC",   # Encourage correct string literal concatenation.
+    "ICN",   # An opinionated plugin for Flake8 on how certain packages should be imported or aliased.
+    "LOG",   # Checks for issues using the standard library logging module.
+    "G",     # Validate (lack of) logging format strings
+    "PIE",   # flake8-pie implements misc lints
+    "T20",   # flake8-print - print statement checker
+    "PYI",   # flake8-pyi - enable linting .pyi stub files.
+    "PT",    # checking common style issues or inconsistencies with pytest-based tests.
+    "Q",     # Flake8 lint for quotes.
+    "RSE",   # flake8-raise - finds improvements for raise statements.
+    "SLF",   # flake8-self - Private member access linting
+    "SIM",   # flake8-simplify - checks for code that can be simplified
+    "TID",   # flake8-tidy-imports - helps you write tidier imports.
+    "TCH",   # managing type-checking imports & forward references
+    "INT",   # flake-8 gettext
+    "ARG",   # flake8-unused-arguments - warn on unused function arguments
+    "PTH",   # finding use of functions that can be replaced by pathlib module.
+    "TD",    # check TODOs in the project.
+    "FIX",   # flake8-fixme - Check for FIXME, TODO and other temporary developer notes.
+    "ERA",   # eradicate - Removes commented-out code.
+    "PD",    # plugin to lint pandas in an opinionated way.
+    "PGH",   # pygrep-hooks
+    "PL",    # Pylint - python code static checker
+    "TRY",   # tryceratops - Prevent Exception Handling AntiPatterns
+    "FLY",   # convert a python project's %-formatted strings to f-strings.
+    "NPY",   # NumPy-specific rules
+    "AIR",   # airflow specific rules
+    "PERF",  # perflint - prevent with performance anti-patterns
+    "FURB",  # refurbish and modernize Python codebases
+    #"CPY",    # adds copyright checks
+    # "INP",    # Ban PEP-420 implicit namespace packages.
+    #"RET",    # flake8-return - checks return values
+    #"SLOT",   # Plugin to require __slots__ to be defined for subclasses of immutable types.
+]
+
+unfixable = [
+    "PIE794", # duplicate class field name - the fix is to delete one entry, which is unlikely to be the correct fix.
+]
+
+ignore = [
+    "ANN101",  # Don't require type annotations for self.
+    "ANN102",  # Don't require type annotations for cls.
+    "ANN401",  # Any is allowed.
+    "D418",    # overload-with-docstring; Overloads should have docstrings when they alter the API/functionality.
+    "FIX002",  # Allow TODO tags but no others.
+    "TRY003",  # Makes no sense for builtin exceptions.
+    "RSE102",  # This is a stylistic choice, but the check doesn't verify the item being raised is an object preventing a function from returning an error to raise.
+    "PERF203", # No try...except in for loop - No clear action to take when this is flagged.
+    "RUF013",  # This is a very basic check prone to false positives, let pyright handle it
+    "E203",    # Whitespace before ':' - Don't lint for style beyond what black cares about.
+    "PLR6301", # no-self-use - Switching to static has functionality considerations and may not be appropriate.
+    "FBT003",  # Boolean positional value in function call - this flags an issue twice and forces per use suppression.
+    "SIM108",  # Use ternary; this can be good, but the check is overzealous and suggests changes that involve line breaks.
+    "SIM117",  # Use single with; like SIM108 this can be good, but it isn't appropriate in all contexts and could easily result in line breaks.
+    "A003",    # Class attribute shadowing builtin; doesn't matter for classes.
+    "PIE790",  # Unnecessary "..." literal; conflicts with pyright for protocols. Removing ... pyright expects a return statement.
+    "D100",    # Missing docstring in public module
+    "D101",    # Missing docstring in public class
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
+    "D104",    # Missing docstring in public package
+    "D106",    # Missing docstring in public nested class
+    "D107",    # Missing docstring in `__init__`
+    # The settings below are suggested to be disabled when formatting with Ruff.
+    "W191",   # tab indentation; conflicts with formatting.
+    "E111",   # indentation with with invalid multiple; conflicts with formatting.
+    "E114",   # indentation with invalid comment; conflicts with formatting.
+    "E117",   # over indented; conflicts with formatting.
+    "D206",   # indent with spaces; conflicts with formatting.
+    "D300",   # triple single quotes; conflicts with formatting.
+    "Q000",   # bad quotes inline string; conflicts with formatting.
+    "Q001",   # bad quotes multiline string; conflicts with formatting.
+    "Q002",   # bad quotes docstring; conflicts with formatting.
+    "Q003",   # avoidable escpaped quote; conflicts with formatting.
+    "COM812", # missing trailing comma; conflicts with formatting.
+    "COM819", # prohibited trailing comma; conflicts with formatting.
+    "ISC001", # single line implicit string concatenation; conflicts with formatting.
+    "ISC002", # multi line implicit string concatenation; conflicts with formatting.
+]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+
+# Settings for google standard.
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.poetry]
+name = "unicef-geospatial"
+version = "0.1.0"
+description = ""
+authors = ["Federico Bello <fe.debello13@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+langchain = "^0.3.9"
+langchain-cohere = "^0.3.3"
+langchain-experimental = "^0.3.3"
+pandas = "^2.2.3"
+seaborn = "^0.13.2"
+earthengine-api = "^1.4.2"
+geemap = "^0.35.1"
+langchain-openai = "^0.2.11"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.2"
+docstr-coverage = "^2.3.2"
+pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
+pre-commit = "^4.0.1"
+detect-secrets = "^1.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
