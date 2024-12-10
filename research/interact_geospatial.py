@@ -1,4 +1,5 @@
 # %%
+import time
 from typing import Literal
 
 import ee
@@ -6,6 +7,7 @@ import pycountry
 from dotenv import load_dotenv
 from langchain.tools import tool
 from langchain_cohere import ChatCohere
+from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
 
 load_dotenv(override=True)
@@ -20,7 +22,8 @@ REDUCERS = Literal["mean", "max", "min"]
 
 
 # %%
-def print_stream(stream):
+def print_stream(stream: list) -> None:
+    """Print messages from a stream of LangChain agent responses."""
     for s in stream:
         message = s["messages"][-1]
         if isinstance(message, tuple):
@@ -29,7 +32,7 @@ def print_stream(stream):
             message.pretty_print()
 
 
-def normalize_country_name(country: str) -> str:
+def standarize_country_name(country: str) -> str:
     """Return the official country name using the input."""
     try:
         country_obj = (
@@ -49,7 +52,7 @@ def normalize_country_name(country: str) -> str:
 def get_heatwave_metric_for_country(
     metric: METRICS, decade: DECADES, country: str, reducer: REDUCERS = "mean"
 ) -> dict:
-    """Get the average value of a heatwave metric for a specific country and decade.
+    """Get the value of a heatwave metric for a specific country and decade.
 
     Args:
         metric: One of 'frequency', 'duration', 'severity', 'extreme_high_temp'
@@ -60,7 +63,7 @@ def get_heatwave_metric_for_country(
     Returns:
         The value of the heatwave metric for the specified country and decade.
     """
-    country = normalize_country_name(country)
+    country = standarize_country_name(country)
     heatwave_tiff = ee.Image(
         f"projects/unicef-geospatial/assets/heatwaves/{metric}/average_heatwaves_{metric}_{decade}_proj_COG"
     )
@@ -87,16 +90,18 @@ system_prompt = """You are an expert in analyzing heatwave data across different
 You have access to a tool that can retrieve the value of a heatwave metric for a specific country and decade.
 The available metrics are:
 - frequency: How often heatwaves occur
-- duration: How long heatwaves typically last
-- severity: How intense the heatwaves are
-- extreme_high_temp: The highest temperature recorded during a heatwave
+- duration: Average length of heatwave event (Number of days).
+- severity: Average exceedance in degrees Celsius of the heatwave threshold for each event.
+- extreme_high_temp: Annual average number of days in which 35°C is exceeded.
 
 You can analyze data from the 1960s through the 2020s. When users ask questions, make sure to:
 1. Identify the correct metric they're asking about
 2. Determine the relevant decade
 3. Properly identify the country name
 4. Use the tool to fetch the data and specify if you want the mean, max, or min value
-5. Return the response saying "The _reducer_ value of the heatwave _metric_ for _country_ in the _decade_ is _value_"
+5. Return the response saying something like but using the same language as the user's question:
+
+"The _reducer_ value of the heatwave _metric_ for _country_ in the _decade_ is _value_"
 """
 
 graph = create_react_agent(
@@ -111,7 +116,7 @@ inputs = {
     "messages": [
         {
             "role": "user",
-            "content": "What was the maximum temperature in Uruguay in the 2020s?",
+            "content": "What was the average duration of heatwaves in Uy in the 1990s?",
         }
     ]
 }
