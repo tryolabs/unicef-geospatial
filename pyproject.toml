@@ -223,6 +223,8 @@ rasterio = "^1.4.3"
 geopandas = "^1.0.1"
 pycountry = "^24.6.1"
 langgraph = "^0.2.56"
+uvicorn = "^0.34.0"
+fastapi = {extras = ["standard"], version = "^0.115.6"}
 
 
 [tool.poetry.group.dev.dependencies]
