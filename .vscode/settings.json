@@ -56,10 +56,12 @@
   "editor.formatOnSaveMode": "file",
   "python.defaultInterpreterPath": "venv",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/unicef_geospatial"
+    "${workspaceFolder}/unicef_geospatial",
+    "${workspaceFolder}",
   ],
   "python.autoComplete.extraPaths": [
-    "${workspaceFolder}/unicef_geospatial"
+    "${workspaceFolder}/unicef_geospatial",
+    "${workspaceFolder}"
   ],
   "git.ignoreRebaseWarning": true,
   "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
