@@ -2,8 +2,7 @@ from langchain.chat_models.base import BaseChatModel
 from langchain.tools import BaseTool
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
-
-from unicef_geospatial.utils.output import print_stream
+from utils.output import print_stream
 
 
 def create_agent(

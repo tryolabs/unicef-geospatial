@@ -1,0 +1,68 @@
+{
+  "python.languageServer": "Pylance",
+  "workbench.sideBar.location": "left",
+  "editor.formatOnSave": true,
+  "editor.fontSize": 12,
+  "editor.rulers": [99],
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.fixAll.isort": "always"
+    }
+  },
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.formatOnPaste": true,
+  "explorer.confirmDragAndDrop": false,
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "editor.inlineSuggest.enabled": true,
+  "notebook.output.textLineLimit": 100,
+  "jupyter.askForKernelRestart": false,
+  "explorer.confirmDelete": false,
+  "workbench.colorTheme": "Default Dark Modern",
+  "markdown-preview-enhanced.previewTheme": "atom-dark.css",
+  "black-formatter.args": ["--line-length", "88"],
+  "editor.formatOnSaveMode": "file",
+  "python.defaultInterpreterPath": "venv",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/unicef_geospatial"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/unicef_geospatial"
+  ],
+  "git.ignoreRebaseWarning": true,
+  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "git.autofetch": true,
+  "terminal.integrated.enableMultiLinePasteWarning": "never"
+}

@@ -4,8 +4,7 @@ from pprint import pprint
 from typing import Literal, Optional
 
 import pandas as pd
-
-from unicef_geospatial.data_warehouse.unicef_api import (
+from data_warehouse.unicef_api import (
     build_csv_from_json,
     get_data,
     get_data_json,

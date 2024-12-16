@@ -2,12 +2,11 @@
 import time
 
 import pandas as pd
+from data_warehouse.unicef_api import get_data, preprocess_data
 from dotenv import load_dotenv
 from langchain_cohere import ChatCohere
 from pandasai import Agent
 from pandasai.skills import skill
-
-from unicef_geospatial.data_warehouse.unicef_api import get_data, preprocess_data
 
 load_dotenv(override=True)
 

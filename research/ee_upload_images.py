@@ -1,9 +1,6 @@
 # %%
-import os
-
 import ee
-
-from unicef_geospatial.earth_engine.buckets import (
+from earth_engine.buckets import (
     create_bucket,
     upload_bucket_to_ee,
     upload_directory,

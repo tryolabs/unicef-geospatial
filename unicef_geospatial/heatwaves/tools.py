@@ -2,8 +2,7 @@ from typing import Literal
 
 import ee
 from langchain.tools import tool
-
-from unicef_geospatial.utils.country import standarize_country_name
+from utils.country import standarize_country_name
 
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]

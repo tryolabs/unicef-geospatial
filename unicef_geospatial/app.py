@@ -1,18 +1,17 @@
 from pathlib import Path
 
 import yaml
+from agent.agent import create_agent, run_agent
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-
-from unicef_geospatial.agent.agent import create_agent, run_agent
-from unicef_geospatial.heatwaves.tools import (
+from heatwaves.tools import (
     get_heatwave_metric_for_admin_level_1,
     get_heatwave_metric_for_country,
 )
-from unicef_geospatial.utils.initialize import get_llm, initialize_earth_engine
-from unicef_geospatial.utils.prompts import system_prompt
+from pydantic import BaseModel
+from utils.initialize import get_llm, initialize_earth_engine
+from utils.prompts import system_prompt
 
 app = FastAPI()
 params_path = Path("unicef_geospatial/params.yaml")
