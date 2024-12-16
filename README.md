@@ -11,6 +11,22 @@ The project dependencies are managed using `poetry`.
 poetry install
 ```
 
+### Running the project
+
+First, initalize the poetry environment.
+
+```bash
+poetry shell
+```
+
+Then, run the project.
+
+```bash
+python -m unicef_geospatial.app
+```
+
+This will start a local server at `http://127.0.0.1:8000/`.
+
 ### Project structure
 
 - `unicef_geospatial/`: The main project for working with geospatial data.
