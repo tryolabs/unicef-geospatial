@@ -1,14 +1,8 @@
-from typing import Literal
-
 import ee
 from langchain.tools import tool
+from utils.constants import ADMIN_LEVEL_1_BOUNDRIES_DATASET, COUNTRY_BOUNDRIES_DATASET
 from utils.country import standarize_country_name
-
-METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
-DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
-COUNTRY_BOUNDRIES_DATASET = "USDOS/LSIB_SIMPLE/2017"
-ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
-REDUCERS = Literal["mean", "max", "min"]
+from utils.types import DECADES, METRICS, REDUCERS
 
 
 @tool

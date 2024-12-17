@@ -64,7 +64,7 @@ def get_values(
     return [lookup.get((i, id_val)) for i, id_val in enumerate(ids)]
 
 
-def build_csv_from_json(json_data: dict) -> pd.DataFrame:
+def build_df_from_json(json_data: dict) -> pd.DataFrame:
     """Build a CSV DataFrame from SDMX-JSON data.
 
     Args:

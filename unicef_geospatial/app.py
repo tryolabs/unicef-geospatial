@@ -5,13 +5,9 @@ from agent.agent import create_agent, run_agent
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from heatwaves.tools import (
-    get_heatwave_metric_for_admin_level_1,
-    get_heatwave_metric_for_country,
-)
 from logging_config import get_logger
 from pydantic import BaseModel
-from utils.initialize import get_llm, initialize_earth_engine
+from utils.initialize import get_llm, get_tools, initialize_earth_engine
 from utils.prompts import system_prompt
 
 app = FastAPI()
@@ -24,7 +20,7 @@ logger.info("Loading application with project %s", params["ee"]["project"])
 
 initialize_earth_engine(params["ee"]["project"])
 
-tools = [get_heatwave_metric_for_country, get_heatwave_metric_for_admin_level_1]
+tools = get_tools()
 llm = get_llm(params["llm"]["temperature"])
 agent = create_agent(llm, tools, system_prompt)
 
