@@ -1,6 +1,7 @@
 import ee
+from geospatial.country import filter_dataset_by_country
 from langchain.tools import tool
-from utils.constants import ADMIN_LEVEL_1_BOUNDRIES_DATASET, COUNTRY_BOUNDRIES_DATASET
+from utils.constants import ADMIN_LEVEL_1_BOUNDRIES_DATASET
 from utils.country import standarize_country_name
 from utils.types import DECADES, METRICS, REDUCERS
 
@@ -24,13 +25,12 @@ def get_heatwave_metric_for_country(
     heatwave_tiff = ee.Image(
         f"projects/unicef-geospatial/assets/heatwaves/{metric}/average_heatwaves_{metric}_{decade}_proj_COG"
     )
-    countries_boundries = ee.FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
-
-    country_boundries = countries_boundries.filter(ee.Filter.eq("country_na", country))
-    country_heatwave = heatwave_tiff.clip(country_boundries)
+    country_heatwave, country_boundry = filter_dataset_by_country(
+        heatwave_tiff, country
+    )
     stats = country_heatwave.reduceRegion(
         reducer=getattr(ee.Reducer, reducer)(),
-        geometry=country_boundries.geometry(),
+        geometry=country_boundry.geometry(),
         scale=1000,
         maxPixels=1e13,
     )

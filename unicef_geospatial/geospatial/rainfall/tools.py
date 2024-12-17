@@ -1,7 +1,7 @@
-# %%
 import ee
+from geospatial.country import filter_dataset_by_country
 from langchain.tools import tool
-from utils.constants import COUNTRY_BOUNDRIES_DATASET, RAINFALL_DATASET
+from utils.constants import RAINFALL_DATASET
 from utils.types import REDUCERS
 
 INITIAL_YEAR = 1979
@@ -24,14 +24,12 @@ def get_precipitation_for_country(
         The value of the precipitation for the specified country and month (in mm)
     """
     rainfall_image = get_rainfall_image(year, month)
-    countries_boundries = ee.FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
-    countries_boundries = countries_boundries.filter(
-        ee.Filter.eq("country_na", country)
+    rainfall_country_image, country_boundry = filter_dataset_by_country(
+        rainfall_image, country
     )
-    rainfall_image = rainfall_image.clip(countries_boundries)
-    stats = rainfall_image.reduceRegion(
+    stats = rainfall_country_image.reduceRegion(
         reducer=getattr(ee.Reducer, reducer)(),
-        geometry=countries_boundries.geometry(),
+        geometry=country_boundry.geometry(),
         scale=1000,
         maxPixels=1e13,
     )
