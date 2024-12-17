@@ -13,7 +13,7 @@ poetry install
 
 ### Running the project
 
-First, initalize the poetry environment.
+First, initialize the poetry environment:
 
 ```bash
 poetry shell
@@ -22,7 +22,7 @@ poetry shell
 Then, run the project.
 
 ```bash
-python -m unicef_geospatial.app
+PYTHONPATH=$PYTHONPATH:./unicef_geospatial poetry run python -m unicef_geospatial.app
 ```
 
 This will start a local server at `http://127.0.0.1:8000/`.
