@@ -15,3 +15,16 @@ def standarize_country_name(country: str) -> str:
             return country
     except KeyError:
         return country
+
+
+def get_country_code(country: str) -> str:
+    """Return the country code using the input."""
+    try:
+        country = standarize_country_name(country)
+        country_obj = pycountry.countries.get(name=country)
+        if country_obj:
+            return country_obj.alpha_3
+        else:
+            return country
+    except KeyError:
+        return country

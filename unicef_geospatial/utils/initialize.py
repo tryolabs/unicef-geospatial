@@ -9,6 +9,11 @@ from geospatial.rainfall.tools import get_precipitation_for_country
 from langchain.chat_models.base import BaseChatModel
 from langchain_cohere import ChatCohere
 
+from unicef_geospatial.data_warehouse.tools import (
+    get_all_indicators_for_climate_risk_index,
+    get_climate_risk_index_data,
+)
+
 
 def initialize_earth_engine(project: str) -> None:
     """Initialize the Earth Engine API."""
@@ -27,4 +32,6 @@ def get_tools() -> list[Callable]:
         get_heatwave_metric_for_country,
         get_heatwave_metric_for_admin_level_1,
         get_precipitation_for_country,
+        get_all_indicators_for_climate_risk_index,
+        get_climate_risk_index_data,
     ]

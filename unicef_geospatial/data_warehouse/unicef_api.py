@@ -1,10 +1,11 @@
 import urllib.parse
-from typing import Any
+from typing import Any, Literal
 
 import pandas as pd
 import requests
 
 BASE_URL = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest/"
+OUTPUT_FORMATS = Literal["sdmx-json", "csv"]
 
 
 def get_dataflow_list() -> list[dict[str, Any]]:
@@ -21,25 +22,19 @@ def get_dataflow_list() -> list[dict[str, Any]]:
     return response.json()["data"]["dataflows"]
 
 
-def get_data(dataflow_id: str) -> pd.DataFrame:
-    """Get data for a specific dataflow ID in CSV format.
-
-    Args:
-        dataflow_id (str): ID of the dataflow to retrieve
-
-    Returns:
-        pd.DataFrame: DataFrame containing the requested data
-    """
-    url = urllib.parse.urljoin(BASE_URL, f"data/{dataflow_id}/All?format=csv")
-    data = pd.read_csv(url)
-    return data
-
-
-def get_data_json(dataflow_id: str) -> dict[str, Any]:
+def get_data(
+    dataflow_id: str,
+    ref_areas: list[str] | None = None,
+    indicators: list[str] | None = None,
+    output_format: OUTPUT_FORMATS = "sdmx-json",
+) -> pd.DataFrame:
     """Get data for a specific dataflow ID in JSON format.
 
     Args:
         dataflow_id (str): ID of the dataflow to retrieve
+        ref_areas (list[str]): List of reference areas to retrieve
+        indicators (list[str]): List of indicators to retrieve
+        output_format (OUTPUT_FORMATS): Format of the output data
 
     Returns:
         Dict[str, Any]: Dictionary containing the requested data
@@ -47,11 +42,27 @@ def get_data_json(dataflow_id: str) -> dict[str, Any]:
     Raises:
         Exception: If the API returns an error response
     """
-    url = urllib.parse.urljoin(BASE_URL, f"data/{dataflow_id}/All?format=sdmx-json")
+    if indicators is not None or ref_areas is not None:
+        indicators = indicators or []
+        ref_areas = ref_areas or []
+        indicators_str = "+".join(indicators)
+        ref_areas_str = "+".join(ref_areas)
+        url = urllib.parse.urljoin(
+            BASE_URL,
+            f"data/{dataflow_id}/{ref_areas_str}.{indicators_str}?format={output_format}",
+        )
+    else:
+        url = urllib.parse.urljoin(
+            BASE_URL, f"data/{dataflow_id}/All?format={output_format}"
+        )
+
+    if output_format == "csv":
+        return pd.read_csv(url)
+
     data = requests.get(url, timeout=200).json()
     if "errors" in data:
         raise Exception(data["errors"])
-    return data["data"]
+    return build_df_from_json(data["data"])
 
 
 def get_values(
