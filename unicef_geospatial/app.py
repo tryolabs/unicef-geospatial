@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import yaml
@@ -6,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from langgraph.graph.graph import CompiledGraph
 from logging_config import get_logger
 from pydantic import BaseModel
 from utils.initialize import get_llm, get_tools, initialize_earth_engine
@@ -13,30 +15,41 @@ from utils.prompts import system_prompt
 
 app = FastAPI()
 
-# Mount static files
-app.mount(
-    "/static", StaticFiles(directory="unicef_geospatial/frontend/static"), name="static"
-)
 
-params_path = Path("unicef_geospatial/params.yaml")
-with params_path.open("r") as f:
-    params = yaml.safe_load(f)
+def init_app() -> tuple[dict, logging.Logger, CompiledGraph, Jinja2Templates]:
+    # Mount static files
+    app.mount(
+        "/static",
+        StaticFiles(directory="unicef_geospatial/frontend/static"),
+        name="static",
+    )
 
-logger = get_logger(__name__)
-logger.info("Loading application with project %s", params["ee"]["project"])
+    # Load parameters
+    params_path = Path("unicef_geospatial/params.yaml")
+    with params_path.open("r") as f:
+        params = yaml.safe_load(f)
 
-initialize_earth_engine(params["ee"]["project"])
+    logger = get_logger(__name__)
+    logger.info("Loading application with project %s", params["ee"]["project"])
 
-tools = get_tools()
-llm = get_llm(params["llm"]["temperature"])
-agent = create_agent(llm, tools, system_prompt)
+    # Initialize components
+    initialize_earth_engine(params["ee"]["project"])
+    tools = get_tools()
+    llm = get_llm(params["llm"]["temperature"])
+    agent = create_agent(llm, tools, system_prompt)
 
-# Mount templates directory
-templates = Jinja2Templates(directory="unicef_geospatial/frontend/templates")
+    # Mount templates
+    templates = Jinja2Templates(directory="unicef_geospatial/frontend/templates")
+
+    return params, logger, agent, templates
 
 
-class Question(BaseModel):
-    question: str
+params, logger, agent, templates = init_app()
+
+
+class Chat(BaseModel):
+    new_query: str
+    previous_messages: list[str] | None = None
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -45,13 +58,19 @@ async def home(request: Request) -> HTMLResponse:
 
 
 @app.post("/ask")
-def ask(question: Question) -> dict:
-    logger.info("Processing question: %s", question.question)
+def ask(chat: Chat) -> dict:
+    logger.info("Processing question: %s", chat.new_query)
+    previous_messages = []
+    for i, message in enumerate(chat.previous_messages):
+        role = "user" if i % 2 == 0 else "system"
+        previous_messages.append({"role": role, "content": message})
+
     inputs = {
-        "messages": [
+        "messages": previous_messages
+        + [
             {
                 "role": "user",
-                "content": question.question,
+                "content": chat.new_query,
             }
         ]
     }
