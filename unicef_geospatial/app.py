@@ -50,8 +50,15 @@ def ask(question: Question) -> dict:
     }
     logger.info("Running agent with inputs")
     response = run_agent(agent, inputs)
+
+    content = response["messages"][-1].content
+
+    # Check if the content is HTML (from map tool)
+    html_content = response["messages"][-2].content
+    is_html = html_content.startswith("<!DOCTYPE html>")
+
     logger.info("Agent response received")
-    return {"response": response["messages"][-1].content}
+    return {"response": content, "is_html": is_html, "html_content": html_content}
 
 
 if __name__ == "__main__":

@@ -5,17 +5,46 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
+        margin: 0;
         padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      h1 {
+        margin: 0 0 20px 0;
+      }
+      .container {
+        display: flex;
+        gap: 20px;
+        flex: 1;
+        min-height: 0; /* Important for proper scrolling */
+      }
+      #map-container {
+        flex: 1;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      #map-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .chat-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 400px;
       }
       #chat-container {
-        height: 400px;
+        flex: 1;
         border: 1px solid #ccc;
         overflow-y: auto;
         padding: 20px;
         margin-bottom: 20px;
         border-radius: 5px;
+        min-height: 0; /* Important for proper scrolling */
       }
       .message {
         margin-bottom: 15px;
@@ -55,24 +84,42 @@
   </head>
   <body>
     <h1>Heatwave Analysis Chat</h1>
-    <div id="chat-container"></div>
-    <div id="input-container">
-      <input
-        type="text"
-        id="question-input"
-        placeholder="Ask a question about heatwaves..."
-      />
-      <button onclick="askQuestion()">Send</button>
+    <div class="container">
+      <div id="map-container">
+        <iframe id="map-frame" src="about:blank"></iframe>
+      </div>
+      <div class="chat-section">
+        <div id="chat-container"></div>
+        <div id="input-container">
+          <input
+            type="text"
+            id="question-input"
+            placeholder="Ask a question about heatwaves..."
+          />
+          <button onclick="askQuestion()">Send</button>
+        </div>
+      </div>
     </div>
 
     <script>
-      function addMessage(content, isUser) {
+      function updateMap(htmlContent) {
+        const mapFrame = document.getElementById("map-frame");
+        const blob = new Blob([htmlContent], { type: "text/html" });
+        mapFrame.src = URL.createObjectURL(blob);
+      }
+
+      function addMessage(content, isUser, isHtml = false, htmlContent = null) {
         const chatContainer = document.getElementById("chat-container");
         const messageDiv = document.createElement("div");
         messageDiv.className = `message ${
           isUser ? "user-message" : "assistant-message"
         }`;
         messageDiv.textContent = content;
+        if (isHtml) {
+          // Update the map instead of creating a new iframe
+          updateMap(htmlContent);
+        }
+
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
       }
@@ -83,7 +130,6 @@
 
         if (!question) return;
 
-        // Add user message to chat
         addMessage(question, true);
         input.value = "";
 
@@ -97,7 +143,7 @@
           });
 
           const data = await response.json();
-          addMessage(data.response, false);
+          addMessage(data.response, false, data.is_html, data.html_content);
         } catch (error) {
           console.error("Error:", error);
           addMessage(
