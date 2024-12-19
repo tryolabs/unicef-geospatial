@@ -4,6 +4,7 @@ import yaml
 from agent.agent import create_agent, run_agent
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from logging_config import get_logger
 from pydantic import BaseModel
@@ -11,6 +12,12 @@ from utils.initialize import get_llm, get_tools, initialize_earth_engine
 from utils.prompts import system_prompt
 
 app = FastAPI()
+
+# Mount static files
+app.mount(
+    "/static", StaticFiles(directory="unicef_geospatial/frontend/static"), name="static"
+)
+
 params_path = Path("unicef_geospatial/params.yaml")
 with params_path.open("r") as f:
     params = yaml.safe_load(f)
@@ -25,7 +32,7 @@ llm = get_llm(params["llm"]["temperature"])
 agent = create_agent(llm, tools, system_prompt)
 
 # Mount templates directory
-templates = Jinja2Templates(directory="unicef_geospatial/templates")
+templates = Jinja2Templates(directory="unicef_geospatial/frontend/templates")
 
 
 class Question(BaseModel):
