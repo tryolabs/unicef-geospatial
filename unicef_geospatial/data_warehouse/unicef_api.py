@@ -65,6 +65,24 @@ def get_data(
     return build_df_from_json(data["data"])
 
 
+def get_indicators_information(dataflow_id: str) -> dict[str, Any]:
+    """Get information on indicators for a specific dataflow.
+
+    Args:
+        dataflow_id: Dataflow ID to get indicators information for
+    """
+    url = urllib.parse.urljoin(BASE_URL, f"data/{dataflow_id}/All?format=sdmx-json")
+    data = requests.get(url, timeout=200).json()
+    data_structure = data["data"]["structure"]
+    indicators_info = {
+        val["id"]: val["name"]
+        for i, attr in enumerate(data_structure["dimensions"]["series"])
+        for val_pos, val in enumerate(attr["values"])
+        if i == 1
+    }
+    return indicators_info
+
+
 def get_values(
     ids: list[int],
     structure_type: str,
@@ -119,7 +137,6 @@ def build_df_from_json(json_data: dict) -> pd.DataFrame:
             for val_pos, val in enumerate(attr["values"])
         },
     }
-
     data = json_data["dataSets"][0]["series"]
     # Process all series at once using list comprehension
     rows = [
@@ -166,3 +183,20 @@ def build_df_from_json(json_data: dict) -> pd.DataFrame:
     )
 
     return pd.DataFrame(rows, columns=column_names)
+
+
+def get_available_dataflows() -> str:
+    info_on_dataflows = """
+    - CCRI: Climate Risk Index - Hazards, health risks, vulnerability factors
+    - CHLD_PVTY: Child Poverty - Measures poverty levels, deprivation rates, income ratios, etc.
+    - CME: Child Mortality - Tracks mortality rates and deaths across age groups 0-24 years
+    - CME_CAUSE_OF_DEATH: Child Mortality by Cause of Death
+    - DM: Demography - Population statistics, age groups, fertility, life expectancy, etc.
+    - EDUCATION: Education indicators like literacy rates, completion rates, out-of-school rates, etc.
+    - GENDER: Gender indicators covering labor, education, health and legal frameworks
+    - HIV_AIDS: HIV prevention, treatment and transmission stats
+    - IMMUNISATION: Vaccination coverage rates for BCG, DTP, polio, measles and other key vaccines
+    - NUTRITION: Key nutrition indicators including stunting, wasting, breastfeeding, anemia and diet
+    - PT_CM: Child Marriage - Tracks early marriage rates, related outcomes and socioeconomic factors
+    """
+    return info_on_dataflows
