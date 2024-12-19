@@ -30,6 +30,14 @@ This will start a local server at `http://127.0.0.1:8000/`.
 ### Project structure
 
 - `unicef_geospatial/`: The main project for working with geospatial data.
+
+  - `agent/`: Functions for creating and running langchain agents.
+  - `data_warehouse/`: Tools and functions for interacting with the unicef data warehouse.
+  - `earth_engine/`: Functions for interacting with google earth engine.
+  - `geospatial/`: Tools and functions for interacting with geospatial data.
+  - `templates/`: Templates for the project.
+  - `utils/`: Utility functions for the project.
+
 - `notebooks/`: Notebooks with interactive visualizations and demonstrations.
 - `research/`: Research scripts for exploring geospatial data, unicef api, etc.
 
