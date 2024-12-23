@@ -1,35 +1,44 @@
 import ee
-from geospatial.country import filter_dataset_by_country
 from langchain.tools import tool
 from utils.constants import RAINFALL_DATASET
-from utils.types import REDUCERS
+from utils.country import filter_dataset_by_area, standarize_country_name
+from utils.types import AREA_TYPES, REDUCERS
 
 INITIAL_YEAR = 1979
 LAST_INDEX = 12 * (2020 - INITIAL_YEAR) + 6
 
 
 @tool
-def get_precipitation_for_country(
-    year: int, month: int, country: str, reducer: REDUCERS = "mean"
+def get_precipitation_for_area(
+    year: int,
+    month: int,
+    area_name: str,
+    area_type: AREA_TYPES = "country",
+    reducer: REDUCERS = "mean",
 ) -> float:
     """Get the total precipitation for a specific country and month (in mm).
 
     Args:
         year: The year of the precipitation
         month: The month of the precipitation
-        country: Name of the country
+        area_name: Name of the area (country or admin level 1)
+        area_type: Type of area - either 'country' for counetries
+            or 'admin1' for admin level 1 like states or provinces.
+            Defaults to 'country'
         reducer: The reducer to use ('mean', 'max', 'min', etc). Defaults to 'mean'
 
     Returns:
-        The value of the precipitation for the specified country and month (in mm)
+        The value of the precipitation for the specified area and month (in mm)
     """
     rainfall_image = get_rainfall_image(year, month)
-    rainfall_country_image, country_boundry = filter_dataset_by_country(
-        rainfall_image, country
+    if area_type == "country":
+        area_name = standarize_country_name(area_name)
+    rainfall_area_image, area_boundry = filter_dataset_by_area(
+        rainfall_image, area_name, area_type
     )
-    stats = rainfall_country_image.reduceRegion(
+    stats = rainfall_area_image.reduceRegion(
         reducer=getattr(ee.Reducer, reducer)(),
-        geometry=country_boundry.geometry(),
+        geometry=area_boundry.geometry(),
         scale=1000,
         maxPixels=1e13,
     )

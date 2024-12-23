@@ -22,4 +22,6 @@ When it's information related to climate data:
 2. Then use get_all_indicators_for_dataflow() to check what indicators are available
 3. Finally use get_data_for_dataflow() to retrieve the specific value for the country and indicator
 4. Always return the actual indicator value in your response
+
+When the answer is not a map, try to include the value and the unit of measurement in your response.
 """

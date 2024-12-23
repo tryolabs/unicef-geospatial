@@ -6,12 +6,9 @@ from data_warehouse.tools import (
     get_available_dataflows_info,
     get_data_for_dataflow,
 )
-from geospatial.heatwaves.tools import (
-    get_heatwave_metric_for_admin_level_1,
-    get_heatwave_metric_for_country,
-)
+from geospatial.heatwaves.tools import get_heatwave_metric_for_area
 from geospatial.map.tools import get_country_map
-from geospatial.rainfall.tools import get_precipitation_for_country
+from geospatial.rainfall.tools import get_precipitation_for_area
 from langchain.chat_models.base import BaseChatModel
 from langchain_cohere import ChatCohere
 
@@ -30,9 +27,8 @@ def get_llm(temperature: float) -> BaseChatModel:
 def get_tools() -> list[Callable]:
     """Get the tools."""
     return [
-        get_heatwave_metric_for_country,
-        get_heatwave_metric_for_admin_level_1,
-        get_precipitation_for_country,
+        get_heatwave_metric_for_area,
+        get_precipitation_for_area,
         get_all_indicators_for_dataflow,
         get_available_dataflows_info,
         get_data_for_dataflow,
