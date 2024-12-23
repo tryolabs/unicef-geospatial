@@ -1,3 +1,4 @@
+import pandas as pd
 from langchain.tools import tool
 
 from unicef_geospatial.data_warehouse.unicef_api import (
@@ -39,21 +40,28 @@ def get_data_for_dataflow(
     dataflow_id: str,
     ref_areas: str,
     indicators: str,
-) -> str:
+    year: int | None = None,
+) -> pd.DataFrame:
     """Get data for a specific dataflow.
+
+    Returns all available data that matches the criteria.
+    If the year is not found, it will return all data for that country and indicator.
 
     Args:
         dataflow_id: Dataflow ID to get data for
         ref_areas: Optional list of country names, codes or ISO-3 codes to filter by.
                   If None, returns data for all countries.
         indicators: Optional list of indicator codes to retrieve. If None, returns data for all indicators.
+        year: The year of the data to retrieve.
 
     Returns:
-        str: The observed value for the specified country and indicator
+        pd.DataFrame: The dataframe matching the criteria.
 
     Raises:
         IndexError: If no data is found for the given country and indicator
     """
     ref_areas = get_country_code(ref_areas)
     data = get_data(dataflow_id, ref_areas=[ref_areas], indicators=[indicators])
-    return data["OBS_VALUE"].to_numpy()[0]
+    if year is not None and year in data["TIME_PERIOD"].unique():
+        data = data[data["TIME_PERIOD"] == year]
+    return data
