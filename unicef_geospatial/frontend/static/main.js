@@ -1,4 +1,5 @@
 let map;
+let messageHistory = [];
 
 function initializeMap() {
   const initialMapHTML = `
@@ -43,6 +44,8 @@ function addMessage(content, isUser, isHtml = false, htmlContent = null) {
     updateMap(htmlContent);
   }
 
+  messageHistory.push(content);
+
   chatContainer.appendChild(messageDiv);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
@@ -62,7 +65,9 @@ async function askQuestion() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ question: question }),
+      body: JSON.stringify({
+        chat_messages: messageHistory,
+      }),
     });
 
     const data = await response.json();

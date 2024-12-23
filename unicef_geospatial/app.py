@@ -11,6 +11,7 @@ from langgraph.graph.graph import CompiledGraph
 from logging_config import get_logger
 from pydantic import BaseModel
 from utils.initialize import get_llm, get_tools, initialize_earth_engine
+from utils.output import pprint_dict
 from utils.prompts import system_prompt
 
 app = FastAPI()
@@ -48,8 +49,7 @@ params, logger, agent, templates = init_app()
 
 
 class Chat(BaseModel):
-    new_query: str
-    previous_messages: list[str] | None = None
+    chat_messages: list[str]
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -59,10 +59,11 @@ async def home(request: Request) -> HTMLResponse:
 
 @app.post("/ask")
 def ask(chat: Chat) -> dict:
-    logger.info("Processing question: %s", chat.new_query)
+    question = chat.chat_messages.pop(-1)
+    logger.info("Processing question: %s", question)
     previous_messages = []
-    for i, message in enumerate(chat.previous_messages):
-        role = "user" if i % 2 == 0 else "system"
+    for i, message in enumerate(chat.chat_messages or []):
+        role = "user" if i % 2 == 0 else "assistant"
         previous_messages.append({"role": role, "content": message})
 
     inputs = {
@@ -70,20 +71,23 @@ def ask(chat: Chat) -> dict:
         + [
             {
                 "role": "user",
-                "content": chat.new_query,
+                "content": question,
             }
         ]
     }
-    logger.info("Running agent with inputs")
+    logger.info("Running agent with inputs %s", pprint_dict(inputs))
     response = run_agent(agent, inputs)
+
+    logger.info("Agent response: %s", pprint_dict(response))
 
     content = response["messages"][-1].content
 
-    # Check if the content is HTML (from map tool)
-    html_content = response["messages"][-2].content
-    is_html = html_content.startswith("<!DOCTYPE html>")
+    html_content = ""
+    is_html = False
+    if len(response["messages"]) > 1:
+        html_content = response["messages"][-2].content
+        is_html = html_content.startswith("<!DOCTYPE html>")
 
-    logger.info("Agent response received")
     return {"response": content, "is_html": is_html, "html_content": html_content}
 
 
