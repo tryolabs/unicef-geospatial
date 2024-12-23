@@ -11,7 +11,7 @@ from langgraph.graph.graph import CompiledGraph
 from logging_config import get_logger
 from pydantic import BaseModel
 from utils.initialize import get_llm, get_tools, initialize_earth_engine
-from utils.output import pprint_dict
+from utils.output import format_dict
 from utils.prompts import system_prompt
 
 app = FastAPI()
@@ -75,10 +75,10 @@ def ask(chat: Chat) -> dict:
             }
         ]
     }
-    logger.info("Running agent with inputs %s", pprint_dict(inputs))
+    logger.info("Running agent with inputs %s", format_dict(inputs))
     response = run_agent(agent, inputs)
 
-    logger.info("Agent response: %s", pprint_dict(response))
+    logger.info("Agent response: %s", format_dict(response))
 
     content = response["messages"][-1].content
 
