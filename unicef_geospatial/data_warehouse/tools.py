@@ -3,6 +3,7 @@ from langchain.tools import tool
 from unicef_geospatial.data_warehouse.unicef_api import (
     get_available_dataflows,
     get_data,
+    get_indicators_information,
 )
 from unicef_geospatial.utils.country import get_country_code
 
@@ -10,22 +11,17 @@ from unicef_geospatial.utils.country import get_country_code
 @tool
 def get_all_indicators_for_dataflow(
     dataflow_id: str,
-    ref_areas: list[str] | None = None,
-) -> list[str]:
+) -> dict[str, str]:
     """Get all indicators for the dataflow.
 
     Args:
         dataflow_id: Dataflow ID to get indicators for
-        ref_areas: Optional list of country names, codes or ISO-3 codes to filter by.
-                  If None, returns indicators for all countries.
 
     Returns:
-        list[str]: List of unique indicator codes available for the specified countries.
+        dict[str, str]: Dictionary of indicator codes and their descriptions.
     """
-    if ref_areas is not None:
-        ref_areas = [get_country_code(area) for area in ref_areas]
-    data = get_data(dataflow_id, ref_areas=ref_areas)
-    return data["INDICATOR"].unique().tolist()
+    indicators_info = get_indicators_information(dataflow_id)
+    return indicators_info
 
 
 @tool
