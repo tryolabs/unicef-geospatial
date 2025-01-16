@@ -5,24 +5,14 @@ The objective is to research and develop tools for interacting with geospatial d
 
 ### Installing dependencies
 
-The project dependencies are managed using `poetry`.
-
-```bash
-poetry install
-```
+The project dependencies are managed using `uv`.
 
 ### Running the project
 
-First, initialize the poetry environment:
+To run the project, use the following command:
 
 ```bash
-poetry shell
-```
-
-Then, run the project.
-
-```bash
-PYTHONPATH=$PYTHONPATH:./unicef_geospatial poetry run python -m unicef_geospatial.app
+uv run python unicef_geospatial/app.py
 ```
 
 This will start a local server at `http://127.0.0.1:8000/`.
