@@ -6,6 +6,7 @@ from data_warehouse.tools import (
     get_available_dataflows_info,
     get_data_for_dataflow,
 )
+from geospatial.demographic.tools import get_population_in_zone
 from geospatial.heatwaves.tools import get_heatwave_metric_for_area
 from geospatial.map.tools import get_country_map
 from geospatial.rainfall.tools import get_precipitation_for_area
@@ -33,4 +34,5 @@ def get_tools() -> list[Callable]:
         get_available_dataflows_info,
         get_data_for_dataflow,
         get_country_map,
+        get_population_in_zone,
     ]
