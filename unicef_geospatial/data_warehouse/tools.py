@@ -1,12 +1,11 @@
 import pandas as pd
-from langchain.tools import tool
-
-from unicef_geospatial.data_warehouse.unicef_api import (
+from data_warehouse.unicef_api import (
     get_available_dataflows,
     get_data,
     get_indicators_information,
 )
-from unicef_geospatial.utils.country import get_country_code
+from langchain.tools import tool
+from utils.country import get_country_code
 
 
 @tool

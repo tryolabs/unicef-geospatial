@@ -1,0 +1,22 @@
+[project]
+name = "unicef-geospatial"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ee>=0.2",
+    "fastapi>=0.115.6",
+    "geemap>=0.35.1",
+    "ipykernel>=6.29.5",
+    "langchain>=0.3.14",
+    "langchain-cohere>=0.3.4",
+    "langgraph>=0.2.63",
+    "pre-commit>=4.0.1",
+    "pycountry>=24.6.1",
+    "pydantic>=2.10.5",
+    "pytest>=8.3.4",
+    "pyyaml>=6.0.2",
+    "setuptools>=75.8.0",
+    "uvicorn>=0.34.0",
+]
