@@ -2,3 +2,4 @@ data/
 .env
 .DS_Store
 *.pyc
+unicef_geospatial/data/
