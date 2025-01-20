@@ -1,7 +1,15 @@
 import ee
+from geospatial.demographic.utils import (
+    filter_dataset_by_area,
+    image_to_html,
+    standarize_country_name,
+)
 from langchain.tools import tool
-from utils.country import filter_dataset_by_area, standarize_country_name
+from logging_config import get_logger
+from utils.constants import PATH_TO_MAP
 from utils.types import AREA_TYPES, DECADES, METRICS, REDUCERS
+
+logger = get_logger(__name__)
 
 
 @tool
@@ -38,14 +46,34 @@ def get_heatwave_metric_for_area(
     if area_type == "country":
         area_name = standarize_country_name(area_name)
 
-    area_data, area_boundary = filter_dataset_by_area(
-        heatwave_tiff, area_name, area_type
-    )
+    area_data = filter_dataset_by_area(heatwave_tiff, area_name, area_type)
+
+    try:
+        vis_params = {
+            "min": 0,
+            "max": 30,
+            "palette": ["blue", "yellow", "red"],
+        }
+
+        html = image_to_html(
+            area_data, name=f"{area_name} Heatwaves", vis_params=vis_params, center=True
+        )
+        with open(PATH_TO_MAP, "w") as f:
+            logger.info(f"Writing map to {PATH_TO_MAP}")
+            f.write(html)
+
+    except Exception as e:
+        logger.error(f"Error generating map: {e}")
+        pass
 
     stats = area_data.reduceRegion(
         reducer=getattr(ee.Reducer, reducer)(),
-        geometry=area_boundary.geometry(),
+        geometry=area_data.get("system:footprint"),
         scale=1000,
         maxPixels=1e13,
     )
-    return round(stats.getInfo()["b1"], 3)
+
+    return {
+        "value": round(stats.getInfo()["b1"], 3),
+        "path_to_map": PATH_TO_MAP,
+    }

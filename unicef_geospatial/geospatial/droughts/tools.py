@@ -14,7 +14,7 @@ MIN_AREA_KM2 = 100
 AREA_SCALE = 1000
 MAX_VERTICES = 1000
 
-PATH_TO_VECTOR_DATA = "data/drought_zones.json"
+PATH_TO_VECTOR_DATA = "unicef_geospatial/data/drought_zones.json"
 
 
 @tool

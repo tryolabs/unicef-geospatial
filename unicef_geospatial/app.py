@@ -1,3 +1,4 @@
+import json
 import logging
 from pathlib import Path
 
@@ -85,8 +86,16 @@ def ask(chat: Chat) -> dict:
     html_content = ""
     is_html = False
     if len(response["messages"]) > 1:
-        html_content = response["messages"][-2].content
-        is_html = html_content.startswith("<!DOCTYPE html>")
+        response_data = response["messages"][-2].content
+        try:
+            response_data = json.loads(response_data)
+            is_html = response_data.get("path_to_map") is not None
+            if is_html:
+                with open(response_data["path_to_map"], "r") as f:
+                    html_content = f.read()
+
+        except json.JSONDecodeError:
+            pass
 
     return {"response": content, "is_html": is_html, "html_content": html_content}
 

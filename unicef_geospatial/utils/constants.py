@@ -6,3 +6,4 @@ DEMOGRAPHIC_DATASET = "CIESIN/GPWv411/GPW_Basic_Demographic_Characteristics"
 DEMOGRAPHIC_BAND = "basic_demographic_characteristics"
 EARTH_GEOMETRY_COORDS = [-180, 85, 0, 85, 180, 85, 180, -85, 0, -85, -180, -85]
 EARTH_GEOMETRY_CRS = "EPSG:4326"
+PATH_TO_MAP = "unicef_geospatial/data/map_data.html"

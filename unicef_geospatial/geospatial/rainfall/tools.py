@@ -1,7 +1,7 @@
 import ee
+from geospatial.demographic.utils import filter_dataset_by_area, standarize_country_name
 from langchain.tools import tool
 from utils.constants import RAINFALL_DATASET
-from utils.country import filter_dataset_by_area, standarize_country_name
 from utils.types import AREA_TYPES, REDUCERS
 
 INITIAL_YEAR = 1979
