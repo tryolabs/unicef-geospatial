@@ -35,7 +35,14 @@
         <iframe id="map-frame" src="about:blank"></iframe>
       </div>
       <div class="chat-section">
+        <div class="tab-container">
+          <div class="tab active" onclick="switchTab('chat')">Chat</div>
+          <div class="tab" onclick="switchTab('thoughts')">
+            Chain of Thought
+          </div>
+        </div>
         <div id="chat-container"></div>
+        <div id="chain-of-thought-container"></div>
         <div id="input-container">
           <input
             type="text"

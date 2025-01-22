@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from langchain_core.messages import AIMessage
 from langgraph.graph.graph import CompiledGraph
 from logging_config import get_logger
 from pydantic import BaseModel
@@ -83,6 +84,27 @@ def ask(chat: Chat) -> dict:
 
     content = response["messages"][-1].content
 
+    # Extract chain of thought from intermediate messages
+    chain_of_thought = []
+    for msg in response["messages"][len(inputs["messages"]) : -1]:
+        if isinstance(msg, AIMessage):
+            try:
+                thought = json.loads(msg.content)
+                chain_of_thought.append(thought)
+            except json.JSONDecodeError:
+                chain_of_thought.append(msg.content)
+
+            function_name = msg.additional_kwargs["tool_calls"][0]["function"]["name"]
+            function_args = msg.additional_kwargs["tool_calls"][0]["function"][
+                "arguments"
+            ]
+            function_args_str = "\n".join(
+                f"  {k}: {v}" for k, v in json.loads(function_args).items()
+            )
+            chain_of_thought.append(
+                f"Calling function {function_name} with arguments:\n{function_args_str}"
+            )
+
     html_content = ""
     is_html = False
     if len(response["messages"]) > 1:
@@ -97,7 +119,12 @@ def ask(chat: Chat) -> dict:
         except json.JSONDecodeError:
             pass
 
-    return {"response": content, "is_html": is_html, "html_content": html_content}
+    return {
+        "response": content,
+        "is_html": is_html,
+        "html_content": html_content,
+        "chain_of_thought": chain_of_thought,
+    }
 
 
 if __name__ == "__main__":

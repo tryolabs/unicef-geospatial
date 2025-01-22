@@ -50,6 +50,69 @@ function addMessage(content, isUser, isHtml = false, htmlContent = null) {
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+function switchTab(tabName) {
+  const isChat = tabName === "chat";
+  document.getElementById("chat-container").style.display = isChat
+    ? "block"
+    : "none";
+  document.getElementById("chain-of-thought-container").style.display = isChat
+    ? "none"
+    : "block";
+  document
+    .querySelectorAll(".tab")
+    .forEach((tab, i) =>
+      tab.classList.toggle("active", i === (isChat ? 0 : 1))
+    );
+}
+
+function formatContent(thought) {
+  if (typeof thought === "object") {
+    return JSON.stringify(thought, null, 2);
+  }
+  return thought;
+}
+
+function displayChainOfThought(thoughts, question) {
+  const container = document.getElementById("chain-of-thought-container");
+
+  const elements = [
+    // Question header
+    Object.assign(document.createElement("div"), {
+      className: "thought-question",
+      innerHTML: `<strong>Question:</strong> ${question}`,
+    }),
+
+    document.createElement("hr"),
+    Object.assign(document.createElement("div"), {
+      className: "thought-container",
+      innerHTML: `
+        <div class="thought-step">
+          <strong>Initial Thought</strong>
+          <pre>${formatContent(thoughts[0])}</pre>
+        </div>
+        <div class="thought-step">
+          ${thoughts
+            .slice(1)
+            .map(
+              (thought, index) => `
+              <strong>Step ${index + 1}</strong>
+              <pre>${formatContent(thought)}</pre>
+              <br>
+
+          `
+            )
+            .join("")}
+        </div>
+      `,
+    }),
+  ];
+
+  // Insert all elements at the top
+  elements
+    .reverse()
+    .forEach((el) => container.insertBefore(el, container.firstChild));
+}
+
 async function askQuestion() {
   const input = document.getElementById("question-input");
   const question = input.value.trim();
@@ -72,6 +135,7 @@ async function askQuestion() {
 
     const data = await response.json();
     addMessage(data.response, false, data.is_html, data.html_content);
+    displayChainOfThought(data.chain_of_thought, question);
   } catch (error) {
     console.error("Error:", error);
     addMessage("Sorry, there was an error processing your request.", false);
