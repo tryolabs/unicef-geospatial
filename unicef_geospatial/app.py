@@ -4,6 +4,7 @@ from pathlib import Path
 
 import yaml
 from agent.agent import create_agent, run_agent
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -27,16 +28,18 @@ def init_app() -> tuple[dict, logging.Logger, CompiledGraph, Jinja2Templates]:
         name="static",
     )
 
+    load_dotenv(override=True)
+
     # Load parameters
     params_path = Path("unicef_geospatial/params.yaml")
     with params_path.open("r") as f:
         params = yaml.safe_load(f)
 
     logger = get_logger(__name__)
-    logger.info("Loading application with project %s", params["ee"]["project"])
+    logger.info("Loading application with project")
 
     # Initialize components
-    initialize_earth_engine(params["ee"]["project"])
+    initialize_earth_engine()
     tools = get_tools()
     llm = get_llm(params["llm"]["temperature"])
     agent = create_agent(llm, tools, system_prompt)

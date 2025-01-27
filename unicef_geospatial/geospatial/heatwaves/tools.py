@@ -12,6 +12,16 @@ from utils.types import AREA_TYPES, DECADES, METRICS, REDUCERS
 logger = get_logger(__name__)
 
 
+def get_band_mapping(metric: str) -> dict:
+    """Get the band mapping for a heatwave metric."""
+    return {
+        "frequency": "b1",
+        "duration": "b2",
+        "severity": "b3",
+        "extreme_high_temp": "b4",
+    }[metric]
+
+
 @tool
 def get_heatwave_metric_for_area(
     metric: METRICS,
@@ -39,8 +49,12 @@ def get_heatwave_metric_for_area(
     Returns:
         The value of the heatwave metric for the specified area and decade.
     """
-    heatwave_tiff = ee.Image(
-        f"projects/unicef-geospatial/assets/heatwaves/{metric}/average_heatwaves_{metric}_{decade}_proj_COG"
+    band = get_band_mapping(metric)
+    image = ee.Image(f"projects/unicef-ccri/assets/heatwave/average_hwi_{decade}")
+    heatwave_tiff = image.select(band)
+
+    logger.info(
+        f"Heatwave image for decade {decade} and metric {metric} (band: {band})"
     )
 
     if area_type == "country":
@@ -54,18 +68,20 @@ def get_heatwave_metric_for_area(
             "max": 30,
             "palette": ["blue", "yellow", "red"],
         }
-
+        logger.info("Going to generate HTML map")
         html = image_to_html(
             area_data, name=f"{area_name} Heatwaves", vis_params=vis_params, center=True
         )
+        logger.info("Saving map to %s", PATH_TO_MAP)
         with open(PATH_TO_MAP, "w") as f:
-            logger.info(f"Writing map to {PATH_TO_MAP}")
+            logger.info("Writing map to %s", PATH_TO_MAP)
             f.write(html)
 
     except Exception as e:
         logger.error(f"Error generating map: {e}")
         pass
 
+    logger.info("Reducing region")
     stats = area_data.reduceRegion(
         reducer=getattr(ee.Reducer, reducer)(),
         geometry=area_data.get("system:footprint"),
@@ -73,7 +89,8 @@ def get_heatwave_metric_for_area(
         maxPixels=1e13,
     )
 
+    logger.info("Returning stats")
     return {
-        "value": round(stats.getInfo()["b1"], 3),
+        "value": round(stats.getInfo()[band], 3),
         "path_to_map": PATH_TO_MAP,
     }

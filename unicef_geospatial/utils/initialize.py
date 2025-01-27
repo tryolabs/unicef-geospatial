@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import Callable
 
 import ee
@@ -14,10 +16,15 @@ from langchain.chat_models.base import BaseChatModel
 from langchain_cohere import ChatCohere
 
 
-def initialize_earth_engine(project: str) -> None:
+def initialize_earth_engine() -> None:
     """Initialize the Earth Engine API."""
+    key_path = Path("ee_auth.json")
+    key_file = key_path.read_text()
+    key_dict = json.loads(key_file)
+    email = key_dict["client_email"]
+    auth = ee.ServiceAccountCredentials(email=email, key_data=key_file)
     ee.Authenticate()
-    ee.Initialize(project=project)
+    ee.Initialize(auth)
 
 
 def get_llm(temperature: float) -> BaseChatModel:
