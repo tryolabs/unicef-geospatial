@@ -1,5 +1,2 @@
 llm:
   temperature: 0.0
-
-ee:
-  project: unicef-geospatial
