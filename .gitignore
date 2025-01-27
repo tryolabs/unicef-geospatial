@@ -3,3 +3,4 @@ data/
 .DS_Store
 *.pyc
 unicef_geospatial/data/
+ee_auth.json
