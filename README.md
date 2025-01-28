@@ -17,6 +17,10 @@ uv run python unicef_geospatial/app.py
 
 This will start a local server at `http://127.0.0.1:8000/`.
 
+### Accessing the logs
+
+The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
+
 ### Project structure
 
 - `unicef_geospatial/`: The main project for working with geospatial data.

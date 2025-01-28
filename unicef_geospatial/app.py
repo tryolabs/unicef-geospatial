@@ -3,24 +3,22 @@ import logging
 from pathlib import Path
 
 import yaml
-from agent.agent import create_agent, run_agent
+from agent.agent import create_agent, get_llm, run_agent
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from langchain_core.messages import AIMessage
-from langgraph.graph.graph import CompiledGraph
 from logging_config import get_logger
 from pydantic import BaseModel
-from utils.initialize import get_llm, get_tools, initialize_earth_engine
+from utils.initialize import initialize_earth_engine
 from utils.output import format_dict
-from utils.prompts import system_prompt
 
 app = FastAPI()
 
 
-def init_app() -> tuple[dict, logging.Logger, CompiledGraph, Jinja2Templates]:
+def init_app() -> tuple[dict, logging.Logger, Jinja2Templates]:
     # Mount static files
     app.mount(
         "/static",
@@ -40,21 +38,19 @@ def init_app() -> tuple[dict, logging.Logger, CompiledGraph, Jinja2Templates]:
 
     # Initialize components
     initialize_earth_engine()
-    tools = get_tools()
-    llm = get_llm(params["llm"]["temperature"])
-    agent = create_agent(llm, tools, system_prompt)
 
     # Mount templates
     templates = Jinja2Templates(directory="unicef_geospatial/frontend/templates")
 
-    return params, logger, agent, templates
+    return params, logger, templates
 
 
-params, logger, agent, templates = init_app()
+params, logger, templates = init_app()
 
 
 class Chat(BaseModel):
     chat_messages: list[str]
+    session_id: str
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -65,7 +61,11 @@ async def home(request: Request) -> HTMLResponse:
 @app.post("/ask")
 def ask(chat: Chat) -> dict:
     question = chat.chat_messages.pop(-1)
-    logger.info("Processing question: %s", question)
+    logger.info(
+        "Processing question: %s with session ID: %s",
+        question,
+        chat.session_id,
+    )
     previous_messages = []
     for i, message in enumerate(chat.chat_messages or []):
         role = "user" if i % 2 == 0 else "assistant"
@@ -81,6 +81,11 @@ def ask(chat: Chat) -> dict:
         ]
     }
     logger.info("Running agent with inputs %s", format_dict(inputs))
+
+    # Create agent with session ID
+    llm = get_llm(params["llm"]["temperature"], session_id=chat.session_id)
+    agent = create_agent(llm)
+
     response = run_agent(agent, inputs)
 
     logger.info("Agent response: %s", format_dict(response))

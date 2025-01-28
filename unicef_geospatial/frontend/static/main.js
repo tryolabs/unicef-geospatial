@@ -1,5 +1,6 @@
 let map;
 let messageHistory = [];
+let sessionId;
 
 function initializeMap() {
   const initialMapHTML = `
@@ -121,7 +122,6 @@ async function askQuestion() {
 
   addMessage(question, true);
   input.value = "";
-
   try {
     const response = await fetch("/ask", {
       method: "POST",
@@ -130,6 +130,7 @@ async function askQuestion() {
       },
       body: JSON.stringify({
         chat_messages: messageHistory,
+        session_id: sessionId,
       }),
     });
 
@@ -151,5 +152,7 @@ document
     }
   });
 
-// Initialize the map when the page loads
-window.onload = initializeMap;
+window.onload = function () {
+  sessionId = crypto.randomUUID();
+  initializeMap();
+};

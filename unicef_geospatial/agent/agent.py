@@ -1,12 +1,37 @@
+import os
+
+import litellm
 from langchain.chat_models.base import BaseChatModel
 from langchain.tools import BaseTool
+from langchain_community.chat_models import ChatLiteLLM
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
+from utils.initialize import get_tools
 from utils.output import print_stream
+from utils.prompts import system_prompt
+
+litellm.success_callback = ["langfuse"]
+litellm.failure_callback = ["langfuse"]
+
+
+def get_llm(temperature: float, session_id: str) -> BaseChatModel:
+    """Get the LLM model."""
+    return ChatLiteLLM(
+        model=os.getenv("MODEL_NAME", "gpt-4o-mini"),
+        temperature=temperature,
+        model_kwargs={
+            "metadata": {
+                "session_id": session_id,
+                "project_id": os.getenv("LANGFUSE_PROJECT_ID"),
+            }
+        },
+    )
 
 
 def create_agent(
-    llm: BaseChatModel, tools: list[BaseTool], system_prompt: str
+    llm: BaseChatModel,
+    tools: list[BaseTool] = get_tools(),
+    system_prompt: str = system_prompt,
 ) -> CompiledGraph:
     """Create a LangGraph ReAct agent with the given LLM, tools and system prompt.
 

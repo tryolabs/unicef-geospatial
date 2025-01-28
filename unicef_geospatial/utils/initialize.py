@@ -12,8 +12,6 @@ from geospatial.demographic.tools import get_country_map, get_population_in_zone
 from geospatial.droughts.tools import get_drought_zones
 from geospatial.heatwaves.tools import get_heatwave_metric_for_area
 from geospatial.rainfall.tools import get_precipitation_for_area
-from langchain.chat_models.base import BaseChatModel
-from langchain_cohere import ChatCohere
 
 
 def initialize_earth_engine() -> None:
@@ -25,11 +23,6 @@ def initialize_earth_engine() -> None:
     auth = ee.ServiceAccountCredentials(email=email, key_data=key_file)
     ee.Authenticate()
     ee.Initialize(auth)
-
-
-def get_llm(temperature: float) -> BaseChatModel:
-    """Get the LLM model."""
-    return ChatCohere(temperature=temperature)
 
 
 def get_tools() -> list[Callable]:
