@@ -7,7 +7,7 @@ import geemap
 
 ee.Initialize()
 
-DROUGHT_DATASET = "CSIC/SPEI/2_9"
+DROUGHT_DATASET = "CSIC/SPEI/2_10"
 SPEI_BAND = "SPEI_01_month"
 DEMOGRAPHIC_DATASET = "CIESIN/GPWv411/GPW_Population_Count"
 DEMOGRAPHIC_BAND = "population_count"

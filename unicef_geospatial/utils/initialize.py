@@ -13,12 +13,10 @@ from geospatial.droughts.tools import get_drought_zones
 from geospatial.heatwaves.tools import get_heatwave_metric_for_area
 from geospatial.rainfall.tools import get_precipitation_for_area
 
-PATH_TO_EE_AUTH = "ee_auth.json"
 
-
-def initialize_earth_engine() -> None:
+def initialize_earth_engine(path_to_ee_auth: str) -> None:
     """Initialize the Earth Engine API."""
-    key_path = Path(PATH_TO_EE_AUTH)
+    key_path = Path(path_to_ee_auth)
     key_file = key_path.read_text()
     key_dict = json.loads(key_file)
     email = key_dict["client_email"]

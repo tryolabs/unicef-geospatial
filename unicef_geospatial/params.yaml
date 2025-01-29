@@ -1,2 +1,4 @@
 llm:
   temperature: 0.0
+auth:
+  path_to_ee_auth: "ee_auth.json"

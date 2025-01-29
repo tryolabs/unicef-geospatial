@@ -29,14 +29,16 @@ def get_llm(temperature: float, session_id: str) -> BaseChatModel:
 
 
 def create_agent(
-    llm: BaseChatModel,
+    session_id: str,
+    temperature: float = 0.0,
     tools: list[BaseTool] = get_tools(),
     system_prompt: str = system_prompt,
 ) -> CompiledGraph:
     """Create a LangGraph ReAct agent with the given LLM, tools and system prompt.
 
     Args:
-        llm: The LLM to use for the agent
+        session_id: The session ID to use for the agent
+        temperature: The temperature to use for the agent
         tools: List of tools available to the agent
         system_prompt: System prompt to provide context to the agent
 
@@ -45,7 +47,7 @@ def create_agent(
     """
     return create_react_agent(
         tools=tools,
-        model=llm,
+        model=get_llm(temperature, session_id),
         state_modifier=system_prompt,
     )
 
