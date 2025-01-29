@@ -11,9 +11,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from langchain_core.messages import AIMessage
 from logging_config import get_logger
-from pydantic import BaseModel
 from utils.initialize import initialize_earth_engine
 from utils.output import format_dict
+from utils.types import Chat
 
 app = FastAPI()
 
@@ -46,11 +46,6 @@ def init_app() -> tuple[dict, logging.Logger, Jinja2Templates]:
 
 
 params, logger, templates = init_app()
-
-
-class Chat(BaseModel):
-    chat_messages: list[str]
-    session_id: str
 
 
 @app.get("/", response_class=HTMLResponse)

@@ -1,5 +1,13 @@
 from typing import Literal
 
+from pydantic import BaseModel
+
+
+class Chat(BaseModel):
+    chat_messages: list[str]
+    session_id: str
+
+
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
 REDUCERS = Literal["mean", "max", "min"]
