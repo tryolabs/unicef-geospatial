@@ -12,7 +12,7 @@ from utils.types import AREA_TYPES, DECADES, METRICS, REDUCERS
 logger = get_logger(__name__)
 
 
-def get_band_mapping(metric: str) -> dict:
+def get_band_mapping(metric: str) -> str:
     """Get the band mapping for a heatwave metric."""
     return {
         "frequency": "b1",
@@ -88,7 +88,6 @@ def get_heatwave_metric_for_area(
         scale=1000,
         maxPixels=1e13,
     )
-
     logger.info("Returning stats")
     return {
         "value": round(stats.getInfo()[band], 3),
