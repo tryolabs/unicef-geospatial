@@ -2,11 +2,12 @@ import ee
 from ee.filter import Filter
 from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
-from geospatial.demographic.utils import image_to_html
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import DEMOGRAPHIC_BAND, DEMOGRAPHIC_DATASET, PATH_TO_MAP
 from utils.types import AGE_GROUPS, SEXES
+
+from unicef_geospatial.geospatial.geo_operations import image_to_html
 
 
 @tool

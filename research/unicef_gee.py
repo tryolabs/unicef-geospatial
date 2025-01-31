@@ -49,9 +49,9 @@ from utils.types import AREA_TYPES, DECADES, METRICS, REDUCERS
 
 from unicef_geospatial.geospatial.demographic.utils import (
     filter_dataset_by_area,
-    image_to_html,
     standarize_country_name,
 )
+from unicef_geospatial.geospatial.geo_operations import image_to_html
 
 logger = get_logger(__name__)
 

@@ -1,27 +1,7 @@
 import ee
-import geemap.foliumap as geemap
 import pycountry
 from utils.constants import ADMIN_LEVEL_1_BOUNDRIES_DATASET, COUNTRY_BOUNDRIES_DATASET
 from utils.types import AREA_TYPES
-
-
-def image_to_html(
-    image: ee.Image,
-    name: str = "",
-    vis_params: dict = {},
-    center: bool = False,
-) -> str:
-    """Converts an Earth Engine image to an HTML string."""
-    demographic_map = geemap.Map()
-    demographic_map.add_layer(image, vis_params, name)
-    if center:
-        demographic_map.center_object(image)
-    html = demographic_map.to_html()
-    if html is None:
-        error_msg = "Failed to generate map"
-        raise ValueError(error_msg)
-
-    return html
 
 
 def standarize_country_name(country: str) -> str:
