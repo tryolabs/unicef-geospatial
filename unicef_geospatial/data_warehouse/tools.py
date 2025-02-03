@@ -4,7 +4,7 @@ from data_warehouse.unicef_api import (
     get_data,
     get_indicators_information,
 )
-from geospatial.demographic.utils import get_country_code
+from geospatial.demographic import get_country_code
 from langchain.tools import tool
 
 

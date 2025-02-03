@@ -8,10 +8,14 @@ from data_warehouse.tools import (
     get_available_dataflows_info,
     get_data_for_dataflow,
 )
-from geospatial.demographic.tools import get_country_map, get_population_in_zone
-from geospatial.droughts.tools import get_drought_zones
-from geospatial.heatwaves.tools import get_heatwave_metric_for_area
-from geospatial.rainfall.tools import get_precipitation_for_area
+from geospatial.demographic import (
+    get_country_map,
+    get_population_in_zone,
+    get_zone_of_area,
+)
+from geospatial.droughts import get_drought_zones
+from geospatial.heatwaves import get_heatwave_metric_for_zone
+from geospatial.rainfall import get_precipitation_for_zone
 
 
 def initialize_earth_engine(path_to_ee_auth: str) -> None:
@@ -29,8 +33,9 @@ def initialize_earth_engine(path_to_ee_auth: str) -> None:
 def get_tools() -> list[Callable]:
     """Get the tools."""
     return [
-        get_heatwave_metric_for_area,
-        get_precipitation_for_area,
+        get_heatwave_metric_for_zone,
+        get_precipitation_for_zone,
+        get_zone_of_area,
         get_all_indicators_for_dataflow,
         get_available_dataflows_info,
         get_data_for_dataflow,
