@@ -5,17 +5,39 @@ The objective is to research and develop tools for interacting with geospatial d
 
 ### Installing dependencies
 
-The project dependencies are managed using `uv`.
+The project API dependencies are managed using `uv`, while the frontend dependencies are managed via `npm`.
+
+To install the API dependencies:
+
+```bash
+uv sync
+```
+
+To install the frontend dependencies:
+
+```bash
+cd unicef-frontend
+npm install
+```
 
 ### Running the project
 
-To run the project, use the following command:
+To run the project the API:
 
 ```bash
 uv run python unicef_geospatial/app.py
 ```
 
 This will start a local server at `http://127.0.0.1:8000/`.
+
+To run the frontend:
+
+```bash
+cd unicef-frontend
+npm run dev
+```
+
+This will start a local server at `http://127.0.0.1:5173`.
 
 ### Accessing the logs
 
