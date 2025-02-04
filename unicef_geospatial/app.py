@@ -17,7 +17,8 @@ app = app_state.app
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request) -> HTMLResponse:
-    return app_state.templates.TemplateResponse("index.html", {"request": request})
+    app_state.logger.info("Serving index.html")
+    return HTMLResponse(status_code=200)
 
 
 @app.post("/ask")

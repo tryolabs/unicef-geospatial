@@ -10,14 +10,21 @@
   --spacing-lg: 20px;
 }
 
+html,
 body {
   font-family: "Roboto", Arial, sans-serif;
   margin: 0;
   padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background-color: #ffffff;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .header {
