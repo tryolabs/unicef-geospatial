@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import MapContainer from "./components/MapContainer.js";
 import ChatSection from "./components/ChatSection.js";
-
+import { Message } from "./types/Message.js";
 function generateUUID(): string {
   // TODO: use an external library to generate a UUID
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
@@ -13,7 +13,7 @@ function generateUUID(): string {
 }
 
 function App() {
-  const [messageHistory, setMessageHistory] = useState<string[]>([]);
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"chat" | "thoughts">("chat");
   const [chainOfThoughts, setChainOfThoughts] = useState<
@@ -60,27 +60,42 @@ function App() {
   async function askQuestion(question: string): Promise<void> {
     if (!question.trim()) return;
 
-    setMessageHistory((prev) => [...prev, question]);
+    const question_message = {
+      content: question,
+      role: "user" as const,
+      trace_id: generateUUID(),
+      feedback_given: undefined,
+    };
+
+    setMessageHistory((prev) => [...prev, question_message]);
 
     try {
+      const body = {
+        chat_messages: [...messageHistory, question_message],
+        session_id: sessionId,
+      };
+      console.log(body);
+      console.log(JSON.stringify(body));
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_messages: [...messageHistory, question],
-          session_id: sessionId,
-        }),
+        body: JSON.stringify(body),
       });
       const data: {
         response: string;
         is_html: boolean;
         html_content?: string;
         chain_of_thought: string[];
+        trace_id: string;
       } = await response.json();
 
       // Add assistant's reply
-      setMessageHistory((prev) => [...prev, data.response]);
-
+      const response_message = {
+        content: data.response,
+        role: "assistant" as const,
+        trace_id: data.trace_id,
+      };
+      setMessageHistory((prev) => [...prev, response_message]);
       if (data.is_html && data.html_content) {
         setMapHTML(data.html_content);
       }
@@ -94,10 +109,12 @@ function App() {
       ]);
     } catch (error) {
       console.error(error);
-      setMessageHistory((prev) => [
-        ...prev,
-        "Sorry, there was an error processing your request.",
-      ]);
+      const error_message = {
+        content: "Sorry, there was an error processing your request.",
+        role: "assistant" as const,
+        trace_id: generateUUID(),
+      };
+      setMessageHistory((prev) => [...prev, error_message]);
     }
   }
 

@@ -4,6 +4,7 @@ import litellm
 from langchain.chat_models.base import BaseChatModel
 from langchain.tools import BaseTool
 from langchain_community.chat_models import ChatLiteLLM
+from langfuse.decorators import langfuse_context, observe
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
 from utils.initialize import get_tools
@@ -52,7 +53,8 @@ def create_agent(
     )
 
 
-def run_agent(agent: CompiledGraph, inputs: dict) -> dict:
+@observe
+def run_agent(agent: CompiledGraph, inputs: dict) -> tuple[dict, str]:
     """Run a LangGraph agent with the given inputs.
 
     Args:
@@ -60,9 +62,10 @@ def run_agent(agent: CompiledGraph, inputs: dict) -> dict:
         inputs: Dictionary of inputs to provide to the agent
 
     Returns:
-        Dictionary containing the agent's response
+        Tuple containing the agent's response and the trace ID
     """
-    return agent.invoke(inputs)
+    trace_id = langfuse_context.get_current_trace_id()
+    return agent.invoke(inputs), trace_id
 
 
 def run_and_print_stream(agent: CompiledGraph, inputs: dict) -> None:

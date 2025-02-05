@@ -84,8 +84,21 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.message-container {
+  position: relative;
+  margin-bottom: 2px;
+  padding-bottom: 20px;
+}
+
+.user-message-container {
+  margin-left: 20%;
+}
+
+.assistant-message-container {
+  margin-right: 20%;
+}
+
 .message {
-  margin-bottom: var(--spacing-md);
   padding: 12px;
   border-radius: var(--border-radius);
   font-size: 14px;
@@ -95,13 +108,46 @@ h1 {
 .user-message {
   background-color: var(--unicef-blue);
   color: white;
-  margin-left: 20%;
 }
 
 .assistant-message {
   background-color: var(--light-gray);
-  margin-right: 20%;
   border: 1px solid var(--border-color);
+}
+
+.feedback-buttons {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.feedback-button {
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.feedback-button:hover:not(:disabled) {
+  background-color: var(--light-gray);
+  border-color: var(--unicef-blue);
+}
+
+.feedback-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feedback-selected {
+  background-color: var(--unicef-blue);
+  color: white;
+  border-color: var(--unicef-blue);
 }
 
 #input-container {

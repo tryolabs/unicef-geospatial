@@ -1,10 +1,17 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
 
+class Message(BaseModel):
+    content: str
+    role: Literal["user", "assistant"]
+    trace_id: str
+    feedback_given: Optional[Literal[0, 1]] = None
+
+
 class Chat(BaseModel):
-    chat_messages: list[str]
+    chat_messages: list[Message]
     session_id: str
 
 

@@ -1,9 +1,10 @@
 import json
 
 from langchain_core.messages import AIMessage
+from utils.types import Message
 
 
-def format_messages(chat_messages: list[str], question: str) -> dict[str, list[dict]]:
+def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     """Format chat messages into the expected format for the agent.
 
     Args:
@@ -13,12 +14,17 @@ def format_messages(chat_messages: list[str], question: str) -> dict[str, list[d
     Returns:
         List of message dictionaries with role and content fields, formatted for the agent
     """
-    previous_messages = []
-    for i, message in enumerate(chat_messages or []):
-        role = "user" if i % 2 == 0 else "assistant"
-        previous_messages.append({"role": role, "content": message})
+    messages = []
+    for message in chat_messages:
+        messages.append(
+            {
+                "role": message.role,
+                "content": message.content,
+                "trace_id": message.trace_id,
+            }
+        )
 
-    messages = {"messages": previous_messages + [{"role": "user", "content": question}]}
+    messages = {"messages": messages}
 
     return messages
 

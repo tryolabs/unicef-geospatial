@@ -1,6 +1,5 @@
 import uvicorn
 from agent.agent import create_agent, run_agent
-from fastapi import Request
 from fastapi.responses import HTMLResponse
 from state import AppState
 from utils.handlers import (
@@ -16,21 +15,19 @@ app = app_state.app
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request) -> HTMLResponse:
+async def home() -> HTMLResponse:
     app_state.logger.info("Serving index.html")
     return HTMLResponse(status_code=200)
 
 
 @app.post("/ask")
 def ask(chat: Chat) -> dict:
-    question = chat.chat_messages.pop(-1)
     app_state.logger.info(
         "Processing question: %s with session ID: %s",
-        question,
+        chat.chat_messages[-1].content,
         chat.session_id,
     )
-
-    messages = format_messages(chat.chat_messages, question)
+    messages = format_messages(chat.chat_messages)
     app_state.logger.info("Running agent with inputs %s", format_dict(messages))
 
     # Create agent with session ID
@@ -38,7 +35,7 @@ def ask(chat: Chat) -> dict:
         session_id=chat.session_id,
         temperature=app_state.params["llm"]["temperature"],
     )
-    response = run_agent(agent, messages)
+    response, trace_id = run_agent(agent, messages)
     app_state.logger.info("Agent response: %s", format_dict(response))
 
     # Process response
@@ -50,6 +47,7 @@ def ask(chat: Chat) -> dict:
         "is_html": is_html,
         "html_content": html_content,
         "chain_of_thought": chain_of_thought,
+        "trace_id": trace_id,
     }
 
 

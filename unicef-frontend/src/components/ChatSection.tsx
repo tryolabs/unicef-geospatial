@@ -2,7 +2,7 @@ import TabNav from "./TabNav.js";
 import ChatMessages from "./ChatMessages.js";
 import ChainOfThoughtSection from "./ChainOfThoughtSection.js";
 import InputContainer from "./InputContainer.js";
-
+import { Message } from "../types/Message.js";
 function ChatSection({
   activeTab,
   messageHistory,
@@ -11,7 +11,7 @@ function ChatSection({
   askQuestion,
 }: {
   activeTab: "chat" | "thoughts";
-  messageHistory: string[];
+  messageHistory: Message[];
   chainOfThoughts: Array<{
     question: string;
     thoughts: string[];
