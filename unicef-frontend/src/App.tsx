@@ -26,35 +26,7 @@ function App() {
 
   useEffect(() => {
     setSessionId(generateUUID());
-    initializeMap();
   }, []);
-
-  // For generating the initial map HTML
-  function initializeMap(): void {
-    const initialMapHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-          <style>
-            body { margin: 0; }
-            #map { height: 100vh; }
-          </style>
-        </head>
-        <body>
-          <div id="map"></div>
-          <script>
-            const map = L.map('map').setView([20, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-          <\/script>
-        </body>
-      </html>
-    `;
-    setMapHTML(initialMapHTML);
-  }
 
   // Sends user question to the server
   async function askQuestion(question: string): Promise<void> {
