@@ -238,7 +238,6 @@ button:hover {
 }
 
 #chain-of-thought-container {
-  display: none;
   height: calc(100% - 120px);
   overflow-y: auto;
   padding: var(--spacing-lg);
