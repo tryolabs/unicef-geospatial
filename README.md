@@ -1,4 +1,4 @@
-## Unicef Geospatial Project
+# Unicef Geospatial Project
 
 This project is a collection of tools and scripts for working with geospatial data and AI.
 The objective is to research and develop tools for interacting with geospatial data using natural language.
@@ -51,9 +51,10 @@ The logs are stored in langfuse cloud. They are accesible [here](https://cloud.l
   - `data_warehouse/`: Tools and functions for interacting with the unicef data warehouse.
   - `earth_engine/`: Functions for interacting with google earth engine.
   - `geospatial/`: Tools and functions for interacting with geospatial data.
-  - `frontend/`: The HTML, js and css for the frontend.
   - `utils/`: Utility functions for the project.
   - `app.py`: The main entry point for the API.
+
+- `unicef-frontend/`: The frontend for the project.
 
 - `notebooks/`: Notebooks with interactive visualizations and demonstrations.
 - `research/`: Research scripts for exploring geospatial data, unicef api, etc.
