@@ -3,6 +3,12 @@
 This project is a collection of tools and scripts for working with geospatial data and AI.
 The objective is to research and develop tools for interacting with geospatial data using natural language.
 
+### Demo
+
+
+https://github.com/user-attachments/assets/c4d4a8e6-a248-4231-b9dc-abbe9f13e11f
+
+
 ### Installing dependencies
 
 The project API dependencies are managed using `uv`, while the frontend dependencies are managed via `npm`.
