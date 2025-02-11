@@ -13,7 +13,7 @@ https://github.com/user-attachments/assets/c4d4a8e6-a248-4231-b9dc-abbe9f13e11f
 
 ### Installing dependencies
 
-The project API dependencies are managed using `uv`, while the frontend dependencies are managed via `npm`.
+The project API dependencies are managed using [`uv`](https://docs.astral.sh/uv/), while the frontend dependencies are managed via [`npm`](https://www.npmjs.com/).
 
 To install the API dependencies:
 
@@ -27,6 +27,8 @@ To install the frontend dependencies:
 cd unicef-frontend
 npm install
 ```
+
+In order to run the project it's also needed the [gcloud CLI](https://cloud.google.com/sdk/docs/install#deb)
 
 ### Running the project
 
