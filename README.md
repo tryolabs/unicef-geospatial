@@ -47,6 +47,43 @@ npm run dev
 
 This will start a local server at `http://127.0.0.1:5173`.
 
+### Secrets
+
+The project uses [python-dotenv](https://github.com/theskumar/python-dotenv) to load environment variables from a `.env` file.
+
+To copy the `.env.example` file to a new file called `.env`:
+
+```bash
+cp .env.example .env
+```
+
+The `.env` file should be located in the root of the project and contain the following variables:
+
+- `OPENAI_API_KEY`: The API key for OpenAI.
+- `MODEL_NAME`: The name of the OpenAI model to use.
+- `LANGFUSE_PUBLIC_KEY`: The public key for the langfuse cloud.
+- `LANGFUSE_SECRET_KEY`: The secret key for the langfuse cloud.
+- `LANGFUSE_HOST`: The host URL for the langfuse cloud.
+- `LANGFUSE_PROJECT_ID`: The project id for the langfuse cloud.
+
+For authentication into the google earth engine, you need a service account and download the credentials file.
+The file should be named `ee_auth.json` and placed in the root of the project. It should look like this:
+
+```json
+{
+    "type": "service_account",
+    "project_id": "XXX",
+    "private_key_id": "XXX",
+    "private_key": "XXX",
+    "client_email": "XXX",
+    "client_id": "XXX",
+    "auth_uri": "XXX",
+    "token_uri": "XXX",
+    "auth_provider_x509_cert_url": "XXX",
+    "client_x509_cert_url": "XXX",
+    "universe_domain": "XXX"
+}
+
 ### Accessing the logs
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
@@ -79,3 +116,4 @@ The logs are stored in langfuse cloud. They are accesible [here](https://cloud.l
 - `interact_geospatial.py`: Research on how to use langchain agents to interact with a geospatial data.
 - `pandas_ai.py`: Research on how to use pandas-ai to interact with a unicef dataframe.
 - `unicef_geospatial_ee.py`: Research on how to use google earth engine to interact with a geospatial data, creating an interactive map.
+```
