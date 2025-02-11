@@ -83,7 +83,7 @@ The file should be named `ee_auth.json` and placed in the root of the project. I
     "client_x509_cert_url": "XXX",
     "universe_domain": "XXX"
 }
-
+```
 ### Accessing the logs
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
