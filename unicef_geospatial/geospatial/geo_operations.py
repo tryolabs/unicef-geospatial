@@ -1,8 +1,62 @@
+import json
+
 import geemap.foliumap as geemap
 from ee.deserializer import fromJSON
+from ee.errormargin import ErrorMargin
+from ee.feature import Feature
 from ee.featurecollection import FeatureCollection
 from ee.image import Image
+from langchain.tools import tool
 from logging_config import get_logger
+
+INTERSECTION_PATH = "data/intersection.html"
+
+
+@tool
+def intersect_feature_collection(
+    paths_to_feature_collections: list[str],
+) -> str:
+    """Intersect a list of feature collections and return the resulting feature collection.
+
+    Args:
+        paths_to_feature_collections: List of paths to the feature collections to intersect
+
+    Returns:
+        FeatureCollection: Intersection of the input feature collections
+    """
+    logger = get_logger(__name__)
+    logger.info("Intersecting feature collections: %s", paths_to_feature_collections)
+
+    if len(paths_to_feature_collections) == 0:
+        raise ValueError("No feature collections provided")
+
+    intersection = load_vector_data(paths_to_feature_collections[0])
+    for path in paths_to_feature_collections[1:]:
+        new_feature = load_vector_data(path)
+        intersection = intersection.map(lambda f: intersect_feature(f, new_feature))
+
+    save_vector_data(INTERSECTION_PATH, intersection)
+    return INTERSECTION_PATH
+
+
+def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
+    """Intersect a feature with a feature collection.
+
+    Computes the geometric intersection between a feature and a feature collection,
+    preserving the properties of the input feature.
+
+    Args:
+        feature: The feature to intersect
+        feature_collection: The feature collection to intersect with
+
+    Returns:
+        Feature: A new feature representing the intersection, with properties copied from
+                the input feature
+    """
+    intersected = feature_1.geometry().intersection(
+        feature_2.geometry(), ErrorMargin(100)
+    )
+    return Feature(intersected).copyProperties(feature_1)
 
 
 def image_to_html(
@@ -31,6 +85,16 @@ def save_html(path: str, html: str) -> None:
     with open(path, "w") as f:
         logger.info("Writing map to %s", path)
         f.write(html)
+
+
+def save_vector_data(path: str, vector_data: FeatureCollection) -> None:
+    """Save a vector data to a file."""
+    logger = get_logger(__name__)
+    logger.info("Saving vector data to %s", path)
+    serialized_vector_data = vector_data.serialize()
+    with open(path, "w") as f:
+        logger.info("Writing vector data to %s", path)
+        json.dump(serialized_vector_data, f)
 
 
 def load_vector_data(path_to_vector_data: str) -> FeatureCollection:
