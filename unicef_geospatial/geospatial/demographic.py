@@ -64,15 +64,18 @@ def get_population_image(
 
 
 @tool
-def get_country_map(country: str) -> str:
-    """Returns an HTML string containing an interactive map centered on the specified country.
+def get_country_map(country: str) -> dict[str, str]:
+    """Generate an interactive map centered on the specified country.
+
+    Creates an HTML map showing the country boundaries using Earth Engine data.
 
     Args:
-        country (str): The name of the country to display on the map. Must match the country
-            names in the USDOS/LSIB_SIMPLE/2017 Earth Engine dataset.
+        country: The name of the country to display. Must match country names in the
+            USDOS/LSIB_SIMPLE/2017 Earth Engine dataset.
 
     Returns:
-        str: HTML string containing the interactive map with the country boundaries highlighted.
+        dict[str, str]: A dictionary containing:
+            - path_to_map: Path to the saved HTML map file
     """
     countries_boundries = FeatureCollection("USDOS/LSIB_SIMPLE/2017")
     country_boundries = countries_boundries.filter(Filter.eq("country_na", country))
@@ -87,25 +90,28 @@ def get_country_map(country: str) -> str:
 
 
 @tool
-def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> str:
-    """Get the zone boundary for a specified area and clip the dataset to it.
+def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
+    """Get the zone boundary for a specified area and save it as a vector file.
 
-    Retrieves the boundary geometry for either a country or admin level 1 area and uses it
-    to clip the input dataset. The boundary is also saved as a vector file.
+    Retrieves the boundary geometry for either a country or admin level 1 area from
+    Earth Engine and saves it as a GeoJSON file.
 
     Args:
-        area_name: Name of the area (country or admin level 1) to get boundary for
-        area_type: Type of area - either 'country' or 'admin1'
+        area_name: Name of the area to get boundary for. Must match names in the
+            corresponding Earth Engine dataset.
+        area_type: Type of area - either 'country' or 'admin1'. Determines which
+            dataset to query.
 
     Returns:
-        Path to the JSON file containing the vector boundary data
+        dict[str, str]: A dictionary containing:
+            - value: Path to the saved GeoJSON vector file
 
     Example:
         To get boundary data for France:
-        >>> zone_path = get_zone_of_area(dataset, "France", "country")
+        >>> zone_path = get_zone_of_area("France", "country")
 
         To get boundary data for California:
-        >>> zone_path = get_zone_of_area(dataset, "California", "admin1")
+        >>> zone_path = get_zone_of_area("California", "admin1")
     """
     if area_type == "country":
         countries_boundries = FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
@@ -119,11 +125,20 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> str:
     with open(PATH_TO_VECTOR_DATA, "w") as f:
         json.dump(area_boundry_serialized, f)
 
-    return PATH_TO_VECTOR_DATA
+    return {"value": PATH_TO_VECTOR_DATA}
 
 
 def standarize_country_name(country: str) -> str:
-    """Return the official country name using the input."""
+    """Standardize a country name to its official form.
+
+    Uses pycountry to look up the official name of a country from various input formats.
+
+    Args:
+        country: Country name, 2-letter code, or 3-letter code to standardize.
+
+    Returns:
+        str: Official country name if found, otherwise returns the input unchanged.
+    """
     try:
         country_obj = (
             pycountry.countries.get(name=country)
@@ -139,7 +154,16 @@ def standarize_country_name(country: str) -> str:
 
 
 def get_country_code(country: str) -> str:
-    """Return the country code using the input."""
+    """Get the 3-letter ISO country code for a country.
+
+    Standardizes the country name first, then looks up its ISO 3166-1 alpha-3 code.
+
+    Args:
+        country: Country name, 2-letter code, or 3-letter code to look up.
+
+    Returns:
+        str: 3-letter ISO country code if found, otherwise returns the input unchanged.
+    """
     try:
         country = standarize_country_name(country)
         country_obj = pycountry.countries.get(name=country)
