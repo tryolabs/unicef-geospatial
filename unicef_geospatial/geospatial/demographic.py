@@ -4,8 +4,11 @@ import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
 from ee.imagecollection import ImageCollection
-from ee.reducer import Reducer
-from geospatial.geo_operations import image_to_html, load_vector_data, save_html
+from geospatial.geo_operations import (
+    image_to_html,
+    save_html,
+    save_vector_data,
+)
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
@@ -18,28 +21,30 @@ from utils.constants import (
 from utils.types import AGE_GROUPS, AREA_TYPES, SEXES
 
 PATH_TO_VECTOR_DATA = "unicef_geospatial/data/map_zones.json"
+PATH_TO_DEMOGRAPHIC_IMAGE = "unicef_geospatial/data/demographic_image.json"
 
 
 @tool
-def get_population_in_zone(
-    path_to_vector_data: str,
+def get_population_image(
     age_group: AGE_GROUPS = "Total Population",
     sex: SEXES = "b",
-) -> dict[str, float | str]:
-    """Calculate population count within a specified geographic zone.
+) -> dict[str, str]:
+    """Get population data image for a specific age group and sex.
+
+    Retrieves demographic data from Earth Engine and saves it as a vector file.
 
     Args:
-        path_to_vector_data: Path to the geometry to clip the demographic data
-        age_group: Age group to analyze.
-        sex: Sex to analyze.
+        age_group: Age group to analyze. Must be one of the valid AGE_GROUPS.
+        sex: Sex to analyze. Must be one of the valid SEXES ('m', 'f', or 'b' for both).
 
     Returns:
-        dict[str, float | str]: A dictionary containing:
-            - population (float): Population count in millions
-            - path_to_map (str): Path to the generated map file
+        dict[str, str]: A dictionary containing:
+            - path_to_image: Path to the saved demographic image file
+
+    Raises:
+        ValueError: If no demographic data is found for the given age group and sex.
     """
     logger = get_logger(__name__)
-    zone_vector = load_vector_data(path_to_vector_data)
 
     demographic = ImageCollection(DEMOGRAPHIC_DATASET)
     demographic_image = (
@@ -47,47 +52,15 @@ def get_population_in_zone(
         .filter(Filter.eq("Sex", sex))
         .first()
     )
+
+    demographic_image = demographic_image.select(DEMOGRAPHIC_BAND)
     if demographic_image is None:
         logger.error("No demographic image found for the given age group and sex")
         raise ValueError("No demographic image found for the given age group and sex")
 
-    scale = demographic_image.projection().nominalScale().getInfo()
+    save_vector_data(PATH_TO_DEMOGRAPHIC_IMAGE, demographic_image)
 
-    masked_demographic = demographic_image.clip(zone_vector)
-
-    raster_vis = {
-        "max": 1000.0,
-        "palette": [
-            "ffffe7",
-            "86a192",
-            "509791",
-            "307296",
-            "2c4484",
-            "000066",
-        ],
-        "min": 0.0,
-    }
-
-    html = image_to_html(masked_demographic, name="Population", vis_params=raster_vis)
-
-    with open(PATH_TO_MAP, "w") as f:
-        f.write(html)
-
-    result = masked_demographic.reduceRegion(
-        reducer=Reducer.sum(),
-        geometry=zone_vector,
-        scale=scale,
-        maxPixels=1e9,
-    ).getInfo()
-
-    if result is None:
-        logger.error("No result found for the given zone vectors")
-        raise ValueError("No result found for the given zone vectors")
-
-    population_count = result.get(DEMOGRAPHIC_BAND, 0)
-    population_millions = round(population_count / 1_000_000, 2)
-
-    return {"population": population_millions, "path_to_map": PATH_TO_MAP}
+    return {"path_to_image": PATH_TO_DEMOGRAPHIC_IMAGE}
 
 
 @tool

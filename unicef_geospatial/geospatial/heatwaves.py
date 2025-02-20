@@ -1,19 +1,18 @@
 import ee
-from geospatial.geo_operations import image_to_html, load_vector_data, save_html
+from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
-from utils.constants import PATH_TO_MAP
-from utils.types import DECADES, METRICS, REDUCERS
+from utils.types import DECADES, METRICS
 
 logger = get_logger(__name__)
 
+PATH_TO_HEATWAVE = "unicef_geospatial/data/heatwave_tiff.json"
+
 
 @tool
-def get_heatwave_metric_for_zone(
+def get_heatwave_image(
     metric: METRICS,
     decade: DECADES,
-    path_to_vector_data: str,
-    reducer: REDUCERS = "mean",
 ) -> dict:
     """Get the value of a heatwave metric for a specific zone and decade.
 
@@ -35,8 +34,6 @@ def get_heatwave_metric_for_zone(
     """
     band = get_band_mapping(metric)
     image = ee.Image(f"projects/unicef-ccri/assets/heatwave/average_hwi_{decade}")
-    zone_vector = load_vector_data(path_to_vector_data)
-    image = image.clip(zone_vector).set("system:footprint", zone_vector.geometry())
     heatwave_tiff = image.select(band)
 
     logger.info(
@@ -44,34 +41,13 @@ def get_heatwave_metric_for_zone(
     )
 
     try:
-        vis_params = {
-            "min": 0,
-            "max": 30,
-            "palette": ["blue", "yellow", "red"],
-        }
-        logger.info("Going to generate HTML map")
-        html = image_to_html(
-            heatwave_tiff, name="Zone Heatwaves", vis_params=vis_params, center=True
-        )
-        save_html(PATH_TO_MAP, html)
-
+        save_vector_data(PATH_TO_HEATWAVE, heatwave_tiff)
     except Exception as e:
-        logger.error(f"Error generating map: {e}")
+        logger.error(f"Error saving heatwave image: {e}")
         pass
 
-    logger.info("Reducing region")
-
-    stats = heatwave_tiff.reduceRegion(
-        reducer=getattr(ee.Reducer, reducer)(),
-        geometry=zone_vector,
-        scale=1000,
-        maxPixels=1e13,
-    )
-    logger.info("Returning stats")
-    return {
-        "value": round(stats.getInfo()[band], 3),
-        "path_to_map": PATH_TO_MAP,
-    }
+    logger.info("Returning image")
+    return {"path_to_image": PATH_TO_HEATWAVE}
 
 
 def get_band_mapping(metric: str) -> str:

@@ -6,37 +6,78 @@ from ee.errormargin import ErrorMargin
 from ee.feature import Feature
 from ee.featurecollection import FeatureCollection
 from ee.image import Image
+from ee.reducer import Reducer
 from langchain.tools import tool
 from logging_config import get_logger
+from utils.types import REDUCERS
 
-INTERSECTION_PATH = "data/intersection.html"
+INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
 
 
 @tool
 def intersect_feature_collection(
     paths_to_feature_collections: list[str],
 ) -> str:
-    """Intersect a list of feature collections and return the resulting feature collection.
+    """Intersect a list of feature collections/images and return the resulting data.
 
     Args:
-        paths_to_feature_collections: List of paths to the feature collections to intersect
+        paths_to_feature_collections: List of paths to the feature collections/images to intersect
 
     Returns:
-        FeatureCollection: Intersection of the input feature collections
+        dict: Dictionary containing paths to the intersection result and HTML visualization
     """
     logger = get_logger(__name__)
-    logger.info("Intersecting feature collections: %s", paths_to_feature_collections)
+    logger.info("Intersecting data: %s", paths_to_feature_collections)
 
     if len(paths_to_feature_collections) == 0:
         raise ValueError("No feature collections provided")
 
     intersection = load_vector_data(paths_to_feature_collections[0])
+    if isinstance(intersection, Image):
+        # if images are intersected, the values of each are changed
+        # only feature collections can be intersected
+        raise ValueError("Image cannot be intersected")
+
     for path in paths_to_feature_collections[1:]:
-        new_feature = load_vector_data(path)
-        intersection = intersection.map(lambda f: intersect_feature(f, new_feature))
+        new_data = load_vector_data(path)
+        if isinstance(new_data, Image):
+            raise ValueError("Image cannot be intersected")
+        intersection = intersection.map(lambda f: intersect_feature(f, new_data))
 
     save_vector_data(INTERSECTION_PATH, intersection)
-    return INTERSECTION_PATH
+    return {"path_to_vector_data": INTERSECTION_PATH}
+
+
+@tool
+def reduce_image(
+    path_to_image: str,
+    path_to_geometry: str,
+    reducer: REDUCERS,
+    scale: int = 1000,
+    maxPixels: int = 1e13,
+) -> dict:
+    """Reduce an image by applying a reducer to its pixels.
+
+    Args:
+        path_to_image: The path to the image to reduce
+        path_to_geometry: The path to the geometry to reduce the image to
+        reducer: The reducer to apply
+        scale: The scale of the image
+        maxPixels: The maximum number of pixels to process
+
+    Returns:
+        dict: A dictionary containing the reduced value
+    """
+    image = load_vector_data(path_to_image)
+    geometry = load_vector_data(path_to_geometry)
+    reduced = image.reduceRegion(
+        reducer=getattr(Reducer, reducer)(),
+        geometry=geometry,
+        scale=scale,
+        maxPixels=maxPixels,
+    )
+    stats = reduced.getInfo()
+    return stats
 
 
 def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
@@ -87,7 +128,7 @@ def save_html(path: str, html: str) -> None:
         f.write(html)
 
 
-def save_vector_data(path: str, vector_data: FeatureCollection) -> None:
+def save_vector_data(path: str, vector_data: FeatureCollection | Image) -> None:
     """Save a vector data to a file."""
     logger = get_logger(__name__)
     logger.info("Saving vector data to %s", path)
@@ -97,29 +138,30 @@ def save_vector_data(path: str, vector_data: FeatureCollection) -> None:
         json.dump(serialized_vector_data, f)
 
 
-def load_vector_data(path_to_vector_data: str) -> FeatureCollection:
-    """Load vector data from a JSON file and convert to Earth Engine FeatureCollection.
-
-    Reads a JSON file containing vector data (e.g. polygons, points) and converts it
-    to an Earth Engine FeatureCollection object that can be used for geospatial analysis.
+def load_vector_data(path_to_vector_data: str) -> FeatureCollection | Image:
+    """Load vector data from a JSON file and convert to Earth Engine FeatureCollection or Image.
 
     Args:
         path_to_vector_data: Path to the JSON file containing the vector data
 
     Returns:
-        FeatureCollection: Earth Engine FeatureCollection object containing the vector data
+        Either an Earth Engine FeatureCollection or Image object
     """
     try:
-        # Convert the dictionary to FeatureCollection
         logger = get_logger(__name__)
         with open(path_to_vector_data, "r") as f:
             logger.info(f"Going to load vector data from {path_to_vector_data}")
             json_value = eval(f.read())
-            zone_vector = fromJSON(json_value)
+            vector_data = fromJSON(json_value)
 
-        zone_vector = zone_vector.getInfo()
-        zone_vector = FeatureCollection(zone_vector)
-        return zone_vector
+        # Get the info without converting to Python dict
+        if isinstance(vector_data, Image):
+            return vector_data
+        elif isinstance(vector_data, FeatureCollection):
+            return vector_data
+        else:
+            raise ValueError(f"Unknown vector data type: {type(vector_data)}")
+
     except Exception as e:
         logger.error(f"Error in vector conversion: {str(e)}")
         raise e
