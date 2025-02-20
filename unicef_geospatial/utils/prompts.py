@@ -1,3 +1,4 @@
+# TODO: explain in the prompt the feature collection/image logic
 system_prompt = """You are an expert in analyzing climate, environmental, and development data,
 with a focus on their impacts across different geographic regions and time periods. \
 

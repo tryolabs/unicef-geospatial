@@ -64,32 +64,6 @@ def get_population_image(
 
 
 @tool
-def get_country_map(country: str) -> dict[str, str]:
-    """Generate an interactive map centered on the specified country.
-
-    Creates an HTML map showing the country boundaries using Earth Engine data.
-
-    Args:
-        country: The name of the country to display. Must match country names in the
-            USDOS/LSIB_SIMPLE/2017 Earth Engine dataset.
-
-    Returns:
-        dict[str, str]: A dictionary containing:
-            - path_to_map: Path to the saved HTML map file
-    """
-    countries_boundries = FeatureCollection("USDOS/LSIB_SIMPLE/2017")
-    country_boundries = countries_boundries.filter(Filter.eq("country_na", country))
-
-    html = image_to_html(
-        image=country_boundries, name=f"{country} Boundaries", center=True
-    )
-
-    save_html(PATH_TO_MAP, html)
-
-    return {"path_to_map": PATH_TO_MAP}
-
-
-@tool
 def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
     """Get the zone boundary for a specified area and save it as a vector file.
 

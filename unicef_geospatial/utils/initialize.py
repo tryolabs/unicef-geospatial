@@ -9,7 +9,6 @@ from data_warehouse.tools import (
     get_data_for_dataflow,
 )
 from geospatial.demographic import (
-    get_country_map,
     get_population_image,
     get_zone_of_area,
 )
@@ -43,7 +42,6 @@ def get_tools() -> list[Callable]:
         get_all_indicators_for_dataflow,
         get_available_dataflows_info,
         get_data_for_dataflow,
-        get_country_map,
         get_population_image,
         get_drought_zones,
         intersect_feature_collection,
