@@ -1,8 +1,7 @@
-import json
-
 from ee.filter import Filter
 from ee.geometry import Geometry
 from ee.imagecollection import ImageCollection
+from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import DROUGHT_DATASET, EARTH_GEOMETRY_COORDS, EARTH_GEOMETRY_CRS
@@ -39,7 +38,7 @@ def get_drought_zones(
             - If 12, analyzes yearly drought conditions
 
     Returns:
-        dict[str, str]: Dictionary with the serialized FeatureCollection of drought zones
+        dict[str, str]: Dictionary with the path to the serialized FeatureCollection of drought zones
 
     Example:
         To analyze yearly drought conditions globally in 2024:
@@ -95,13 +94,10 @@ def get_drought_zones(
                 Filter.gt("area_km2", MIN_AREA_KM2),
             )
         )
-        vectors_serialized = final_vectors.serialize()
-
-        with open(PATH_TO_VECTOR_DATA, "w") as f:
-            json.dump(vectors_serialized, f)
+        save_vector_data(PATH_TO_VECTOR_DATA, final_vectors)
 
     except Exception as e:
         logger.error(f"Error in vector conversion: {str(e)}")
         return ""
 
-    return PATH_TO_VECTOR_DATA
+    return {"path_to_vector_data": PATH_TO_VECTOR_DATA}

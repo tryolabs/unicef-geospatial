@@ -4,8 +4,7 @@ import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
 from ee.imagecollection import ImageCollection
-from ee.reducer import Reducer
-from geospatial.geo_operations import image_to_html, load_vector_data, save_html
+from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
@@ -13,33 +12,34 @@ from utils.constants import (
     COUNTRY_BOUNDRIES_DATASET,
     DEMOGRAPHIC_BAND,
     DEMOGRAPHIC_DATASET,
-    PATH_TO_MAP,
 )
 from utils.types import AGE_GROUPS, AREA_TYPES, SEXES
 
 PATH_TO_VECTOR_DATA = "unicef_geospatial/data/map_zones.json"
+PATH_TO_DEMOGRAPHIC_IMAGE = "unicef_geospatial/data/demographic_image.json"
 
 
 @tool
-def get_population_in_zone(
-    path_to_vector_data: str,
+def get_population_image(
     age_group: AGE_GROUPS = "Total Population",
     sex: SEXES = "b",
-) -> dict[str, float | str]:
-    """Calculate population count within a specified geographic zone.
+) -> dict[str, str]:
+    """Get population data image for a specific age group and sex.
+
+    Retrieves demographic data from Earth Engine and saves it as a vector file.
 
     Args:
-        path_to_vector_data: Path to the geometry to clip the demographic data
-        age_group: Age group to analyze.
-        sex: Sex to analyze.
+        age_group: Age group to analyze. Must be one of the valid AGE_GROUPS.
+        sex: Sex to analyze. Must be one of the valid SEXES ('m', 'f', or 'b' for both).
 
     Returns:
-        dict[str, float | str]: A dictionary containing:
-            - population (float): Population count in millions
-            - path_to_map (str): Path to the generated map file
+        dict[str, str]: A dictionary containing:
+            - path_to_image: Path to the saved demographic image file
+
+    Raises:
+        ValueError: If no demographic data is found for the given age group and sex.
     """
     logger = get_logger(__name__)
-    zone_vector = load_vector_data(path_to_vector_data)
 
     demographic = ImageCollection(DEMOGRAPHIC_DATASET)
     demographic_image = (
@@ -47,92 +47,40 @@ def get_population_in_zone(
         .filter(Filter.eq("Sex", sex))
         .first()
     )
+
+    demographic_image = demographic_image.select(DEMOGRAPHIC_BAND)
     if demographic_image is None:
         logger.error("No demographic image found for the given age group and sex")
         raise ValueError("No demographic image found for the given age group and sex")
 
-    scale = demographic_image.projection().nominalScale().getInfo()
+    save_vector_data(PATH_TO_DEMOGRAPHIC_IMAGE, demographic_image)
 
-    masked_demographic = demographic_image.clip(zone_vector)
-
-    raster_vis = {
-        "max": 1000.0,
-        "palette": [
-            "ffffe7",
-            "86a192",
-            "509791",
-            "307296",
-            "2c4484",
-            "000066",
-        ],
-        "min": 0.0,
-    }
-
-    html = image_to_html(masked_demographic, name="Population", vis_params=raster_vis)
-
-    with open(PATH_TO_MAP, "w") as f:
-        f.write(html)
-
-    result = masked_demographic.reduceRegion(
-        reducer=Reducer.sum(),
-        geometry=zone_vector,
-        scale=scale,
-        maxPixels=1e9,
-    ).getInfo()
-
-    if result is None:
-        logger.error("No result found for the given zone vectors")
-        raise ValueError("No result found for the given zone vectors")
-
-    population_count = result.get(DEMOGRAPHIC_BAND, 0)
-    population_millions = round(population_count / 1_000_000, 2)
-
-    return {"population": population_millions, "path_to_map": PATH_TO_MAP}
+    return {"path_to_image": PATH_TO_DEMOGRAPHIC_IMAGE}
 
 
 @tool
-def get_country_map(country: str) -> str:
-    """Returns an HTML string containing an interactive map centered on the specified country.
+def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
+    """Get the zone boundary for a specified area and save it as a vector file.
+
+    Retrieves the boundary geometry for either a country or admin level 1 area from
+    Earth Engine and saves it as a GeoJSON file.
 
     Args:
-        country (str): The name of the country to display on the map. Must match the country
-            names in the USDOS/LSIB_SIMPLE/2017 Earth Engine dataset.
+        area_name: Name of the area to get boundary for. Must match names in the
+            corresponding Earth Engine dataset.
+        area_type: Type of area - either 'country' or 'admin1'. Determines which
+            dataset to query.
 
     Returns:
-        str: HTML string containing the interactive map with the country boundaries highlighted.
-    """
-    countries_boundries = FeatureCollection("USDOS/LSIB_SIMPLE/2017")
-    country_boundries = countries_boundries.filter(Filter.eq("country_na", country))
-
-    html = image_to_html(
-        image=country_boundries, name=f"{country} Boundaries", center=True
-    )
-
-    save_html(PATH_TO_MAP, html)
-
-    return {"path_to_map": PATH_TO_MAP}
-
-
-@tool
-def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> str:
-    """Get the zone boundary for a specified area and clip the dataset to it.
-
-    Retrieves the boundary geometry for either a country or admin level 1 area and uses it
-    to clip the input dataset. The boundary is also saved as a vector file.
-
-    Args:
-        area_name: Name of the area (country or admin level 1) to get boundary for
-        area_type: Type of area - either 'country' or 'admin1'
-
-    Returns:
-        Path to the JSON file containing the vector boundary data
+        dict[str, str]: A dictionary containing:
+            - value: Path to the saved GeoJSON vector file
 
     Example:
         To get boundary data for France:
-        >>> zone_path = get_zone_of_area(dataset, "France", "country")
+        >>> zone_path = get_zone_of_area("France", "country")
 
         To get boundary data for California:
-        >>> zone_path = get_zone_of_area(dataset, "California", "admin1")
+        >>> zone_path = get_zone_of_area("California", "admin1")
     """
     if area_type == "country":
         countries_boundries = FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
@@ -146,11 +94,20 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> str:
     with open(PATH_TO_VECTOR_DATA, "w") as f:
         json.dump(area_boundry_serialized, f)
 
-    return PATH_TO_VECTOR_DATA
+    return {"value": PATH_TO_VECTOR_DATA}
 
 
 def standarize_country_name(country: str) -> str:
-    """Return the official country name using the input."""
+    """Standardize a country name to its official form.
+
+    Uses pycountry to look up the official name of a country from various input formats.
+
+    Args:
+        country: Country name, 2-letter code, or 3-letter code to standardize.
+
+    Returns:
+        str: Official country name if found, otherwise returns the input unchanged.
+    """
     try:
         country_obj = (
             pycountry.countries.get(name=country)
@@ -166,7 +123,16 @@ def standarize_country_name(country: str) -> str:
 
 
 def get_country_code(country: str) -> str:
-    """Return the country code using the input."""
+    """Get the 3-letter ISO country code for a country.
+
+    Standardizes the country name first, then looks up its ISO 3166-1 alpha-3 code.
+
+    Args:
+        country: Country name, 2-letter code, or 3-letter code to look up.
+
+    Returns:
+        str: 3-letter ISO country code if found, otherwise returns the input unchanged.
+    """
     try:
         country = standarize_country_name(country)
         country_obj = pycountry.countries.get(name=country)
