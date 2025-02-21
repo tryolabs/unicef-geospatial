@@ -14,6 +14,7 @@ from geospatial.demographic import (
 )
 from geospatial.droughts import get_drought_zones
 from geospatial.geo_operations import (
+    build_map,
     intersect_feature_collection,
     reduce_image,
 )
@@ -46,4 +47,5 @@ def get_tools() -> list[Callable]:
         get_drought_zones,
         intersect_feature_collection,
         reduce_image,
+        build_map,
     ]

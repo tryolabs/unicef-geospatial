@@ -4,11 +4,7 @@ import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
 from ee.imagecollection import ImageCollection
-from geospatial.geo_operations import (
-    image_to_html,
-    save_html,
-    save_vector_data,
-)
+from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
@@ -16,7 +12,6 @@ from utils.constants import (
     COUNTRY_BOUNDRIES_DATASET,
     DEMOGRAPHIC_BAND,
     DEMOGRAPHIC_DATASET,
-    PATH_TO_MAP,
 )
 from utils.types import AGE_GROUPS, AREA_TYPES, SEXES
 

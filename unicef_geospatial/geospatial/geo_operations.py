@@ -9,6 +9,7 @@ from ee.image import Image
 from ee.reducer import Reducer
 from langchain.tools import tool
 from logging_config import get_logger
+from utils.constants import PATH_TO_MAP
 from utils.types import REDUCERS
 
 INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
@@ -80,6 +81,37 @@ def reduce_image(
     return stats
 
 
+@tool
+def build_map(
+    path_to_image: str,
+    path_to_vector_data: str,
+    name: str = "",
+    center: bool = True,
+) -> dict:
+    """Build a map from an image and vector data and save it to an HTML file.
+
+    Creates an interactive map by overlaying an Earth Engine image on top of vector data
+    (e.g. administrative boundaries). The map is saved as an HTML file that can be viewed
+    in a web browser.
+
+    Args:
+        path_to_image: Path to the Earth Engine image file to display on the map
+        path_to_vector_data: Path to the vector data file (e.g. GeoJSON) defining the
+            boundaries to overlay the image on
+        name: The name of the map
+        center: Whether to center the map on the vector data
+
+    Returns:
+        dict: A dictionary containing the path to the saved HTML map file under the key
+            'path_to_map'
+    """
+    vector_data = load_vector_data(path_to_vector_data)
+    image = load_vector_data(path_to_image)
+    html = image_to_html(image=image, vector_data=vector_data, name=name, center=center)
+    save_html(PATH_TO_MAP, html)
+    return {"path_to_map": PATH_TO_MAP}
+
+
 def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
     """Intersect a feature with a feature collection.
 
@@ -102,15 +134,17 @@ def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
 
 def image_to_html(
     image: Image,
+    vector_data: FeatureCollection,
     name: str = "",
     vis_params: dict = {},
-    center: bool = False,
+    center: bool = True,
 ) -> str:
     """Converts an Earth Engine image to an HTML string."""
     demographic_map = geemap.Map()
-    demographic_map.add_layer(image, vis_params, name)
+    clipped_image = image.clip(vector_data)
+    demographic_map.add_layer(clipped_image, vis_params, name)
     if center:
-        demographic_map.center_object(image)
+        demographic_map.center_object(vector_data)
     html = demographic_map.to_html()
     if html is None:
         error_msg = "Failed to generate map"
