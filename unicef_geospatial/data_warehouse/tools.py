@@ -1,3 +1,5 @@
+from logging import getLogger
+
 import pandas as pd
 from data_warehouse.unicef_api import (
     get_available_dataflows,
@@ -6,6 +8,8 @@ from data_warehouse.unicef_api import (
 )
 from geospatial.demographic import get_country_code
 from langchain.tools import tool
+
+logger = getLogger(__name__)
 
 
 @tool
@@ -20,6 +24,7 @@ def get_all_indicators_for_dataflow(
     Returns:
         dict[str, str]: Dictionary of indicator codes and their descriptions.
     """
+    logger.info(f"Getting all indicators for dataflow {dataflow_id}")
     indicators_info = get_indicators_information(dataflow_id)
     return indicators_info
 
@@ -31,6 +36,7 @@ def get_available_dataflows_info() -> str:
     Returns:
         str: Information on all available dataflows.
     """
+    logger.info("Getting available dataflows")
     return get_available_dataflows()
 
 
@@ -59,8 +65,10 @@ def get_data_for_dataflow(
     Raises:
         IndexError: If no data is found for the given country and indicator
     """
-    ref_areas = get_country_code(ref_areas)
-    data = get_data(dataflow_id, ref_areas=[ref_areas], indicators=[indicators])
-    if year is not None and year in data["TIME_PERIOD"].unique():
-        data = data[data["TIME_PERIOD"] == year]
+    logger.info(f"Getting data for dataflow {dataflow_id}")
+    ref_areas = ref_areas.split(",")
+    ref_areas = [get_country_code(area) for area in ref_areas]
+    data = get_data(dataflow_id, ref_areas=ref_areas, indicators=indicators.split(","))
+    if year is not None and str(year) in data["TIME_PERIOD"].unique():
+        data = data[data["TIME_PERIOD"] == str(year)]
     return data
