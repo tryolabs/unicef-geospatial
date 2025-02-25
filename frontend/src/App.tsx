@@ -3,6 +3,7 @@ import MapContainer from "./components/MapContainer.js";
 import ChatSection from "./components/ChatSection.js";
 import UserGuide from "./components/UserGuide.js";
 import { Message } from "./types/Message.js";
+
 function generateUUID(): string {
   // TODO: use an external library to generate a UUID
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
