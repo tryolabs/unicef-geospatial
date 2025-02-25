@@ -24,7 +24,7 @@ uv sync
 To install the frontend dependencies:
 
 ```bash
-cd unicef-frontend
+cd frontend
 npm install
 ```
 
@@ -43,7 +43,7 @@ This will start a local server at `http://127.0.0.1:8000/`.
 To run the frontend:
 
 ```bash
-cd unicef-frontend
+cd frontend
 npm run dev
 ```
 
