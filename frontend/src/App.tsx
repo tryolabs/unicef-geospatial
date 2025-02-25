@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import MapContainer from "./components/MapContainer.js";
 import ChatSection from "./components/ChatSection.js";
+import UserGuide from "./components/UserGuide.js";
 import { Message } from "./types/Message.js";
 function generateUUID(): string {
   // TODO: use an external library to generate a UUID
@@ -95,15 +96,18 @@ function App() {
   }
 
   return (
-    <div className="container">
-      <MapContainer mapHTML={mapHTML} />
-      <ChatSection
-        activeTab={activeTab}
-        messageHistory={messageHistory}
-        chainOfThoughts={chainOfThoughts}
-        switchTab={switchTab}
-        askQuestion={askQuestion}
-      />
+    <div className="app-container">
+      <div className="container">
+        <MapContainer mapHTML={mapHTML} />
+        <ChatSection
+          activeTab={activeTab}
+          messageHistory={messageHistory}
+          chainOfThoughts={chainOfThoughts}
+          switchTab={switchTab}
+          askQuestion={askQuestion}
+        />
+      </div>
+      <UserGuide />
     </div>
   );
 }

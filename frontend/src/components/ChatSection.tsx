@@ -26,7 +26,12 @@ function ChatSection({
     >
       <TabNav activeTab={activeTab} switchTab={switchTab} />
 
-      {activeTab === "chat" && <ChatMessages messageHistory={messageHistory} />}
+      {activeTab === "chat" && (
+        <ChatMessages
+          messageHistory={messageHistory}
+          askQuestion={askQuestion}
+        />
+      )}
       {activeTab === "thoughts" && (
         <ChainOfThoughtSection chainOfThoughts={chainOfThoughts} />
       )}
