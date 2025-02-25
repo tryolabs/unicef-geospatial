@@ -19,7 +19,9 @@ INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
 def intersect_feature_collection(
     paths_to_feature_collections: list[str],
 ) -> str:
-    """Intersect a list of feature collections/images and return the resulting data.
+    """Intersect a list of feature collections and return the resulting data.
+
+    It is not possible to intersect images, just vector data.
 
     Args:
         paths_to_feature_collections: List of paths to the feature collections/images to intersect
@@ -54,8 +56,6 @@ def reduce_image(
     path_to_image: str,
     path_to_geometry: str,
     reducer: REDUCERS,
-    scale: int = 1000,
-    maxPixels: int = 1e13,
 ) -> dict:
     """Reduce an image by applying a reducer to its pixels.
 
@@ -63,19 +63,18 @@ def reduce_image(
         path_to_image: The path to the image to reduce
         path_to_geometry: The path to the geometry to reduce the image to
         reducer: The reducer to apply
-        scale: The scale of the image
-        maxPixels: The maximum number of pixels to process
 
     Returns:
         dict: A dictionary containing the reduced value
     """
     image = load_vector_data(path_to_image)
+    scale = image.projection().nominalScale().getInfo()
     geometry = load_vector_data(path_to_geometry)
     reduced = image.reduceRegion(
         reducer=getattr(Reducer, reducer)(),
         geometry=geometry,
         scale=scale,
-        maxPixels=maxPixels,
+        maxPixels=1e13,
     )
     stats = reduced.getInfo()
     return stats
