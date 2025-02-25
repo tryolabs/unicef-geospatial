@@ -49,12 +49,13 @@ def extract_chain_of_thought(response: dict, input_length: int) -> list[str]:
             chain_of_thought.append(msg.content)
 
         # Add function call information
-        tool_call = msg.additional_kwargs["tool_calls"][0]["function"]
-        function_args = json.loads(tool_call["arguments"])
-        args_str = "\n".join(f"  {k}: {v}" for k, v in function_args.items())
-        chain_of_thought.append(
-            f"Calling function {tool_call['name']} with arguments:\n{args_str}"
-        )
+        if "tool_calls" in msg.additional_kwargs:
+            for tool_call in msg.additional_kwargs["tool_calls"]:
+                function_args = json.loads(tool_call["function"]["arguments"])
+                args_str = "\n".join(f"  {k}: {v}" for k, v in function_args.items())
+                chain_of_thought.append(
+                    f"Calling function {tool_call['function']['name']} with arguments:\n{args_str}"
+                )
 
     return chain_of_thought
 
