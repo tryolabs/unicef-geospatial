@@ -17,10 +17,10 @@ class Chat(BaseModel):
 
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
-REDUCERS = Literal["mean", "max", "min"]
+REDUCERS = Literal["mean", "max", "min", "sum", "median", "std"]
 AREA_TYPES = Literal["country", "admin1"]
 AGE_GROUPS = Literal[
-    "0,4",
+    "0-4",
     "0-14",
     "5-9",
     "10-14",
