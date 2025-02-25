@@ -1,3 +1,5 @@
+import os
+
 import uvicorn
 from agent.agent import create_agent, run_agent
 from fastapi.responses import HTMLResponse
@@ -52,5 +54,7 @@ def ask(chat: Chat) -> dict:
 
 
 if __name__ == "__main__":
-    app_state.logger.info("Starting server on http://127.0.0.1:8000")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    host = os.getenv("BACKEND_HOST")
+    port = os.getenv("BACKEND_PORT")
+    app_state.logger.info("Starting server on http://%s:%s", host, port)
+    uvicorn.run(app, host=host, port=port)
