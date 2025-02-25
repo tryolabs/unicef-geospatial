@@ -55,6 +55,6 @@ def ask(chat: Chat) -> dict:
 
 if __name__ == "__main__":
     host = os.getenv("BACKEND_HOST")
-    port = os.getenv("BACKEND_PORT")
+    port = int(os.getenv("BACKEND_PORT"))
     app_state.logger.info("Starting server on http://%s:%s", host, port)
     uvicorn.run(app, host=host, port=port)

@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  let host = "localhost";
+  let host = "0.0.0.0";
   let port = 5173;
 
   if (env.VITE_HOST) {
@@ -23,6 +23,10 @@ export default defineConfig(({ mode }) => {
       host,
       port,
       strictPort: true,
+    },
+    build: {
+      outDir: "dist",
+      assetsDir: "assets",
     },
   };
 });
