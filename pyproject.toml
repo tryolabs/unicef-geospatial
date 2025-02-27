@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "earthengine-api>=1.5",
     "fastapi>=0.115.8",
-    "geemap>=0.35.1",
+    "geemap @ git+https://github.com/gee-community/geemap.git",
     "ipykernel>=6.29.5",
     "langchain>=0.3.18",
     "langchain-cohere>=0.4.2",
