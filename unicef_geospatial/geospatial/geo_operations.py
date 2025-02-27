@@ -143,7 +143,7 @@ def image_to_html(
     clipped_image = image.clip(vector_data)
     demographic_map.add_layer(clipped_image, vis_params, name)
     if center:
-        demographic_map.center_object(vector_data)
+        demographic_map.center_object(vector_data, max_error=0.1)
     html = demographic_map.to_html()
     if html is None:
         error_msg = "Failed to generate map"
