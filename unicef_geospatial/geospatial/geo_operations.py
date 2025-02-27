@@ -106,9 +106,7 @@ def build_map(
     """
     vector_data = load_vector_data(path_to_vector_data)
     image = load_vector_data(path_to_image)
-    html = image_to_html(image=image, vector_data=vector_data, name=name, center=center)
-    save_html(PATH_TO_MAP, html)
-    return {"path_to_map": PATH_TO_MAP}
+    return image_to_html(image=image, vector_data=vector_data, name=name, center=center)
 
 
 def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
@@ -144,21 +142,8 @@ def image_to_html(
     demographic_map.add_layer(clipped_image, vis_params, name)
     if center:
         demographic_map.center_object(vector_data, max_error=0.1)
-    html = demographic_map.to_html()
-    if html is None:
-        error_msg = "Failed to generate map"
-        raise ValueError(error_msg)
-
-    return html
-
-
-def save_html(path: str, html: str) -> None:
-    """Save an HTML string to a file."""
-    logger = get_logger(__name__)
-    logger.info("Saving map to %s", path)
-    with open(path, "w") as f:
-        logger.info("Writing map to %s", path)
-        f.write(html)
+    demographic_map.to_html(PATH_TO_MAP)
+    return {"path_to_map": PATH_TO_MAP}
 
 
 def save_vector_data(path: str, vector_data: FeatureCollection | Image) -> None:
