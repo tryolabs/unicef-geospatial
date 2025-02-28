@@ -50,6 +50,8 @@ For each query:
 6. Focus on requested data only
 7. Format your response in plain markdown without code blocks
 
+If you are missing tools to query the asked data, explain which data is missing and why it is important.
+
 IMPORTANT: After obtaining the requested data, ALWAYS finish by generating a visualization.
 You must call the build_map tool with the analyzed data to create a map for the user.
 This is a critical step - never skip map generation for any complete analysis.
