@@ -18,6 +18,8 @@ from utils.types import AGE_GROUPS, AREA_TYPES, SEXES
 PATH_TO_VECTOR_DATA = "unicef_geospatial/data/map_zones.json"
 PATH_TO_DEMOGRAPHIC_IMAGE = "unicef_geospatial/data/demographic_image.json"
 
+logger = get_logger(__name__)
+
 
 @tool
 def get_population_image(
@@ -39,8 +41,6 @@ def get_population_image(
     Raises:
         ValueError: If no demographic data is found for the given age group and sex.
     """
-    logger = get_logger(__name__)
-
     demographic = ImageCollection(DEMOGRAPHIC_DATASET)
     demographic_image = (
         demographic.filter(Filter.eq("Age_Group", age_group))
@@ -55,7 +55,10 @@ def get_population_image(
 
     save_vector_data(PATH_TO_DEMOGRAPHIC_IMAGE, demographic_image)
 
-    return {"path_to_image": PATH_TO_DEMOGRAPHIC_IMAGE}
+    return {
+        "path_to_image": PATH_TO_DEMOGRAPHIC_IMAGE,
+        "input_arguments": {"age_group": age_group, "sex": sex},
+    }
 
 
 @tool
@@ -94,7 +97,10 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
     with open(PATH_TO_VECTOR_DATA, "w") as f:
         json.dump(area_boundry_serialized, f)
 
-    return {"value": PATH_TO_VECTOR_DATA}
+    return {
+        "value": PATH_TO_VECTOR_DATA,
+        "input_arguments": {"area_name": area_name, "area_type": area_type},
+    }
 
 
 def standarize_country_name(country: str) -> str:

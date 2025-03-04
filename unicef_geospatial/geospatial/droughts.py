@@ -15,6 +15,8 @@ MAX_VERTICES = 1000
 
 PATH_TO_VECTOR_DATA = "unicef_geospatial/data/drought_zones.json"
 
+logger = get_logger(__name__)
+
 
 @tool
 def get_drought_zones(
@@ -47,7 +49,6 @@ def get_drought_zones(
     Notes:
         Only returns polygons larger than 100 km² to filter out noise.
     """
-    logger = get_logger(__name__)
     spei_band = f"SPEI_{spei_months:02d}_month"
     drought_dataset = ImageCollection(DROUGHT_DATASET)
     drought_image = (
@@ -100,4 +101,12 @@ def get_drought_zones(
         logger.error(f"Error in vector conversion: {str(e)}")
         return ""
 
-    return {"path_to_vector_data": PATH_TO_VECTOR_DATA}
+    return {
+        "path_to_vector_data": PATH_TO_VECTOR_DATA,
+        "input_arguments": {
+            "year": year,
+            "month": month,
+            "day": day,
+            "spei_months": spei_months,
+        },
+    }

@@ -38,7 +38,15 @@ def get_precipitation_for_zone(
         scale=1000,
         maxPixels=1e13,
     )
-    return round(stats.getInfo()["total_precipitation"] * 1000, 3)
+    return {
+        "value": round(stats.getInfo()["total_precipitation"] * 1000, 3),
+        "input_arguments": {
+            "year": year,
+            "month": month,
+            "path_to_vector_data": path_to_vector_data,
+            "reducer": reducer,
+        },
+    }
 
 
 def get_rainfall_image(year: int, month: int) -> ee.Image:

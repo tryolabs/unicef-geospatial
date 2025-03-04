@@ -26,7 +26,10 @@ def get_all_indicators_for_dataflow(
     """
     logger.info(f"Getting all indicators for dataflow {dataflow_id}")
     indicators_info = get_indicators_information(dataflow_id)
-    return indicators_info
+    return {
+        "indicators_info": indicators_info,
+        "input_arguments": {"dataflow_id": dataflow_id},
+    }
 
 
 @tool
@@ -37,7 +40,10 @@ def get_available_dataflows_info() -> str:
         str: Information on all available dataflows.
     """
     logger.info("Getting available dataflows")
-    return get_available_dataflows()
+    return {
+        "available_dataflows": get_available_dataflows(),
+        "input_arguments": {},
+    }
 
 
 @tool
@@ -71,4 +77,12 @@ def get_data_for_dataflow(
     data = get_data(dataflow_id, ref_areas=ref_areas, indicators=indicators.split(","))
     if year is not None and str(year) in data["TIME_PERIOD"].unique():
         data = data[data["TIME_PERIOD"] == str(year)]
-    return data
+    return {
+        "data": str(data),
+        "input_arguments": {
+            "dataflow_id": dataflow_id,
+            "ref_areas": ref_areas,
+            "indicators": indicators,
+            "year": year,
+        },
+    }

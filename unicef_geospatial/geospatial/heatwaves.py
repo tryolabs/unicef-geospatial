@@ -47,7 +47,10 @@ def get_heatwave_image(
         pass
 
     logger.info("Returning image")
-    return {"path_to_image": PATH_TO_HEATWAVE}
+    return {
+        "path_to_image": PATH_TO_HEATWAVE,
+        "input_arguments": {"metric": metric, "decade": decade},
+    }
 
 
 def get_band_mapping(metric: str) -> str:

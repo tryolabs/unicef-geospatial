@@ -13,6 +13,7 @@ from utils.constants import PATH_TO_MAP
 from utils.types import REDUCERS
 
 INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
+logger = get_logger(__name__)
 
 
 @tool
@@ -29,7 +30,6 @@ def intersect_feature_collection(
     Returns:
         dict: Dictionary containing paths to the intersection result and HTML visualization
     """
-    logger = get_logger(__name__)
     logger.info("Intersecting data: %s", paths_to_feature_collections)
 
     if len(paths_to_feature_collections) == 0:
@@ -48,7 +48,12 @@ def intersect_feature_collection(
         intersection = intersection.map(lambda f: intersect_feature(f, new_data))
 
     save_vector_data(INTERSECTION_PATH, intersection)
-    return {"path_to_vector_data": INTERSECTION_PATH}
+    return {
+        "path_to_vector_data": INTERSECTION_PATH,
+        "input_arguments": {
+            "paths_to_feature_collections": paths_to_feature_collections
+        },
+    }
 
 
 @tool
@@ -77,7 +82,14 @@ def reduce_image(
         maxPixels=1e13,
     )
     stats = reduced.getInfo()
-    return stats
+    return {
+        "stats": stats,
+        "input_arguments": {
+            "path_to_image": path_to_image,
+            "path_to_geometry": path_to_geometry,
+            "reducer": reducer,
+        },
+    }
 
 
 @tool
@@ -85,7 +97,6 @@ def build_map(
     path_to_image: str,
     path_to_vector_data: str,
     name: str = "",
-    center: bool = True,
 ) -> dict:
     """Build a map from an image and vector data and save it to an HTML file.
 
@@ -104,9 +115,19 @@ def build_map(
         dict: A dictionary containing the path to the saved HTML map file under the key
             'path_to_map'
     """
+    logger.info(f"Building map with {path_to_image} and {path_to_vector_data}")
     vector_data = load_vector_data(path_to_vector_data)
     image = load_vector_data(path_to_image)
-    return image_to_html(image=image, vector_data=vector_data, name=name, center=center)
+    return {
+        "path_to_map": image_to_html(
+            image=image, vector_data=vector_data, name=name, center=True
+        ),
+        "input_arguments": {
+            "path_to_image": path_to_image,
+            "path_to_vector_data": path_to_vector_data,
+            "name": name,
+        },
+    }
 
 
 def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
@@ -137,13 +158,14 @@ def image_to_html(
     center: bool = True,
 ) -> str:
     """Converts an Earth Engine image to an HTML string."""
+    logger.info("Converting image to HTML")
     demographic_map = geemap.Map()
     clipped_image = image.clip(vector_data)
     demographic_map.add_layer(clipped_image, vis_params, name)
     if center:
         demographic_map.center_object(vector_data, max_error=0.1)
     demographic_map.to_html(PATH_TO_MAP)
-    return {"path_to_map": PATH_TO_MAP}
+    return PATH_TO_MAP
 
 
 def save_vector_data(path: str, vector_data: FeatureCollection | Image) -> None:
@@ -169,9 +191,8 @@ def load_vector_data(path_to_vector_data: str) -> FeatureCollection | Image:
         logger = get_logger(__name__)
         with open(path_to_vector_data, "r") as f:
             logger.info(f"Going to load vector data from {path_to_vector_data}")
-            json_value = eval(f.read())
-            vector_data = fromJSON(json_value)
-
+            vector_data = eval(f.read())
+            vector_data = fromJSON(vector_data)
         # Get the info without converting to Python dict
         if isinstance(vector_data, Image):
             return vector_data
