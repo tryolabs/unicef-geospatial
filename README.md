@@ -35,7 +35,7 @@ In order to run the project it's also needed the [gcloud CLI](https://cloud.goog
 To run the project the API:
 
 ```bash
-uv run python unicef_geospatial/app.py
+uv run python run.py
 ```
 
 This will start a local server at `http://127.0.0.1:8000/`.
@@ -73,19 +73,20 @@ The file should be named `ee_auth.json` and placed in the root of the project. I
 
 ```json
 {
-    "type": "service_account",
-    "project_id": "XXX",
-    "private_key_id": "XXX",
-    "private_key": "XXX",
-    "client_email": "XXX",
-    "client_id": "XXX",
-    "auth_uri": "XXX",
-    "token_uri": "XXX",
-    "auth_provider_x509_cert_url": "XXX",
-    "client_x509_cert_url": "XXX",
-    "universe_domain": "XXX"
+  "type": "service_account",
+  "project_id": "XXX",
+  "private_key_id": "XXX",
+  "private_key": "XXX",
+  "client_email": "XXX",
+  "client_id": "XXX",
+  "auth_uri": "XXX",
+  "token_uri": "XXX",
+  "auth_provider_x509_cert_url": "XXX",
+  "client_x509_cert_url": "XXX",
+  "universe_domain": "XXX"
 }
 ```
+
 ### Accessing the logs
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
@@ -118,4 +119,7 @@ The logs are stored in langfuse cloud. They are accesible [here](https://cloud.l
 - `interact_geospatial.py`: Research on how to use langchain agents to interact with a geospatial data.
 - `pandas_ai.py`: Research on how to use pandas-ai to interact with a unicef dataframe.
 - `unicef_geospatial_ee.py`: Research on how to use google earth engine to interact with a geospatial data, creating an interactive map.
+
+```
+
 ```

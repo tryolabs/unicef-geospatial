@@ -51,10 +51,3 @@ def ask(chat: Chat) -> dict:
         "chain_of_thought": chain_of_thought,
         "trace_id": trace_id,
     }
-
-
-if __name__ == "__main__":
-    host = os.getenv("BACKEND_HOST")
-    port = int(os.getenv("BACKEND_PORT"))
-    app_state.logger.info("Starting server on http://%s:%s", host, port)
-    uvicorn.run(app, host=host, port=port)
