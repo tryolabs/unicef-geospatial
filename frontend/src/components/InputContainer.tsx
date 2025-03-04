@@ -2,8 +2,10 @@ import { useState } from "react";
 
 function InputContainer({
   askQuestion,
+  isLoading,
 }: {
   askQuestion: (question: string) => Promise<void>;
+  isLoading: boolean;
 }) {
   const [inputValue, setInputValue] = useState("");
 
@@ -29,8 +31,14 @@ function InputContainer({
             setInputValue("");
           }
         }}
+        disabled={isLoading}
       />
-      <button onClick={handleSend}>Send</button>
+      <button
+        onClick={handleSend}
+        disabled={isLoading || inputValue.trim() === ""}
+      >
+        {isLoading ? "Sending..." : "Send"}
+      </button>
     </div>
   );
 }

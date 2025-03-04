@@ -1,23 +1,26 @@
 import TabNav from "./TabNav.js";
 import ChatMessages from "./ChatMessages.js";
-import ChainOfThoughtSection from "./ChainOfThoughtSection.js";
+import ToolCallsSection from "./ToolCallsSection.js";
 import InputContainer from "./InputContainer.js";
 import { Message } from "../types/Message.js";
+
 function ChatSection({
   activeTab,
   messageHistory,
-  chainOfThoughts,
+  toolCalls,
   switchTab,
   askQuestion,
+  isLoading,
 }: {
-  activeTab: "chat" | "thoughts";
+  activeTab: "chat" | "tools";
   messageHistory: Message[];
-  chainOfThoughts: Array<{
+  toolCalls: Array<{
     question: string;
-    thoughts: string[];
+    toolCalls: string[];
   }>;
-  switchTab: (tab: "chat" | "thoughts") => void;
+  switchTab: (tab: "chat" | "tools") => void;
   askQuestion: (question: string) => Promise<void>;
+  isLoading: boolean;
 }) {
   return (
     <div
@@ -32,11 +35,11 @@ function ChatSection({
           askQuestion={askQuestion}
         />
       )}
-      {activeTab === "thoughts" && (
-        <ChainOfThoughtSection chainOfThoughts={chainOfThoughts} />
-      )}
+      {activeTab === "tools" && <ToolCallsSection toolCalls={toolCalls} />}
 
-      {activeTab === "chat" && <InputContainer askQuestion={askQuestion} />}
+      {activeTab === "chat" && (
+        <InputContainer askQuestion={askQuestion} isLoading={isLoading} />
+      )}
     </div>
   );
 }

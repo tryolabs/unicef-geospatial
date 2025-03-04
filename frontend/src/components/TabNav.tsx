@@ -2,8 +2,8 @@ function TabNav({
   activeTab,
   switchTab,
 }: {
-  activeTab: "chat" | "thoughts";
-  switchTab: (tab: "chat" | "thoughts") => void;
+  activeTab: "chat" | "tools";
+  switchTab: (tab: "chat" | "tools") => void;
 }) {
   return (
     <div className="tab-container">
@@ -14,10 +14,10 @@ function TabNav({
         Chat
       </div>
       <div
-        className={`tab ${activeTab === "thoughts" ? "active" : ""}`}
-        onClick={() => switchTab("thoughts")}
+        className={`tab ${activeTab === "tools" ? "active" : ""}`}
+        onClick={() => switchTab("tools")}
       >
-        Chain of Thought
+        Tool Calls
       </div>
     </div>
   );

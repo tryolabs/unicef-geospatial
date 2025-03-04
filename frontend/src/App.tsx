@@ -17,14 +17,15 @@ function generateUUID(): string {
 function App() {
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"chat" | "thoughts">("chat");
-  const [chainOfThoughts, setChainOfThoughts] = useState<
+  const [activeTab, setActiveTab] = useState<"chat" | "tools">("chat");
+  const [toolCalls, setToolCalls] = useState<
     Array<{
       question: string;
-      thoughts: string[];
+      toolCalls: string[];
     }>
   >([]);
   const [mapHTML, setMapHTML] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setSessionId(generateUUID());
@@ -42,6 +43,7 @@ function App() {
     };
 
     setMessageHistory((prev) => [...prev, question_message]);
+    setIsLoading(true);
 
     try {
       const body = {
@@ -49,38 +51,125 @@ function App() {
         session_id: sessionId,
       };
       console.log(body);
-      console.log(JSON.stringify(body));
+
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data: {
-        response: string;
-        is_html: boolean;
-        html_content?: string;
-        chain_of_thought: string[];
-        trace_id: string;
-      } = await response.json();
 
-      // Add assistant's reply
-      const response_message = {
-        content: data.response,
-        role: "assistant" as const,
-        trace_id: data.trace_id,
-      };
-      setMessageHistory((prev) => [...prev, response_message]);
-      if (data.is_html && data.html_content) {
-        setMapHTML(data.html_content);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      setChainOfThoughts((prev) => [
-        {
-          question,
-          thoughts: data.chain_of_thought,
-        },
-        ...prev,
-      ]);
+      if (!response.body) {
+        throw new Error("Response body is null");
+      }
+
+      // Set up stream reader
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let traceId = "";
+      let fullResponse = "";
+      let assistantMessageAdded = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const jsonLines = chunk.split("\n").filter((line) => line.trim());
+
+        for (const line of jsonLines) {
+          try {
+            let data = JSON.parse(line);
+
+            traceId = data.trace_id || traceId;
+            let is_finish = data.is_finish === "True";
+            let is_html = data.is_html === "True";
+
+            if (data.response !== undefined) {
+              // Add the assistant message only when the first response chunk arrives
+              if (!assistantMessageAdded) {
+                const assistantMessage: Message = {
+                  content: data.response,
+                  role: "assistant",
+                  trace_id: traceId,
+                  is_finished: false,
+                };
+                setMessageHistory((prev) => [...prev, assistantMessage]);
+                assistantMessageAdded = true;
+                fullResponse = data.response;
+              } else {
+                // Update message history with new content
+                fullResponse += data.response;
+                setMessageHistory((prev) => {
+                  const newHistory = [...prev];
+                  if (newHistory.length > 0) {
+                    newHistory[newHistory.length - 1] = {
+                      ...newHistory[newHistory.length - 1],
+                      content: fullResponse,
+                      trace_id: traceId,
+                    };
+                  }
+                  return newHistory;
+                });
+              }
+            }
+
+            // Mark message as finished when server sends is_finish flag
+            if (is_finish && assistantMessageAdded) {
+              setMessageHistory((prev) => {
+                const newHistory = [...prev];
+                if (newHistory.length > 0) {
+                  newHistory[newHistory.length - 1] = {
+                    ...newHistory[newHistory.length - 1],
+                    is_finished: true,
+                  };
+                }
+                return newHistory;
+              });
+            }
+
+            if (is_html && data.html_content) {
+              setMapHTML(data.html_content);
+            }
+
+            if (data.tool_call && data.tool_call !== "") {
+              setToolCalls((prev) => {
+                const existingQuestionIndex = prev.findIndex(
+                  (item) => item.question === question
+                );
+
+                const toolCallsArray = Array.isArray(data.tool_call)
+                  ? data.tool_call
+                  : [data.tool_call];
+
+                if (existingQuestionIndex >= 0) {
+                  // Question exists, add each tool call as a step to its toolCalls array
+                  const updatedToolCalls = [...prev];
+                  updatedToolCalls[existingQuestionIndex] = {
+                    ...updatedToolCalls[existingQuestionIndex],
+                    toolCalls: [
+                      ...updatedToolCalls[existingQuestionIndex].toolCalls,
+                      ...toolCallsArray,
+                    ],
+                  };
+                  return updatedToolCalls;
+                } else {
+                  // Question doesn't exist yet, create a new entry
+                  return [
+                    ...prev,
+                    { question: question, toolCalls: toolCallsArray },
+                  ];
+                }
+              });
+            }
+          } catch (e) {
+            console.error("Error parsing streaming response:", e, line);
+          }
+        }
+      }
     } catch (error) {
       console.error(error);
       const error_message = {
@@ -89,10 +178,12 @@ function App() {
         trace_id: generateUUID(),
       };
       setMessageHistory((prev) => [...prev, error_message]);
+    } finally {
+      setIsLoading(false);
     }
   }
 
-  function switchTab(tab: "chat" | "thoughts"): void {
+  function switchTab(tab: "chat" | "tools"): void {
     setActiveTab(tab);
   }
 
@@ -103,9 +194,10 @@ function App() {
         <ChatSection
           activeTab={activeTab}
           messageHistory={messageHistory}
-          chainOfThoughts={chainOfThoughts}
+          toolCalls={toolCalls}
           switchTab={switchTab}
           askQuestion={askQuestion}
+          isLoading={isLoading}
         />
       </div>
       <UserGuide />

@@ -10,6 +10,14 @@ class Message(BaseModel):
     feedback_given: Optional[Literal[0, 1]] = None
 
 
+class ReturnChunk(BaseModel):
+    response: str
+    tool_call: str
+    trace_id: str
+    is_html: bool
+    html_content: str
+
+
 class Chat(BaseModel):
     chat_messages: list[Message]
     session_id: str

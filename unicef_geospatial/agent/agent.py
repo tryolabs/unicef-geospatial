@@ -1,4 +1,5 @@
 import os
+from typing import Iterator
 
 import litellm
 from langchain.chat_models.base import BaseChatModel
@@ -54,7 +55,7 @@ def create_agent(
 
 
 @observe
-def run_agent(agent: CompiledGraph, inputs: dict) -> tuple[dict, str]:
+def run_agent(agent: CompiledGraph, inputs: dict) -> Iterator[tuple[dict, str]]:
     """Run a LangGraph agent with the given inputs.
 
     Args:
@@ -65,7 +66,8 @@ def run_agent(agent: CompiledGraph, inputs: dict) -> tuple[dict, str]:
         Tuple containing the agent's response and the trace ID
     """
     trace_id = langfuse_context.get_current_trace_id()
-    return agent.invoke(inputs), trace_id
+    for chunk in agent.stream(inputs, stream_mode="messages"):
+        yield chunk, trace_id
 
 
 def run_and_print_stream(agent: CompiledGraph, inputs: dict) -> None:

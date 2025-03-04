@@ -1,9 +1,9 @@
-function ChainOfThoughtSection({
-  chainOfThoughts,
+function ToolCallsSection({
+  toolCalls,
 }: {
-  chainOfThoughts: Array<{
+  toolCalls: Array<{
     question: string;
-    thoughts: Array<string | object>;
+    toolCalls: Array<string | object>;
   }>;
 }) {
   return (
@@ -19,7 +19,7 @@ function ChainOfThoughtSection({
         padding: "20px",
       }}
     >
-      {chainOfThoughts.map((item, idx) => (
+      {toolCalls.map((item, idx) => (
         <div key={idx} style={{ marginBottom: "20px" }}>
           <div className="thought-question">
             <strong>Question:</strong> {item.question}
@@ -34,17 +34,13 @@ function ChainOfThoughtSection({
           <div
             style={{ display: "flex", flexDirection: "column", gap: "15px" }}
           >
-            {item.thoughts.map((thought, tIndex) => (
+            {item.toolCalls.map((toolCall, tIndex) => (
               <div className="thought-step" key={tIndex}>
-                {tIndex === 0 ? (
-                  <strong>Initial Thought</strong>
-                ) : (
-                  <strong>Step {tIndex}</strong>
-                )}
+                <strong>Step {tIndex + 1}</strong>
                 <pre>
-                  {typeof thought === "object"
-                    ? JSON.stringify(thought, null, 2)
-                    : thought}
+                  {typeof toolCall === "object"
+                    ? JSON.stringify(toolCall, null, 2)
+                    : toolCall}
                 </pre>
               </div>
             ))}
@@ -55,4 +51,4 @@ function ChainOfThoughtSection({
   );
 }
 
-export default ChainOfThoughtSection;
+export default ToolCallsSection;

@@ -1,4 +1,4 @@
-import { Message } from "../types/Message";
+import { Message } from "../types/Message.tsx";
 import { LangfuseWeb } from "langfuse";
 import { useState } from "react";
 
@@ -85,7 +85,7 @@ function ChatMessages({
               >
                 {msg.content}
               </div>
-              {!isUserMessage && (
+              {!isUserMessage && msg.is_finished && (
                 <div className="feedback-buttons">
                   <button
                     onClick={() => handleUserFeedback(msg, 1)}

@@ -1,7 +1,13 @@
 import json
+from typing import AsyncGenerator
 
-from langchain_core.messages import AIMessage
-from utils.types import Message
+from agent.agent import run_agent
+from langchain_core.messages import AIMessageChunk, ToolMessage
+from logging_config import get_logger
+from utils.constants import PATH_TO_MAP
+from utils.types import Message, ReturnChunk
+
+logger = get_logger(__name__)
 
 
 def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
@@ -29,57 +35,60 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     return messages
 
 
-def extract_chain_of_thought(response: dict, input_length: int) -> list[str]:
-    """Extract and format the chain of thought reasoning from agent messages.
+async def respond(agent, messages) -> AsyncGenerator[str, None]:
+    for chunk, trace_id in run_agent(agent, messages):
+        if isinstance(chunk[0], ToolMessage):
+            return_chunk = handle_tool_call(chunk[0], trace_id)
 
-    Args:
-        response: Dictionary containing agent response messages
-        input_length: Number of input messages to skip before extracting chain of thought
+        elif isinstance(chunk[0], AIMessageChunk):
+            response = str(chunk[0].content)
+            return_chunk = ReturnChunk(
+                response=response,
+                trace_id=trace_id,
+                tool_call="",
+                is_html=False,
+                html_content="",
+            )
 
-    Returns:
-        List of strings containing the agent's reasoning steps and function calls
-    """
-    chain_of_thought = []
-    for msg in response["messages"][input_length:-1]:
-        if not isinstance(msg, AIMessage):
-            continue
+        yield json.dumps(return_chunk.model_dump())
+        yield "\n"
 
-        # Add thought content
-        if msg.content:
-            chain_of_thought.append(msg.content)
+    # Signal that the response is complete
+    return_chunk = ReturnChunk(
+        response="",
+        trace_id=trace_id,
+        tool_call="",
+        is_html=False,
+        html_content="",
+        is_finished=True,
+    )
 
-        # Add function call information
-        if "tool_calls" in msg.additional_kwargs:
-            for tool_call in msg.additional_kwargs["tool_calls"]:
-                function_args = json.loads(tool_call["function"]["arguments"])
-                args_str = "\n".join(f"  {k}: {v}" for k, v in function_args.items())
-                chain_of_thought.append(
-                    f"Calling function {tool_call['function']['name']} with arguments:\n{args_str}"
-                )
-
-    return chain_of_thought
+    yield json.dumps(return_chunk.model_dump())
 
 
-def process_html_content(response: dict) -> tuple[bool, str]:
-    """Process HTML content from the agent response if present.
+def handle_tool_call(tool_message: ToolMessage, trace_id: str) -> ReturnChunk:
+    is_html = False
+    html_content = ""
+    content = json.loads(tool_message.content)
 
-    Args:
-        response: Dictionary containing agent response messages
+    input_arguments = content.get("input_arguments", {})
+    tool_name = tool_message.name
+    if tool_name == "build_map":
+        is_html = True
+        with open(PATH_TO_MAP, "r") as f:
+            html_content = f.read()
 
-    Returns:
-        Tuple containing:
-            - Boolean indicating if HTML content was found
-            - String containing the HTML content if found, empty string otherwise
-    """
-    if len(response["messages"]) <= 1:
-        return False, ""
+    tool_call_message = f"Calling {tool_name}"
+    if input_arguments != {}:
+        tool_call_message += " with arguments:\n" + "".join(
+            [f"   {key}: {value}\n" for key, value in input_arguments.items()]
+        )
 
-    try:
-        response_data = json.loads(response["messages"][-2].content)
-        if path_to_map := response_data.get("path_to_map"):
-            with open(path_to_map, "r") as f:
-                return True, f.read()
-    except json.JSONDecodeError:
-        pass
-
-    return False, ""
+    return ReturnChunk(
+        response="",
+        tool_call=tool_call_message,
+        trace_id=trace_id,
+        is_html=is_html,
+        html_content=html_content,
+        is_finished=False,
+    )
