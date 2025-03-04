@@ -50,6 +50,9 @@ For each query:
 6. Focus on requested data only
 7. Format your response in plain markdown without code blocks
 
+Think step by step and explain your reasoning process in your messages.
+Break down complex analyses into clear stages and explain what you are doing at each step.
+
 If you are missing tools to query the asked data, explain which data is missing and why it is important.
 
 IMPORTANT: After obtaining the requested data, ALWAYS finish by generating a visualization.
