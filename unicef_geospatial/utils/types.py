@@ -16,6 +16,7 @@ class ReturnChunk(BaseModel):
     trace_id: str
     is_html: bool
     html_content: str
+    is_finished: bool
 
 
 class Chat(BaseModel):

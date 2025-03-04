@@ -85,8 +85,6 @@ function App() {
             let data = JSON.parse(line);
 
             traceId = data.trace_id || traceId;
-            let is_finish = data.is_finish === "True";
-            let is_html = data.is_html === "True";
 
             if (data.response !== undefined) {
               // Add the assistant message only when the first response chunk arrives
@@ -118,7 +116,7 @@ function App() {
             }
 
             // Mark message as finished when server sends is_finish flag
-            if (is_finish && assistantMessageAdded) {
+            if (data.is_finished && assistantMessageAdded) {
               setMessageHistory((prev) => {
                 const newHistory = [...prev];
                 if (newHistory.length > 0) {
@@ -131,7 +129,7 @@ function App() {
               });
             }
 
-            if (is_html && data.html_content) {
+            if (data.is_html && data.html_content) {
               setMapHTML(data.html_content);
             }
 

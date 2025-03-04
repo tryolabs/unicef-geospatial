@@ -48,6 +48,7 @@ async def respond(agent, messages) -> AsyncGenerator[str, None]:
                 tool_call="",
                 is_html=False,
                 html_content="",
+                is_finished=False,
             )
 
         yield json.dumps(return_chunk.model_dump())
@@ -62,7 +63,6 @@ async def respond(agent, messages) -> AsyncGenerator[str, None]:
         html_content="",
         is_finished=True,
     )
-
     yield json.dumps(return_chunk.model_dump())
 
 
