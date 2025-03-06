@@ -1,3 +1,5 @@
+import uuid
+
 from agent.agent import create_agent
 from fastapi.responses import HTMLResponse, StreamingResponse
 from state import AppState
@@ -16,10 +18,13 @@ async def home() -> HTMLResponse:
 
 @app.post("/ask")
 async def ask(chat: Chat) -> StreamingResponse:
+    trace_id = str(uuid.uuid4())
+
     app_state.logger.info(
-        "Processing question: %s with session ID: %s",
+        "Processing question: %s with session ID: %s and trace ID: %s",
         chat.chat_messages[-1].content,
         chat.session_id,
+        trace_id,
     )
     messages = format_messages(chat.chat_messages)
     app_state.logger.info("Running agent with inputs %s", format_dict(messages))
@@ -27,6 +32,9 @@ async def ask(chat: Chat) -> StreamingResponse:
     # Create agent with session ID
     agent = create_agent(
         session_id=chat.session_id,
+        trace_id=trace_id,
         temperature=app_state.params["llm"]["temperature"],
     )
-    return StreamingResponse(respond(agent, messages), media_type="text/event-stream")
+    return StreamingResponse(
+        respond(agent, messages, trace_id), media_type="text/event-stream"
+    )

@@ -25,6 +25,7 @@ def get_llm(temperature: float, session_id: str) -> BaseChatModel:
             "metadata": {
                 "session_id": session_id,
                 "project_id": os.getenv("LANGFUSE_PROJECT_ID"),
+                "trace_id": trace_id,
             }
         },
     )
@@ -32,6 +33,7 @@ def get_llm(temperature: float, session_id: str) -> BaseChatModel:
 
 def create_agent(
     session_id: str,
+    trace_id: str,
     temperature: float = 0.0,
     tools: list[BaseTool] = get_tools(),
     system_prompt: str = system_prompt,
@@ -49,7 +51,7 @@ def create_agent(
     """
     return create_react_agent(
         tools=tools,
-        model=get_llm(temperature, session_id),
+        model=get_llm(temperature, session_id, trace_id),
         state_modifier=system_prompt,
     )
 
