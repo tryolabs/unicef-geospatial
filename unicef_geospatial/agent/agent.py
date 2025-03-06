@@ -16,8 +16,17 @@ litellm.success_callback = ["langfuse"]
 litellm.failure_callback = ["langfuse"]
 
 
-def get_llm(temperature: float, session_id: str) -> BaseChatModel:
-    """Get the LLM model."""
+def get_llm(temperature: float, session_id: str, trace_id: str) -> BaseChatModel:
+    """Get the LLM model.
+
+    Args:
+        temperature: The temperature to use for the model
+        session_id: The session ID to associate with this model
+        trace_id: The trace ID for tracking in Langfuse
+
+    Returns:
+        A configured ChatLiteLLM instance
+    """
     return ChatLiteLLM(
         model=os.getenv("MODEL_NAME", "gpt-4o-mini"),
         temperature=temperature,
@@ -42,6 +51,7 @@ def create_agent(
 
     Args:
         session_id: The session ID to use for the agent
+        trace_id: The trace ID for tracking in Langfuse
         temperature: The temperature to use for the agent
         tools: List of tools available to the agent
         system_prompt: System prompt to provide context to the agent
@@ -57,19 +67,40 @@ def create_agent(
 
 
 @observe
-def run_agent(agent: CompiledGraph, inputs: dict) -> Iterator[tuple[dict, str]]:
-    """Run a LangGraph agent with the given inputs.
+def run_agent(
+    agent: CompiledGraph,
+    inputs: dict,
+    tags: list[str] = [],
+) -> Iterator[tuple[dict, str]]:
+    """Run a LangGraph agent with the given inputs and stream the results.
 
     Args:
         agent: The compiled LangGraph agent to run
         inputs: Dictionary of inputs to provide to the agent
+        tags: List of tags to associate with the Langfuse trace
+
+    Yields:
+        Chunks of the agent's response stream
+    """
+    langfuse_context.update_current_trace(tags=tags)
+    for chunk in agent.stream(inputs, stream_mode="messages"):
+        yield chunk
+
+
+@observe
+def invoke_agent(agent: CompiledGraph, inputs: dict, tags: list[str] = []) -> dict:
+    """Invoke a LangGraph agent and return its response.
+
+    Args:
+        agent: The compiled LangGraph agent to invoke
+        inputs: Dictionary of inputs to provide to the agent
+        tags: List of tags to associate with the Langfuse trace
 
     Returns:
-        Tuple containing the agent's response and the trace ID
+        The agent's complete response
     """
-    trace_id = langfuse_context.get_current_trace_id()
-    for chunk in agent.stream(inputs, stream_mode="messages"):
-        yield chunk, trace_id
+    langfuse_context.update_current_trace(tags=tags)
+    return agent.invoke(inputs)
 
 
 def run_and_print_stream(agent: CompiledGraph, inputs: dict) -> None:

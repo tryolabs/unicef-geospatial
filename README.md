@@ -91,6 +91,16 @@ The file should be named `ee_auth.json` and placed in the root of the project. I
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
 
+### Running the benchmark
+
+To run the benchmark, after installing the dependencies, run the following command:
+
+```bash
+uv run python tests/benchmark.py
+```
+
+This will log the results in langfuse cloud.
+
 ### Project structure
 
 - `unicef_geospatial/`: The main project for working with geospatial data.

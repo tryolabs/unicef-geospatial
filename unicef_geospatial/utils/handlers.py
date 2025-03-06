@@ -35,8 +35,8 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     return messages
 
 
-async def respond(agent, messages) -> AsyncGenerator[str, None]:
-    for chunk, trace_id in run_agent(agent, messages):
+async def respond(agent, messages, trace_id) -> AsyncGenerator[str, None]:
+    for chunk in run_agent(agent, messages, langfuse_observation_id=trace_id):
         if isinstance(chunk[0], ToolMessage):
             return_chunk = handle_tool_call(chunk[0], trace_id)
 
