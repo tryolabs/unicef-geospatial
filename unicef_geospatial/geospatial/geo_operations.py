@@ -5,15 +5,87 @@ from ee.deserializer import fromJSON
 from ee.errormargin import ErrorMargin
 from ee.feature import Feature
 from ee.featurecollection import FeatureCollection
+from ee.filter import Filter
+from ee.geometry import Geometry
 from ee.image import Image
 from ee.reducer import Reducer
 from langchain.tools import tool
 from logging_config import get_logger
-from utils.constants import PATH_TO_MAP
+from utils.constants import EARTH_GEOMETRY_COORDS, EARTH_GEOMETRY_CRS, PATH_TO_MAP
 from utils.types import REDUCERS
 
 INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
 logger = get_logger(__name__)
+
+MAX_PIXELS = int(1e13)
+MIN_AREA_KM2 = 100
+MAX_VERTICES = 10
+
+
+@tool
+def filter_image_by_threshold(path_to_image: str, threshold: float) -> str:
+    """Filter an image by a threshold.
+
+    This function is useful for extracting specific zones from continuous data based on a threshold value.
+    For example, when analyzing how many children are affected by droughts, you would need to define
+    what constitutes a drought zone. In drought analysis, areas with SPEI values below -1.5 are typically
+    considered drought zones, so you would use -1.5 as the threshold.
+
+    Args:
+        path_to_image: The path to the image to filter
+        threshold: The threshold to filter the image by. Values below this threshold will be kept
+                  (for drought analysis, use -1.5 to identify drought zones)
+
+    Returns:
+        The path to the filtered image
+    """
+    logger.info(f"Filtering image {path_to_image} by threshold: {threshold}")
+    image = load_vector_data(path_to_image)
+    if not isinstance(image, Image):
+        raise TypeError(
+            f"Expected an Earth Engine Image object, but got {type(image).__name__}. "
+            f"Please provide a valid image path."
+        )
+    # Create a mask where values are less than threshold
+    filtered_mask = image.lt(threshold)
+    # Apply the mask to the original image
+    filtered = image.updateMask(filtered_mask).toInt()
+    geometry = Geometry.Polygon(
+        EARTH_GEOMETRY_COORDS,
+        EARTH_GEOMETRY_CRS,
+        False,
+    )
+    scale = filtered.projection().nominalScale().getInfo()
+    logger.info(f"Scale: {scale}")
+    # Convert to vectors with explicit geometry to avoid EEException
+    vectors = filtered.reduceToVectors(
+        scale=scale,
+        geometry=geometry,
+        geometryType="polygon",
+        eightConnected=True,
+        labelProperty="value",
+        maxPixels=1e13,
+    )
+
+    simplified_vectors = vectors.map(
+        lambda f: f.simplify(MAX_VERTICES).set(
+            {
+                "area_km2": f.geometry()
+                .area(scale)
+                .divide(scale),  # Add area in km² with error margin
+            }
+        )
+    )
+    # Filter out any invalid or tiny polygons
+    final_vectors = simplified_vectors.filter(
+        Filter.And(
+            Filter.neq("value", None),
+            Filter.gt("area_km2", MIN_AREA_KM2),
+        )
+    )
+
+    save_vector_data(path_to_image + "_filtered", final_vectors)
+    return path_to_image + "_filtered"
 
 
 @tool
@@ -199,6 +271,10 @@ def load_vector_data(path_to_vector_data: str) -> FeatureCollection | Image:
         elif isinstance(vector_data, FeatureCollection):
             return vector_data
         else:
+            if vector_data.getInfo().get("type") == "Image":
+                return Image(vector_data)
+            elif vector_data.getInfo().get("type") == "FeatureCollection":
+                return FeatureCollection(vector_data)
             raise ValueError(f"Unknown vector data type: {type(vector_data)}")
 
     except Exception as e:
