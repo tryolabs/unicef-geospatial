@@ -26,8 +26,6 @@ def get_heatwave_image(
             - 'severity': Average degrees Celsius above heatwave threshold
             - 'extreme_high_temp': Average annual days exceeding 35°C
         decade: One of '1960s', '1970s', '1980s', '1990s', '2000s', '2010s', '2020s'
-        path_to_vector_data: Path to the geometry to clip the heatwave data
-        reducer: The reducer to use ('mean', 'max', 'min', etc). Defaults to 'mean'
 
     Returns:
         The value of the heatwave metric for the specified zone and decade.
