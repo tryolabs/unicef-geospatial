@@ -44,11 +44,7 @@ def get_dataset_image_and_metadata(
         image = Image(metadata.asset_id)
     save_vector_data(metadata.path_to_image, image)
     return {
-        "path_to_image": metadata.path_to_image,
-        "asset_id": metadata.asset_id,
-        "mosaic": metadata.mosaic,
-        "threshold": metadata.threshold,
-        "greater_than": metadata.greater_than,
+        **metadata.model_dump(),
         "input_arguments": {
             "dataset": dataset,
         },
@@ -75,7 +71,7 @@ def filter_image_by_threshold(
         greater_than: Whether to keep values greater than the threshold
 
     Returns:
-        The path to the filtered image
+        The path to the filtered vector data
     """
     logger.info(f"Filtering image {path_to_image} by threshold: {threshold}")
     image = load_vector_data(path_to_image)
@@ -121,10 +117,18 @@ def filter_image_by_threshold(
             Filter.gt("area_km2", MIN_AREA_KM2),
         )
     )
-    path_to_filtered_image = path_to_image.replace(".json", "_filtered.json")
-    save_vector_data(path_to_filtered_image, final_vectors)
+    path_to_filtered_vector_data = path_to_image.replace(".json", "_filtered.json")
+    path_to_filtered_vector_data = path_to_filtered_vector_data.replace(
+        "image", "feature_collection"
+    )
+    save_vector_data(path_to_filtered_vector_data, final_vectors)
     return {
-        "path_to_image": path_to_filtered_image,
+        "path_to_vector_data": path_to_filtered_vector_data,
+        "input_arguments": {
+            "path_to_image": path_to_image,
+            "threshold": threshold,
+            "greater_than": greater_than,
+        },
     }
 
 
