@@ -2,11 +2,10 @@ import ee
 from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
+from utils.constants import HEATWAVE_DATASET, PATH_TO_HEATWAVE
 from utils.types import DECADES, METRICS
 
 logger = get_logger(__name__)
-
-PATH_TO_HEATWAVE = "unicef_geospatial/data/heatwave_image.json"
 
 
 @tool
@@ -28,7 +27,7 @@ def get_heatwave_image(
         decade: One of '1960s', '1970s', '1980s', '1990s', '2000s', '2010s', '2020s'
 
     Returns:
-        The value of the heatwave metric for the specified zone and decade.
+        The path to the saved heatwave image.
     """
     band = get_band_mapping(metric)
 
@@ -36,7 +35,7 @@ def get_heatwave_image(
         f"Getting heatwave image for decade {decade} and metric {metric} (band: {band})"
     )
 
-    image = ee.Image(f"projects/unicef-ccri/assets/heatwave/average_hwi_{decade}")
+    image = ee.Image(f"{HEATWAVE_DATASET}_{decade}")
     heatwave_tiff = image.select(band)
 
     try:

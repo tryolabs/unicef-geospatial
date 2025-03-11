@@ -1,7 +1,6 @@
 from logging_config import get_logger
+from utils.constants import PATH_TO_RIVER_FLOOD
 from utils.types import DatasetMetadata
-
-PATH_TO_RIVER_FLOOD = "unicef_geospatial/data/river_flood_image.json"
 
 logger = get_logger(__name__)
 

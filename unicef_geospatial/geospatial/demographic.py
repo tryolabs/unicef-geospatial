@@ -9,11 +9,10 @@ from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
     CHILDREN_DEMOGRAPHIC_DATASET,
     COUNTRY_BOUNDRIES_DATASET,
+    PATH_TO_DEMOGRAPHIC_IMAGE,
+    PATH_TO_VECTOR_DATA,
 )
 from utils.types import AREA_TYPES, DatasetMetadata
-
-PATH_TO_VECTOR_DATA = "unicef_geospatial/data/map_zones_feature_collection.json"
-PATH_TO_DEMOGRAPHIC_IMAGE = "unicef_geospatial/data/demographic_image.json"
 
 logger = get_logger(__name__)
 

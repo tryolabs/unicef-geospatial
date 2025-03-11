@@ -34,7 +34,7 @@ def get_dataset_image_and_metadata(
         dataset: The dataset to get the image and metadata for
 
     Returns:
-        The path to the saved vector data
+        # The path to the saved vector data
     """
     metadata = get_dataset_metadata(dataset)
     logger.info(f"Getting image from {metadata.asset_id}")
