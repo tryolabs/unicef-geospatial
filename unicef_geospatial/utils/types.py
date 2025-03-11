@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel
 
@@ -24,6 +24,16 @@ class Chat(BaseModel):
     session_id: str
 
 
+class DatasetMetadata(BaseModel):
+    path_to_image: str
+    asset_id: str
+    mosaic: bool = False
+    threshold: float | None = None
+    greater_than: bool | None = None
+    input_arguments: dict[str, Any] = {}
+
+
+ALL_DATASETS = Literal["river_flood", "children_population"]
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
 REDUCERS = Literal["mean", "max", "min", "sum", "median", "std"]

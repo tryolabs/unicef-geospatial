@@ -38,7 +38,12 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
 async def respond(agent, messages, trace_id) -> AsyncGenerator[str, None]:
     for chunk in run_agent(agent, messages, langfuse_observation_id=trace_id):
         if isinstance(chunk[0], ToolMessage):
-            return_chunk = handle_tool_call(chunk[0], trace_id)
+            try:
+                return_chunk = handle_tool_call(chunk[0], trace_id)
+            except Exception as e:
+                logger.error(f"Error handling tool call: {e}")
+                logger.error(f"Tool call: {chunk[0]}")
+                pass
 
         elif isinstance(chunk[0], AIMessageChunk):
             response = str(chunk[0].content)

@@ -2,9 +2,35 @@ import os
 from typing import List
 
 import ee
+from geospatial.demographic import get_children_population_metadata
+from geospatial.floods import get_river_flood_metadata
 from google.cloud import storage
-from google.cloud.storage.blob import Blob
 from google.cloud.storage.bucket import Bucket
+from logging_config import get_logger
+from utils.types import ALL_DATASETS, DatasetMetadata
+
+logger = get_logger(__name__)
+
+
+def get_dataset_metadata(dataset: ALL_DATASETS) -> DatasetMetadata:
+    """Get metadata for a dataset.
+
+    Args:
+        dataset: The dataset to get metadata for
+
+    Returns:
+        A dictionary containing the metadata for the dataset
+    """
+    logger.info(f"Getting metadata for dataset: {dataset}")
+    if dataset == "river_flood":
+        metadata = get_river_flood_metadata()
+    elif dataset == "children_population":
+        metadata = get_children_population_metadata()
+    else:
+        raise ValueError(f"Dataset {dataset} not supported")
+
+    metadata.input_arguments = {"dataset": dataset}
+    return metadata
 
 
 def create_bucket(bucket_name: str, project_id: str) -> Bucket:

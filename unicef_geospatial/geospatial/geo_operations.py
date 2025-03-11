@@ -8,11 +8,13 @@ from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
 from ee.geometry import Geometry
 from ee.image import Image
+from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
+from geospatial.earth_engine import get_dataset_metadata
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import EARTH_GEOMETRY_COORDS, EARTH_GEOMETRY_CRS, PATH_TO_MAP
-from utils.types import REDUCERS
+from utils.types import ALL_DATASETS, REDUCERS
 
 INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
 logger = get_logger(__name__)
@@ -23,18 +25,54 @@ MAX_VERTICES = 10
 
 
 @tool
-def filter_image_by_threshold(path_to_image: str, threshold: float) -> str:
+def get_dataset_image_and_metadata(
+    dataset: ALL_DATASETS,
+) -> dict[str, str]:
+    """Get an image from Earth Engine and save it as a vector data.
+
+    Args:
+        dataset: The dataset to get the image and metadata for
+
+    Returns:
+        The path to the saved vector data
+    """
+    metadata = get_dataset_metadata(dataset)
+    logger.info(f"Getting image from {metadata.asset_id}")
+    if metadata.mosaic:
+        image = ImageCollection(metadata.asset_id).mosaic()
+    else:
+        image = Image(metadata.asset_id)
+    save_vector_data(metadata.path_to_image, image)
+    return {
+        "path_to_image": metadata.path_to_image,
+        "asset_id": metadata.asset_id,
+        "mosaic": metadata.mosaic,
+        "threshold": metadata.threshold,
+        "greater_than": metadata.greater_than,
+        "input_arguments": {
+            "dataset": dataset,
+        },
+    }
+
+
+@tool
+def filter_image_by_threshold(
+    path_to_image: str, threshold: float, greater_than: bool = True
+) -> str:
     """Filter an image by a threshold.
 
     This function is useful for extracting specific zones from continuous data based on a threshold value.
     For example, when analyzing how many children are affected by droughts, you would need to define
-    what constitutes a drought zone. In drought analysis, areas with SPEI values below -1.5 are typically
-    considered drought zones, so you would use -1.5 as the threshold.
+    what constitutes a drought zone.
+
+    The threshold is the value below which the data is considered to be in the drought zone.
+    For example, for drought analysis, a threshold of -1.5 is used to identify drought zones.
 
     Args:
         path_to_image: The path to the image to filter
         threshold: The threshold to filter the image by. Values below this threshold will be kept
                   (for drought analysis, use -1.5 to identify drought zones)
+        greater_than: Whether to keep values greater than the threshold
 
     Returns:
         The path to the filtered image
@@ -47,7 +85,7 @@ def filter_image_by_threshold(path_to_image: str, threshold: float) -> str:
             f"Please provide a valid image path."
         )
     # Create a mask where values are less than threshold
-    filtered_mask = image.lt(threshold)
+    filtered_mask = image.gt(threshold) if greater_than else image.lt(threshold)
     # Apply the mask to the original image
     filtered = image.updateMask(filtered_mask).toInt()
     geometry = Geometry.Polygon(
@@ -83,9 +121,11 @@ def filter_image_by_threshold(path_to_image: str, threshold: float) -> str:
             Filter.gt("area_km2", MIN_AREA_KM2),
         )
     )
-
-    save_vector_data(path_to_image + "_filtered", final_vectors)
-    return path_to_image + "_filtered"
+    path_to_filtered_image = path_to_image.replace(".json", "_filtered.json")
+    save_vector_data(path_to_filtered_image, final_vectors)
+    return {
+        "path_to_image": path_to_filtered_image,
+    }
 
 
 @tool
@@ -144,6 +184,7 @@ def reduce_image(
     Returns:
         dict: A dictionary containing the reduced value
     """
+    logger.info(f"Reducing image with {reducer}")
     image = load_vector_data(path_to_image)
     scale = image.projection().nominalScale().getInfo()
     geometry = load_vector_data(path_to_geometry)
@@ -260,20 +301,23 @@ def load_vector_data(path_to_vector_data: str) -> FeatureCollection | Image:
         Either an Earth Engine FeatureCollection or Image object
     """
     try:
-        logger = get_logger(__name__)
         with open(path_to_vector_data, "r") as f:
             logger.info(f"Going to load vector data from {path_to_vector_data}")
             vector_data = eval(f.read())
             vector_data = fromJSON(vector_data)
         # Get the info without converting to Python dict
         if isinstance(vector_data, Image):
+            logger.info("Vector data is an image")
             return vector_data
         elif isinstance(vector_data, FeatureCollection):
+            logger.info("Vector data is a feature collection")
             return vector_data
         else:
             if vector_data.getInfo().get("type") == "Image":
+                logger.info("Vector data is an image")
                 return Image(vector_data)
             elif vector_data.getInfo().get("type") == "FeatureCollection":
+                logger.info("Vector data is a feature collection")
                 return FeatureCollection(vector_data)
             raise ValueError(f"Unknown vector data type: {type(vector_data)}")
 

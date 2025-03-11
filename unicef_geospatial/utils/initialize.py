@@ -8,18 +8,16 @@ from data_warehouse.tools import (
     get_available_dataflows_info,
     get_data_for_dataflow,
 )
-from geospatial.demographic import (
-    get_population_image,
-    get_zone_of_area,
-)
-from geospatial.droughts import get_drought_zones
+from geospatial.earth_engine import get_dataset_metadata
 from geospatial.geo_operations import (
     build_map,
+    filter_image_by_threshold,
+    get_dataset_image_and_metadata,
     intersect_feature_collection,
     reduce_image,
 )
-from geospatial.heatwaves import get_heatwave_image
-from geospatial.rainfall import get_precipitation_for_zone
+
+# from geospatial.heatwaves import get_heatwave_image
 
 
 def initialize_earth_engine(path_to_ee_auth: str) -> None:
@@ -37,15 +35,14 @@ def initialize_earth_engine(path_to_ee_auth: str) -> None:
 def get_tools() -> list[Callable]:
     """Get the tools."""
     return [
-        get_heatwave_image,
-        get_precipitation_for_zone,
-        get_zone_of_area,
+        # get_heatwave_image,
+        filter_image_by_threshold,
         get_all_indicators_for_dataflow,
         get_available_dataflows_info,
         get_data_for_dataflow,
-        get_population_image,
-        get_drought_zones,
         intersect_feature_collection,
         reduce_image,
         build_map,
+        get_dataset_metadata,
+        get_dataset_image_and_metadata,
     ]

@@ -3,62 +3,19 @@ import json
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
-from ee.imagecollection import ImageCollection
-from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
+    CHILDREN_DEMOGRAPHIC_DATASET,
     COUNTRY_BOUNDRIES_DATASET,
-    DEMOGRAPHIC_BAND,
-    DEMOGRAPHIC_DATASET,
 )
-from utils.types import AGE_GROUPS, AREA_TYPES, SEXES
+from utils.types import AREA_TYPES, DatasetMetadata
 
-PATH_TO_VECTOR_DATA = "unicef_geospatial/data/map_zones.json"
+PATH_TO_VECTOR_DATA = "unicef_geospatial/data/map_zones_feature_collection.json"
 PATH_TO_DEMOGRAPHIC_IMAGE = "unicef_geospatial/data/demographic_image.json"
 
 logger = get_logger(__name__)
-
-
-@tool
-def get_population_image(
-    age_group: AGE_GROUPS = "Total Population",
-    sex: SEXES = "b",
-) -> dict[str, str]:
-    """Get population data image for a specific age group and sex.
-
-    Retrieves demographic data from Earth Engine and saves it as a vector file.
-
-    Args:
-        age_group: Age group to analyze. Must be one of the valid AGE_GROUPS.
-        sex: Sex to analyze. Must be one of the valid SEXES ('m', 'f', or 'b' for both).
-
-    Returns:
-        dict[str, str]: A dictionary containing:
-            - path_to_image: Path to the saved demographic image file
-
-    Raises:
-        ValueError: If no demographic data is found for the given age group and sex.
-    """
-    demographic = ImageCollection(DEMOGRAPHIC_DATASET)
-    demographic_image = (
-        demographic.filter(Filter.eq("Age_Group", age_group))
-        .filter(Filter.eq("Sex", sex))
-        .first()
-    )
-
-    demographic_image = demographic_image.select(DEMOGRAPHIC_BAND)
-    if demographic_image is None:
-        logger.error("No demographic image found for the given age group and sex")
-        raise ValueError("No demographic image found for the given age group and sex")
-
-    save_vector_data(PATH_TO_DEMOGRAPHIC_IMAGE, demographic_image)
-
-    return {
-        "path_to_image": PATH_TO_DEMOGRAPHIC_IMAGE,
-        "input_arguments": {"age_group": age_group, "sex": sex},
-    }
 
 
 @tool
@@ -85,6 +42,7 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
         To get boundary data for California:
         >>> zone_path = get_zone_of_area("California", "admin1")
     """
+    logger.info("Getting zone of area")
     if area_type == "country":
         countries_boundries = FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
         area_boundry = countries_boundries.filter(Filter.eq("country_na", area_name))
@@ -101,6 +59,27 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
         "value": PATH_TO_VECTOR_DATA,
         "input_arguments": {"area_name": area_name, "area_type": area_type},
     }
+
+
+def get_children_population_metadata() -> DatasetMetadata:
+    """Get children population metadata.
+
+    Retrieves demographic data from Earth Engine and saves it as a vector file.
+
+    Returns:
+        dict[str, str]: A dictionary containing:
+            - path_to_image: Path to where to save the demographic image file
+            - input_arguments: Input arguments for the tool
+            - asset_id: Asset ID of the demographic image
+            # - mosaic: Whether to mosaic the image
+    """
+    logger.info("Getting children population information")
+    metadata = DatasetMetadata(
+        path_to_image=PATH_TO_DEMOGRAPHIC_IMAGE,
+        asset_id=CHILDREN_DEMOGRAPHIC_DATASET,
+    )
+
+    return metadata
 
 
 def standarize_country_name(country: str) -> str:
