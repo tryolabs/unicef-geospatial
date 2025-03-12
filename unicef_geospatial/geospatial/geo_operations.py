@@ -34,7 +34,13 @@ def get_dataset_image_and_metadata(
         dataset: The dataset to get the image and metadata for
 
     Returns:
-        # The path to the saved vector data
+        A dictionary containing the metadata for the dataset:
+            - path_to_image: Path to where the image is saved
+            - description: Description of the dataset
+            - threshold: Threshold value for filtering (if applicable)
+            - greater_than: Whether to filter values greater than threshold (if applicable)
+            - input_arguments: Input arguments for the tool
+
     """
     metadata = get_dataset_metadata(dataset)
     logger.info(f"Getting image from {metadata.asset_id}")
@@ -44,7 +50,10 @@ def get_dataset_image_and_metadata(
         image = Image(metadata.asset_id)
     save_vector_data(metadata.path_to_image, image)
     return {
-        **metadata.model_dump(),
+        "path_to_image": metadata.path_to_image,
+        "description": metadata.description,
+        "threshold": metadata.threshold,
+        "greater_than": metadata.greater_than,
         "input_arguments": {
             "dataset": dataset,
         },

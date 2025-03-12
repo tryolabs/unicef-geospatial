@@ -66,16 +66,13 @@ def get_children_population_metadata() -> DatasetMetadata:
     Retrieves demographic data from Earth Engine and saves it as a vector file.
 
     Returns:
-        dict[str, str]: A dictionary containing:
-            - path_to_image: Path to where to save the demographic image file
-            - input_arguments: Input arguments for the tool
-            - asset_id: Asset ID of the demographic image
-            # - mosaic: Whether to mosaic the image
+        DatasetMetadata: The children population metadata
     """
     logger.info("Getting children population information")
     metadata = DatasetMetadata(
         path_to_image=PATH_TO_DEMOGRAPHIC_IMAGE,
         asset_id=CHILDREN_DEMOGRAPHIC_DATASET,
+        description="Population of children between 0-18 years old.",
     )
 
     return metadata

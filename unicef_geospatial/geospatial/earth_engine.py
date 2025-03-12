@@ -3,7 +3,11 @@ from typing import List
 
 import ee
 from geospatial.demographic import get_children_population_metadata
-from geospatial.floods import get_river_flood_metadata
+from geospatial.floods import (
+    get_coastal_flood_metadata,
+    get_pluvial_flood_metadata,
+    get_river_flood_metadata,
+)
 from google.cloud import storage
 from google.cloud.storage.bucket import Bucket
 from logging_config import get_logger
@@ -19,13 +23,18 @@ def get_dataset_metadata(dataset: ALL_DATASETS) -> DatasetMetadata:
         dataset: The dataset to get metadata for
 
     Returns:
-        A dictionary containing the metadata for the dataset
+        DatasetMetadata: The metadata for the specified dataset
     """
     logger.info(f"Getting metadata for dataset: {dataset}")
     if dataset == "river_flood":
         metadata = get_river_flood_metadata()
+    elif dataset == "coastal_flood":
+        metadata = get_coastal_flood_metadata()
+    elif dataset == "pluvial_flood":
+        metadata = get_pluvial_flood_metadata()
     elif dataset == "children_population":
         metadata = get_children_population_metadata()
+
     else:
         raise ValueError(f"Dataset {dataset} not supported")
 
