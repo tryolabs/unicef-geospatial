@@ -66,6 +66,7 @@ function ChatMessages({
       ) : (
         messageHistory.map((msg: Message) => {
           const isUserMessage = msg.role === "user";
+          const isThinkingMessage = msg.is_thinking;
           const hasGivenFeedback = feedbackState[msg.trace_id] !== undefined;
           const feedbackValue = feedbackState[msg.trace_id];
 
@@ -75,17 +76,26 @@ function ChatMessages({
               className={`message-container ${
                 isUserMessage
                   ? "user-message-container"
+                  : isThinkingMessage
+                  ? "thinking-message-container"
                   : "assistant-message-container"
               }`}
             >
+              {isThinkingMessage && !isUserMessage && (
+                <div className="thinking-label">Thinking...</div>
+              )}
               <div
                 className={`message ${
-                  isUserMessage ? "user-message" : "assistant-message"
+                  isUserMessage
+                    ? "user-message"
+                    : isThinkingMessage
+                    ? "thinking-message"
+                    : "assistant-message"
                 }`}
               >
                 {msg.content}
               </div>
-              {!isUserMessage && msg.is_finished && (
+              {!isUserMessage && !isThinkingMessage && msg.is_finished && (
                 <div className="feedback-buttons">
                   <button
                     onClick={() => handleUserFeedback(msg, 1)}

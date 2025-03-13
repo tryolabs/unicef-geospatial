@@ -1,7 +1,7 @@
 import json
 from typing import AsyncGenerator
 
-from agent.agent import run_agent
+from agent.agent import get_llm, run_agent
 from langchain_core.messages import AIMessageChunk, ToolMessage
 from logging_config import get_logger
 from utils.constants import PATH_TO_MAP
@@ -35,7 +35,8 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     return messages
 
 
-async def respond(agent, messages, trace_id) -> AsyncGenerator[str, None]:
+async def respond(agent, messages, trace_id, session_id) -> AsyncGenerator[str, None]:
+    full_response = ""
     for chunk in run_agent(agent, messages, langfuse_observation_id=trace_id):
         if isinstance(chunk[0], ToolMessage):
             try:
@@ -47,6 +48,7 @@ async def respond(agent, messages, trace_id) -> AsyncGenerator[str, None]:
 
         elif isinstance(chunk[0], AIMessageChunk):
             response = str(chunk[0].content)
+            full_response += response
             return_chunk = ReturnChunk(
                 response=response,
                 trace_id=trace_id,
@@ -54,6 +56,7 @@ async def respond(agent, messages, trace_id) -> AsyncGenerator[str, None]:
                 is_html=False,
                 html_content="",
                 is_finished=False,
+                thinking_chunk=True,
             )
 
         yield json.dumps(return_chunk.model_dump())
@@ -67,6 +70,44 @@ async def respond(agent, messages, trace_id) -> AsyncGenerator[str, None]:
         is_html=False,
         html_content="",
         is_finished=True,
+        thinking_chunk=True,
+    )
+    yield json.dumps(return_chunk.model_dump())
+
+    llm = get_llm(0.0, session_id, trace_id)
+    prompt = """You are a helpful assistant.
+    You are given the response from an agent in several steps of the thinking process and
+    a conversation history.
+    Your job is to generate a final response to the conversation history based on the
+    response from the agent. It must be concise and answer the question.
+    Here is the conversation history:
+    {conversation_history}
+    Here is the response from the agent:
+    {response}
+    """
+    prompt = prompt.format(conversation_history=messages, response=full_response)
+    for chunk in llm.stream(prompt):
+        yield json.dumps(
+            ReturnChunk(
+                response=chunk.content,
+                trace_id=trace_id,
+                tool_call="",
+                is_html=False,
+                html_content="",
+                is_finished=False,
+                thinking_chunk=False,
+            ).model_dump()
+        )
+        yield "\n"
+
+    return_chunk = ReturnChunk(
+        response="",
+        trace_id=trace_id,
+        tool_call="",
+        is_html=False,
+        html_content="",
+        is_finished=True,
+        thinking_chunk=False,
     )
     yield json.dumps(return_chunk.model_dump())
 

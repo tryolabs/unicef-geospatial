@@ -36,5 +36,6 @@ async def ask(chat: Chat) -> StreamingResponse:
         temperature=app_state.params["llm"]["temperature"],
     )
     return StreamingResponse(
-        respond(agent, messages, trace_id), media_type="text/event-stream"
+        respond(agent, messages, trace_id, chat.session_id),
+        media_type="text/event-stream",
     )

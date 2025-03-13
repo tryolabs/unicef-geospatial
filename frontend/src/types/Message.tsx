@@ -4,6 +4,7 @@ interface Message {
   role: "user" | "assistant";
   feedback_given?: number;
   is_finished?: boolean;
+  is_thinking?: boolean;
 }
 
 export type { Message };

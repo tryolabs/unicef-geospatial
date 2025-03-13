@@ -70,8 +70,10 @@ function App() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let traceId = "";
-      let fullResponse = "";
-      let assistantMessageAdded = false;
+      let fullThinkingResponse = "";
+      let finalResponse = "";
+      let assistantThinkingMessageAdded = false;
+      let assistantFinalMessageAdded = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -87,46 +89,110 @@ function App() {
             traceId = data.trace_id || traceId;
 
             if (data.response !== undefined) {
-              // Add the assistant message only when the first response chunk arrives
-              if (!assistantMessageAdded) {
-                const assistantMessage: Message = {
-                  content: data.response,
-                  role: "assistant",
-                  trace_id: traceId,
-                  is_finished: false,
-                };
-                setMessageHistory((prev) => [...prev, assistantMessage]);
-                assistantMessageAdded = true;
-                fullResponse = data.response;
-              } else {
-                // Update message history with new content
-                fullResponse += data.response;
-                setMessageHistory((prev) => {
-                  const newHistory = [...prev];
-                  if (newHistory.length > 0) {
-                    newHistory[newHistory.length - 1] = {
-                      ...newHistory[newHistory.length - 1],
-                      content: fullResponse,
-                      trace_id: traceId,
-                    };
-                  }
-                  return newHistory;
-                });
-              }
-            }
-
-            // Mark message as finished when server sends is_finish flag
-            if (data.is_finished && assistantMessageAdded) {
-              setMessageHistory((prev) => {
-                const newHistory = [...prev];
-                if (newHistory.length > 0) {
-                  newHistory[newHistory.length - 1] = {
-                    ...newHistory[newHistory.length - 1],
-                    is_finished: true,
+              // Handle thinking chunks differently from the final response
+              if (data.thinking_chunk) {
+                // Handle thinking response chunks
+                if (!assistantThinkingMessageAdded) {
+                  const assistantMessage: Message = {
+                    content: data.response,
+                    role: "assistant",
+                    trace_id: traceId,
+                    is_finished: false,
+                    is_thinking: true,
                   };
+                  setMessageHistory((prev) => [...prev, assistantMessage]);
+                  assistantThinkingMessageAdded = true;
+                  fullThinkingResponse = data.response;
+                } else if (data.response !== "") {
+                  // Update thinking message with new content
+                  fullThinkingResponse += data.response;
+                  setMessageHistory((prev) => {
+                    const newHistory = [...prev];
+                    const thinkingMessageIndex = newHistory.findIndex(
+                      (msg) => msg.is_thinking && !msg.is_finished
+                    );
+                    if (thinkingMessageIndex >= 0) {
+                      newHistory[thinkingMessageIndex] = {
+                        ...newHistory[thinkingMessageIndex],
+                        content: fullThinkingResponse,
+                        trace_id: traceId,
+                      };
+                    }
+                    return newHistory;
+                  });
                 }
-                return newHistory;
-              });
+
+                // Mark thinking message as finished when server signals it's done
+                if (data.is_finished && assistantThinkingMessageAdded) {
+                  setMessageHistory((prev) => {
+                    const newHistory = [...prev];
+                    const thinkingMessageIndex = newHistory.findIndex(
+                      (msg) =>
+                        msg.is_thinking &&
+                        !msg.is_finished &&
+                        msg.role === "assistant"
+                    );
+                    if (thinkingMessageIndex >= 0) {
+                      newHistory[thinkingMessageIndex] = {
+                        ...newHistory[thinkingMessageIndex],
+                        is_finished: true,
+                      };
+                    }
+                    return newHistory;
+                  });
+                }
+              } else {
+                // Handle final response (non-thinking chunk)
+                if (!assistantFinalMessageAdded && data.response !== "") {
+                  const assistantMessage: Message = {
+                    content: data.response,
+                    role: "assistant",
+                    trace_id: traceId,
+                    is_finished: false,
+                    is_thinking: false,
+                  };
+                  setMessageHistory((prev) => [...prev, assistantMessage]);
+                  assistantFinalMessageAdded = true;
+                  finalResponse = data.response;
+                } else if (data.response !== "") {
+                  // Update final response with new content
+                  finalResponse += data.response;
+                  setMessageHistory((prev) => {
+                    const newHistory = [...prev];
+                    const finalMessageIndex = newHistory.findIndex(
+                      (msg) =>
+                        !msg.is_thinking &&
+                        !msg.is_finished &&
+                        msg.role === "assistant"
+                    );
+                    if (finalMessageIndex >= 0) {
+                      newHistory[finalMessageIndex] = {
+                        ...newHistory[finalMessageIndex],
+                        content: finalResponse,
+                        trace_id: traceId,
+                      };
+                    }
+                    return newHistory;
+                  });
+                }
+
+                // Mark final message as finished
+                if (data.is_finished && assistantFinalMessageAdded) {
+                  setMessageHistory((prev) => {
+                    const newHistory = [...prev];
+                    const finalMessageIndex = newHistory.findIndex(
+                      (msg) => !msg.is_thinking && !msg.is_finished
+                    );
+                    if (finalMessageIndex >= 0) {
+                      newHistory[finalMessageIndex] = {
+                        ...newHistory[finalMessageIndex],
+                        is_finished: true,
+                      };
+                    }
+                    return newHistory;
+                  });
+                }
+              }
             }
 
             if (data.is_html && data.html_content) {
