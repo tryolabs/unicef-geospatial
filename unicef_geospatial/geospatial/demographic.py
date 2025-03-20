@@ -43,8 +43,9 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
     """
     logger.info("Getting zone of area")
     if area_type == "country":
+        area_name = get_country_code(area_name)
         countries_boundries = FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
-        area_boundry = countries_boundries.filter(Filter.eq("country_na", area_name))
+        area_boundry = countries_boundries.filter(Filter.eq("ISO3", area_name))
     else:
         admin_level_1_boundries = FeatureCollection(ADMIN_LEVEL_1_BOUNDRIES_DATASET)
         area_boundry = admin_level_1_boundries.filter(Filter.eq("shapeName", area_name))
@@ -73,6 +74,7 @@ def get_children_population_metadata() -> DatasetMetadata:
         path_to_image=PATH_TO_DEMOGRAPHIC_IMAGE,
         asset_id=CHILDREN_DEMOGRAPHIC_DATASET,
         description="Population of children between 0-18 years old.",
+        mosaic=True,
     )
 
     return metadata

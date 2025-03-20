@@ -1,7 +1,8 @@
 # Datasets
-COUNTRY_BOUNDRIES_DATASET = "USDOS/LSIB_SIMPLE/2017"
+# COUNTRY_BOUNDRIES_DATASET = "USDOS/LSIB_SIMPLE/2017"
+COUNTRY_BOUNDRIES_DATASET = "projects/unicef-ccri/assets/adm0_simple"
 ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
-CHILDREN_DEMOGRAPHIC_DATASET = "projects/unicef-ccri/assets/worldpop_2024"
+CHILDREN_DEMOGRAPHIC_DATASET = "projects/unicef-ccri/assets/childpop_constrained"
 DEMOGRAPHIC_BAND = "basic_demographic_characteristics"
 HEATWAVE_DATASET = "projects/unicef-ccri/assets/heatwave/average_hwi"
 
