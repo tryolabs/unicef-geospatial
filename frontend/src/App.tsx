@@ -109,13 +109,15 @@ function App() {
                   setMessageHistory((prev) => {
                     const newHistory = [...prev];
                     const thinkingMessageIndex = newHistory.findIndex(
-                      (msg) => msg.is_thinking && !msg.is_finished
+                      (msg) =>
+                        msg.is_thinking &&
+                        !msg.is_finished &&
+                        msg.trace_id === traceId
                     );
                     if (thinkingMessageIndex >= 0) {
                       newHistory[thinkingMessageIndex] = {
                         ...newHistory[thinkingMessageIndex],
                         content: fullThinkingResponse,
-                        trace_id: traceId,
                       };
                     }
                     return newHistory;
@@ -130,7 +132,8 @@ function App() {
                       (msg) =>
                         msg.is_thinking &&
                         !msg.is_finished &&
-                        msg.role === "assistant"
+                        msg.role === "assistant" &&
+                        msg.trace_id === traceId
                     );
                     if (thinkingMessageIndex >= 0) {
                       newHistory[thinkingMessageIndex] = {
@@ -163,13 +166,13 @@ function App() {
                       (msg) =>
                         !msg.is_thinking &&
                         !msg.is_finished &&
-                        msg.role === "assistant"
+                        msg.role === "assistant" &&
+                        msg.trace_id === traceId
                     );
                     if (finalMessageIndex >= 0) {
                       newHistory[finalMessageIndex] = {
                         ...newHistory[finalMessageIndex],
                         content: finalResponse,
-                        trace_id: traceId,
                       };
                     }
                     return newHistory;
@@ -181,7 +184,10 @@ function App() {
                   setMessageHistory((prev) => {
                     const newHistory = [...prev];
                     const finalMessageIndex = newHistory.findIndex(
-                      (msg) => !msg.is_thinking && !msg.is_finished
+                      (msg) =>
+                        !msg.is_thinking &&
+                        !msg.is_finished &&
+                        msg.trace_id === traceId
                     );
                     if (finalMessageIndex >= 0) {
                       newHistory[finalMessageIndex] = {
