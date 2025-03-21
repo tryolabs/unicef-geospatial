@@ -1,4 +1,5 @@
 import json
+import os
 from typing import AsyncGenerator
 
 from agent.agent import create_agent, get_llm, run_agent
@@ -35,10 +36,9 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     return messages
 
 
-async def respond(
-    messages, trace_id, session_id, temperature
-) -> AsyncGenerator[str, None]:
+async def respond(messages, trace_id, session_id) -> AsyncGenerator[str, None]:
     thinking_trace_id = f"th_{trace_id}"
+    temperature = float(os.getenv("TEMPERATURE", 0.0))
     agent = create_agent(session_id, thinking_trace_id, temperature)
     full_response = ""
     for chunk in run_agent(agent, messages, langfuse_observation_id=thinking_trace_id):

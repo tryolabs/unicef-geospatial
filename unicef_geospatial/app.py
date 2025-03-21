@@ -33,7 +33,6 @@ async def ask(chat: Chat) -> StreamingResponse:
             messages,
             trace_id,
             chat.session_id,
-            app_state.params["llm"]["temperature"],
         ),
         media_type="text/event-stream",
     )
