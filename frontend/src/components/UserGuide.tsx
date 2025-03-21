@@ -35,7 +35,7 @@ function UserGuide() {
           <div className="data-type">
             <h4>🌍 Geospatial Data</h4>
             <ul>
-              <li>Droughts data</li>
+              <li>Floods data</li>
               <li>Heatwaves data</li>
               <li>Demographic data</li>
             </ul>
