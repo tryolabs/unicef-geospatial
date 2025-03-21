@@ -5,15 +5,13 @@ from ee.deserializer import fromJSON
 from ee.errormargin import ErrorMargin
 from ee.feature import Feature
 from ee.featurecollection import FeatureCollection
-from ee.filter import Filter
-from ee.geometry import Geometry
 from ee.image import Image
 from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
 from geospatial.earth_engine import get_dataset_metadata
 from langchain.tools import tool
 from logging_config import get_logger
-from utils.constants import EARTH_GEOMETRY_COORDS, EARTH_GEOMETRY_CRS, PATH_TO_MAP
+from utils.constants import PATH_TO_MAP
 from utils.types import ALL_DATASETS, REDUCERS
 
 INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
@@ -56,6 +54,45 @@ def get_dataset_image_and_metadata(
         "greater_than": metadata.greater_than,
         "input_arguments": {
             "dataset": dataset,
+        },
+    }
+
+
+@tool
+def mask_image(path_to_image: str, path_to_mask: str) -> dict[str, str]:
+    """Mask an Earth Engine image based on a mask.
+
+    A mask is a binary image that is used to mask the image.
+
+    Args:
+        path_to_image: Path to the JSON file containing the Earth Engine image
+        path_to_mask: Path to the JSON file containing the Earth Engine mask
+
+    Returns:
+        dict: A dictionary containing:
+            - path_to_image: Path to the saved masked image file
+            - input_arguments: The original input arguments used for the operation
+    """
+    image = load_vector_data(path_to_image)
+    mask = load_vector_data(path_to_mask)
+    if not isinstance(image, Image):
+        raise TypeError(
+            f"Expected an Earth Engine Image object, but got {type(image).__name__}. "
+            f"Please provide a valid image path."
+        )
+    if not isinstance(mask, Image):
+        raise TypeError(
+            f"Expected an Earth Engine Image object, but got {type(mask).__name__}. "
+            f"Please provide a valid mask path."
+        )
+    masked_image = image.updateMask(mask)
+    path_to_masked_image = path_to_image.replace(".json", "_masked.json")
+    save_vector_data(path_to_masked_image, masked_image)
+    return {
+        "path_to_image": path_to_masked_image,
+        "input_arguments": {
+            "path_to_image": path_to_image,
+            "path_to_mask": path_to_mask,
         },
     }
 
@@ -153,6 +190,7 @@ def reduce_image(
     path_to_image: str,
     path_to_geometry: str,
     reducer: REDUCERS,
+    scale: int = 100,
 ) -> dict:
     """Reduce an image by applying a reducer to its pixels.
 
@@ -160,23 +198,24 @@ def reduce_image(
         path_to_image: The path to the image to reduce
         path_to_geometry: The path to the geometry to reduce the image to
         reducer: The reducer to apply
+        scale: The scale of the image. It should be 100 unless otherwise specified.
 
     Returns:
         dict: A dictionary containing the reduced value
     """
     logger.info(f"Reducing image with {reducer}")
     image = load_vector_data(path_to_image)
-    scale = image.projection().nominalScale().getInfo()
-    geometry = load_vector_data(path_to_geometry)
-    reduced = image.reduceRegion(
-        reducer=getattr(Reducer, reducer)(),
-        geometry=geometry,
-        scale=scale,
-        maxPixels=1e13,
+    feature_collection = load_vector_data(path_to_geometry)
+    reduced = image.reduceRegions(
+        reducer=getattr(Reducer, reducer)(), collection=feature_collection, scale=scale
     )
     stats = reduced.getInfo()
+    total_sum = 0
+    for feature in stats["features"]:
+        total_sum += feature["properties"]["sum"]
+    logger.info(f"Reduced image with {reducer} to {total_sum}")
     return {
-        "stats": stats,
+        "total_sum": total_sum,
         "input_arguments": {
             "path_to_image": path_to_image,
             "path_to_geometry": path_to_geometry,
