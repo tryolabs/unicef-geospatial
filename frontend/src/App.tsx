@@ -74,15 +74,24 @@ function App() {
       let finalResponse = "";
       let assistantThinkingMessageAdded = false;
       let assistantFinalMessageAdded = false;
+      let buffer = ""; // Buffer to accumulate incomplete chunks
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value);
-        const jsonLines = chunk.split("\n").filter((line) => line.trim());
+        buffer += chunk; // Add the new chunk to our buffer
 
-        for (const line of jsonLines) {
+        // Split by newlines but keep any potential incomplete JSON at the end
+        const lines = buffer.split("\n");
+        // The last line might be incomplete, so we keep it in the buffer
+        buffer = lines.pop() || "";
+
+        // Process all complete lines
+        for (const line of lines) {
+          if (!line.trim()) continue; // Skip empty lines
+
           try {
             let data = JSON.parse(line);
 
