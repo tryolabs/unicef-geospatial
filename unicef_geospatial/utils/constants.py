@@ -3,8 +3,10 @@
 COUNTRY_BOUNDRIES_DATASET = "projects/unicef-ccri/assets/adm0_simple"
 ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
 CHILDREN_DEMOGRAPHIC_DATASET = "projects/unicef-ccri/assets/childpop_constrained"
-DEMOGRAPHIC_BAND = "basic_demographic_characteristics"
 HEATWAVE_DATASET = "projects/unicef-ccri/assets/heatwave/average_hwi"
+RIVER_FLOOD_DATASET = "projects/unicef-ccri/assets/river_flood_r100"
+COASTAL_FLOOD_DATASET = "projects/unicef-ccri/assets/coastal_flood_r100"
+PLUVIAL_FLOOD_DATASET = "projects/unicef-ccri/assets/JBA_FLSW_resampled"
 
 # Earth geometry
 EARTH_GEOMETRY_COORDS = [-180, 85, 0, 85, 180, 85, 180, -85, 0, -85, -180, -85]
