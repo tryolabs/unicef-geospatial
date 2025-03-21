@@ -7,8 +7,11 @@ sys.path.insert(
 )
 
 import uvicorn
+from dotenv import load_dotenv
 
 if __name__ == "__main__":
+    load_dotenv(override=True)
+
     host = os.getenv("BACKEND_HOST", "localhost")
     port = int(os.getenv("BACKEND_PORT", 8000))
     uvicorn.run("app:app", host=host, port=port, reload=True)

@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import yaml
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from logging_config import get_logger
@@ -24,7 +23,6 @@ class AppState:
 
     def _init_app(self) -> None:
         """Initialize application components."""
-        load_dotenv(override=True)
         self.logger.info("Loading application with project")
 
         # Initialize components
