@@ -90,7 +90,8 @@ function App() {
 
             if (data.response !== undefined) {
               // Handle thinking chunks differently from the final response
-              if (data.thinking_chunk) {
+              const isThinkingChunk = data.trace_id.startsWith("th_");
+              if (isThinkingChunk) {
                 // Handle thinking response chunks
                 if (!assistantThinkingMessageAdded) {
                   const assistantMessage: Message = {

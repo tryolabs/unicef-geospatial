@@ -17,7 +17,6 @@ class ReturnChunk(BaseModel):
     is_html: bool
     html_content: str
     is_finished: bool
-    thinking_chunk: bool
 
 
 class Chat(BaseModel):

@@ -1,7 +1,7 @@
 import json
 from typing import AsyncGenerator
 
-from agent.agent import get_llm, run_agent
+from agent.agent import create_agent, get_llm, run_agent
 from langchain_core.messages import AIMessageChunk, ToolMessage
 from logging_config import get_logger
 from utils.constants import PATH_TO_MAP
@@ -35,12 +35,16 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     return messages
 
 
-async def respond(agent, messages, trace_id, session_id) -> AsyncGenerator[str, None]:
+async def respond(
+    messages, trace_id, session_id, temperature
+) -> AsyncGenerator[str, None]:
+    thinking_trace_id = f"th_{trace_id}"
+    agent = create_agent(session_id, thinking_trace_id, temperature)
     full_response = ""
-    for chunk in run_agent(agent, messages, langfuse_observation_id=trace_id):
+    for chunk in run_agent(agent, messages, langfuse_observation_id=thinking_trace_id):
         if isinstance(chunk[0], ToolMessage):
             try:
-                return_chunk = handle_tool_call(chunk[0], trace_id)
+                return_chunk = handle_tool_call(chunk[0], thinking_trace_id)
             except Exception as e:
                 logger.error(f"Error handling tool call: {e}")
                 logger.error(f"Tool call: {chunk[0]}")
@@ -51,12 +55,11 @@ async def respond(agent, messages, trace_id, session_id) -> AsyncGenerator[str, 
             full_response += response
             return_chunk = ReturnChunk(
                 response=response,
-                trace_id=trace_id,
+                trace_id=thinking_trace_id,
                 tool_call="",
                 is_html=False,
                 html_content="",
                 is_finished=False,
-                thinking_chunk=True,
             )
 
         yield json.dumps(return_chunk.model_dump())
@@ -65,16 +68,16 @@ async def respond(agent, messages, trace_id, session_id) -> AsyncGenerator[str, 
     # Signal that the response is complete
     return_chunk = ReturnChunk(
         response="",
-        trace_id=trace_id,
+        trace_id=thinking_trace_id,
         tool_call="",
         is_html=False,
         html_content="",
         is_finished=True,
-        thinking_chunk=True,
     )
     yield json.dumps(return_chunk.model_dump())
 
-    llm = get_llm(0.0, session_id, trace_id)
+    response_trace_id = f"r_{trace_id}"
+    llm = get_llm(0.0, session_id, response_trace_id)
     prompt = """You are a helpful assistant.
     You are given the response from an agent in several steps of the thinking process and
     a conversation history.
@@ -90,24 +93,22 @@ async def respond(agent, messages, trace_id, session_id) -> AsyncGenerator[str, 
         yield json.dumps(
             ReturnChunk(
                 response=chunk.content,
-                trace_id=trace_id,
+                trace_id=response_trace_id,
                 tool_call="",
                 is_html=False,
                 html_content="",
                 is_finished=False,
-                thinking_chunk=False,
             ).model_dump()
         )
         yield "\n"
 
     return_chunk = ReturnChunk(
         response="",
-        trace_id=trace_id,
+        trace_id=response_trace_id,
         tool_call="",
         is_html=False,
         html_content="",
         is_finished=True,
-        thinking_chunk=False,
     )
     yield json.dumps(return_chunk.model_dump())
 
