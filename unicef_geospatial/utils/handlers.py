@@ -137,4 +137,5 @@ def handle_tool_call(tool_message: ToolMessage, trace_id: str) -> ReturnChunk:
         is_html=is_html,
         html_content=html_content,
         is_finished=False,
+        thinking_chunk=True,
     )
