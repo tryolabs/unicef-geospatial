@@ -75,6 +75,7 @@ async def respond(messages, trace_id, session_id) -> AsyncGenerator[str, None]:
         is_finished=True,
     )
     yield json.dumps(return_chunk.model_dump())
+    yield "\n"
 
     response_trace_id = f"r_{trace_id}"
     llm = get_llm(0.0, session_id, response_trace_id)
@@ -111,6 +112,7 @@ async def respond(messages, trace_id, session_id) -> AsyncGenerator[str, None]:
         is_finished=True,
     )
     yield json.dumps(return_chunk.model_dump())
+    yield "\n"
 
 
 def handle_tool_call(tool_message: ToolMessage, trace_id: str) -> ReturnChunk:
