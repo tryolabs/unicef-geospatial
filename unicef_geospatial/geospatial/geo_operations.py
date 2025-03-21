@@ -63,24 +63,25 @@ def get_dataset_image_and_metadata(
 @tool
 def filter_image_by_threshold(
     path_to_image: str, threshold: float, greater_than: bool = True
-) -> str:
-    """Filter an image by a threshold.
+) -> dict[str, str | dict]:
+    """Mask an Earth Engine image based on a threshold value.
 
-    This function is useful for extracting specific zones from continuous data based on a threshold value.
-    For example, when analyzing how many children are affected by droughts, you would need to define
-    what constitutes a drought zone.
-
-    The threshold is the value below which the data is considered to be in the drought zone.
-    For example, for drought analysis, a threshold of -1.5 is used to identify drought zones.
+    This function applies a threshold filter to an image.
+    The result is a binary image where the values are either 0 or 1.
 
     Args:
-        path_to_image: The path to the image to filter
-        threshold: The threshold to filter the image by. Values below this threshold will be kept
-                  (for drought analysis, use -1.5 to identify drought zones)
-        greater_than: Whether to keep values greater than the threshold
+        path_to_image: Path to the JSON file containing the Earth Engine image
+        threshold: Numeric value to use as the threshold for filtering
+        greater_than: If True, keep values greater than threshold;
+            if False, keep values less than threshold
 
     Returns:
-        The path to the filtered vector data
+        dict: A dictionary containing:
+            - path_to_image: Path to the saved masked image file
+            - input_arguments: The original input arguments used for the operation
+
+    Raises:
+        TypeError: If the loaded data is not an Earth Engine Image object
     """
     logger.info(f"Filtering image {path_to_image} by threshold: {threshold}")
     image = load_vector_data(path_to_image)
@@ -92,47 +93,13 @@ def filter_image_by_threshold(
     # Create a mask where values are less than threshold
     filtered_mask = image.gt(threshold) if greater_than else image.lt(threshold)
     # Apply the mask to the original image
-    filtered = image.updateMask(filtered_mask).toInt()
-    geometry = Geometry.Polygon(
-        EARTH_GEOMETRY_COORDS,
-        EARTH_GEOMETRY_CRS,
-        False,
-    )
-    scale = filtered.projection().nominalScale().getInfo()
-    logger.info(f"Scale: {scale}")
-    # Convert to vectors with explicit geometry to avoid EEException
-    vectors = filtered.reduceToVectors(
-        scale=scale,
-        geometry=geometry,
-        geometryType="polygon",
-        eightConnected=True,
-        labelProperty="value",
-        maxPixels=1e13,
-    )
+    filtered_image = image.updateMask(filtered_mask).toInt()
 
-    simplified_vectors = vectors.map(
-        lambda f: f.simplify(MAX_VERTICES).set(
-            {
-                "area_km2": f.geometry()
-                .area(scale)
-                .divide(scale),  # Add area in km² with error margin
-            }
-        )
-    )
-    # Filter out any invalid or tiny polygons
-    final_vectors = simplified_vectors.filter(
-        Filter.And(
-            Filter.neq("value", None),
-            Filter.gt("area_km2", MIN_AREA_KM2),
-        )
-    )
-    path_to_filtered_vector_data = path_to_image.replace(".json", "_filtered.json")
-    path_to_filtered_vector_data = path_to_filtered_vector_data.replace(
-        "image", "feature_collection"
-    )
-    save_vector_data(path_to_filtered_vector_data, final_vectors)
+    path_to_filtered_vector_data = path_to_image.replace(".json", "_masked.json")
+
+    save_vector_data(path_to_filtered_vector_data, filtered_image)
     return {
-        "path_to_vector_data": path_to_filtered_vector_data,
+        "path_to_image": path_to_filtered_vector_data,
         "input_arguments": {
             "path_to_image": path_to_image,
             "threshold": threshold,
