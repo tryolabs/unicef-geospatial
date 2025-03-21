@@ -63,10 +63,14 @@ The `.env` file should be located in the root of the project and contain the fol
 
 - `OPENAI_API_KEY`: The API key for OpenAI.
 - `MODEL_NAME`: The name of the OpenAI model to use.
+- `TEMPERATURE = 0.0`: The temperature of the agent.
 - `LANGFUSE_PUBLIC_KEY`: The public key for the langfuse cloud.
 - `LANGFUSE_SECRET_KEY`: The secret key for the langfuse cloud.
 - `LANGFUSE_HOST`: The host URL for the langfuse cloud.
 - `LANGFUSE_PROJECT_ID`: The project id for the langfuse cloud.
+- `BACKEND_HOST`: The API host address.
+- `BACKEND_PORT`: The API port number.
+- `PATH_TO_EE_AUTH`: The path to the earth engine auth file.
 
 For authentication into the google earth engine, you need a service account and download the credentials file.
 The file should be named `ee_auth.json` and placed in the root of the project. It should look like this:
