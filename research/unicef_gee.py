@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
@@ -23,41 +24,72 @@ auth = ee.ServiceAccountCredentials(email=email, key_data=auth_file)
 ee.Authenticate()
 ee.Initialize(auth)
 # %%
-# list all assets
-# ee.data.listAssets({"parent": "projects/unicef-ccri/assets/"})
+ee.data.listAssets({"parent": "projects/unicef-ccri/assets"})
 # %%
-# change python path to inside the unicef_geospatial folder
-import os
+# Reload the module to ensure we have the latest version
+import importlib
 
-from geospatial.floods import PATH_TO_RIVER_FLOOD, get_river_flood_image
-from geospatial.geo_operations import load_vector_data
-
-# path_to_river_flood = get_river_flood_image()
-river_flood = load_vector_data(PATH_TO_RIVER_FLOOD)
-# river_flood.getInfo()
-# %%
+if "geospatial.geo_operations" in sys.modules:
+    importlib.reload(sys.modules["geospatial.geo_operations"])
+from ee.reducer import Reducer
+from geospatial.demographic import get_zone_of_area
 from geospatial.geo_operations import (
     filter_image_by_threshold,
+    get_dataset_image_and_metadata,
+    load_vector_data,
+    reduce_image,
     save_vector_data,
 )
-
-path_to_filtered = filter_image_by_threshold(PATH_TO_RIVER_FLOOD, 3)
-filtered = load_vector_data(path_to_filtered)
+from utils.constants import EARTH_GEOMETRY_COORDS, EARTH_GEOMETRY_CRS
 
 # %%
-import geemap
-
+# esto de aca es coastal floods en Colombia (tendria que dar 22714)
+country = "Colombia"
+path_to_country = get_zone_of_area(country, "country")["value"]
+coastal_flood_image_path = get_dataset_image_and_metadata("coastal_flood")[
+    "path_to_image"
+]
+# filtered_coastal_flood_image_path = filter_image_by_threshold(
+#     coastal_flood_image_path, 0
+# )["path_to_image"]
+demographic_image_path = get_dataset_image_and_metadata("children_population")[
+    "path_to_image"
+]
+exposed_population = load_vector_data(demographic_image_path).updateMask(
+    load_vector_data(coastal_flood_image_path).gt(0)
+)
+exposed_population_path = "exposed_population.json"
+save_vector_data(exposed_population_path, exposed_population)
+# intersection_path = intersect_feature_collection(
+#     [path_to_country, filtered_coastal_flood_image_path]
+# )["path_to_vector_data"]
+reduce_image(exposed_population_path, path_to_country, "sum")
+# %%
 Map = geemap.Map()
-Map.addLayer(filtered, {"min": 0, "max": 1}, "River Flood Filtered")
-Map.addLayer(river_flood, {"min": 0, "max": 1}, "River Flood")
+Map.addLayer(load_vector_data(path_to_country), {}, "Country")
+Map.addLayer(load_vector_data(demographic_image_path), {}, "Demographic")
+# Map.addLayer(load_vector_data(intersection_path), {}, "Intersection")
+Map.addLayer(load_vector_data(exposed_population_path), {}, "Exposed population")
 Map
 # %%
-from geospatial.droughts import get_drought_zones
 
-drought_zones = get_drought_zones()
-drought_zones = load_vector_data(drought_zones["path_to_vector_data"])
+#
+
+# %%
+demographic_image_masked_path = (
+    "../unicef_geospatial/data/demographic_image_masked.json"
+)
+map_zones_feature_collection_path = (
+    "../unicef_geospatial/data/map_zones_feature_collection.json"
+)
+coastal_flood_image_path = "../unicef_geospatial/data/coastal_flood_image.json"
+demographic_image_masked = load_vector_data(demographic_image_masked_path)
+map_zones_feature_collection = load_vector_data(map_zones_feature_collection_path)
+coastal_flood_image = load_vector_data(coastal_flood_image_path)
 # %%
 Map = geemap.Map()
-Map.addLayer(drought_zones, {"min": 0, "max": 1}, "Drought Zones")
+Map.addLayer(demographic_image_masked, {}, "Demographic Masked")
+Map.addLayer(map_zones_feature_collection, {}, "Map zones")
+Map.addLayer(coastal_flood_image, {}, "Coastal flood")
 Map
 # %%
