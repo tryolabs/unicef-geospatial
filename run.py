@@ -14,4 +14,5 @@ if __name__ == "__main__":
 
     host = os.getenv("BACKEND_HOST", "localhost")
     port = int(os.getenv("BACKEND_PORT", 8000))
-    uvicorn.run("app:app", host=host, port=port, reload=True)
+    reload = os.getenv("RELOAD", "false").lower() == "true"
+    uvicorn.run("app:app", host=host, port=port, reload=reload)

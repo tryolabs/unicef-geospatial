@@ -70,6 +70,7 @@ The `.env` file should be located in the root of the project and contain the fol
 - `LANGFUSE_PROJECT_ID`: The project id for the langfuse cloud.
 - `BACKEND_HOST`: The API host address.
 - `BACKEND_PORT`: The API port number.
+- `RELOAD`: Whether to reload the API on chage.
 - `PATH_TO_EE_AUTH`: The path to the earth engine auth file.
 
 For authentication into the google earth engine, you need a service account and download the credentials file.
