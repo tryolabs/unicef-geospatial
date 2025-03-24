@@ -4,7 +4,7 @@ data/
 *.pyc
 unicef_geospatial/data/
 ee_auth.json
-reasearch/output
+research/output/
 
 # Frontend
 # Logs
