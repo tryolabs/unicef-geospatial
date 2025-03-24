@@ -24,7 +24,7 @@ def get_river_flood_metadata() -> DatasetMetadata:
         asset_id=RIVER_FLOOD_DATASET,
         description="Zones of river flood. The value indicates the depth in meters.",
         mosaic=True,
-        threshold=0.5,
+        threshold=0.01,
         greater_than=True,
     )
     return metadata

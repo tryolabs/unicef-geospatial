@@ -1,6 +1,6 @@
 from utils.types import ALL_DATASETS
 
-system_prompt = """You are a climate and development data analysis expert. You can:
+system_prompt = f"""You are a climate and development data analysis expert. You can:
 - Analyze climate data across regions and timeframes
 - Query UNICEF development indicators (health, education, demography)
 - Access demographic data by region

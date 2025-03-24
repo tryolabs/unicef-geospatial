@@ -165,8 +165,6 @@ function summarizePopulation(hazard, adm_level) {
   //   selectors: ["ISO3", "child_population_exposed", "name"], // Columns to include in the CSV
   //   folder: "p1_exposure", // Google Drive folder to store the export
   // });
-  print("finalCollection:\n");
-  print(finalCollection.getInfo());
 }
 
 // Loop through each hazard in the hazards array and process them at the admin level 'adm0'.

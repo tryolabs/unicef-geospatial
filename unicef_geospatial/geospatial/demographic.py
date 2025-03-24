@@ -3,6 +3,7 @@ import json
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
+from geospatial.geo_operations import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
@@ -50,10 +51,7 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
         admin_level_1_boundries = FeatureCollection(ADMIN_LEVEL_1_BOUNDRIES_DATASET)
         area_boundry = admin_level_1_boundries.filter(Filter.eq("shapeName", area_name))
 
-    area_boundry_serialized = area_boundry.serialize()
-
-    with open(PATH_TO_VECTOR_DATA, "w") as f:
-        json.dump(area_boundry_serialized, f)
+    save_vector_data(PATH_TO_VECTOR_DATA, area_boundry)
 
     return {
         "value": PATH_TO_VECTOR_DATA,

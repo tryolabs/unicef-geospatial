@@ -1,5 +1,6 @@
 import json
 
+import ee
 import geemap.foliumap as geemap
 from ee.deserializer import fromJSON
 from ee.errormargin import ErrorMargin
@@ -128,9 +129,10 @@ def filter_image_by_threshold(
             f"Please provide a valid image path."
         )
     # Create a mask where values are less than threshold
-    filtered_mask = image.gt(threshold) if greater_than else image.lt(threshold)
+    threshold_ee = ee.Number(threshold)
+    filtered_mask = image.gt(threshold_ee) if greater_than else image.lt(threshold_ee)
     # Apply the mask to the original image
-    filtered_image = image.updateMask(filtered_mask).toInt()
+    filtered_image = image.updateMask(filtered_mask)
 
     path_to_filtered_vector_data = path_to_image.replace(".json", "_masked.json")
 
@@ -220,6 +222,7 @@ def reduce_image(
             "path_to_image": path_to_image,
             "path_to_geometry": path_to_geometry,
             "reducer": reducer,
+            "scale": scale,
         },
     }
 
