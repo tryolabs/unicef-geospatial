@@ -60,7 +60,7 @@ def get_pluvial_flood_metadata() -> DatasetMetadata:
         asset_id=PLUVIAL_FLOOD_DATASET,
         description="Zones of pluvial flood. The value indicates the depth in meters.",
         mosaic=False,
-        threshold=3,  # TODO: TBD the value
+        threshold=0,
         greater_than=True,
     )
     return metadata
