@@ -3,7 +3,7 @@ import json
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
-from geospatial.geo_operations import save_vector_data
+from geospatial.io import save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
