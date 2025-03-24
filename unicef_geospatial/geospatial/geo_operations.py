@@ -127,11 +127,10 @@ def filter_image_by_threshold(
     threshold_ee = ee.Number(threshold)
     filtered_mask = image.gt(threshold_ee) if greater_than else image.lt(threshold_ee)
     # Apply the mask to the original image
-    filtered_image = image.updateMask(filtered_mask)
 
-    path_to_filtered_vector_data = path_to_image.replace(".json", "_masked.json")
+    path_to_filtered_vector_data = path_to_image.replace(".json", "_filtered.json")
 
-    save_vector_data(path_to_filtered_vector_data, filtered_image)
+    save_vector_data(path_to_filtered_vector_data, filtered_mask)
     return {
         "path_to_image": path_to_filtered_vector_data,
         "input_arguments": {
@@ -204,13 +203,18 @@ def reduce_image(
     image = load_vector_data(path_to_image)
     feature_collection = load_vector_data(path_to_geometry)
     reduced = image.reduceRegions(
-        reducer=getattr(Reducer, reducer)(), collection=feature_collection, scale=scale
+        reducer=getattr(Reducer, reducer)(),
+        collection=feature_collection,
+        scale=scale,
+        crs="EPSG:4326",
     )
     stats = reduced.getInfo()
+
     total_sum = 0
     for feature in stats["features"]:
         total_sum += feature["properties"]["sum"]
     logger.info(f"Reduced image with {reducer} to {total_sum}")
+
     return {
         "total_sum": total_sum,
         "input_arguments": {
