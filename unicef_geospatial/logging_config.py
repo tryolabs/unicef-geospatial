@@ -9,6 +9,7 @@ logger_context: ContextVar[dict[str, Any]] = ContextVar("logger_context")
 
 class ContextFilter(Filter):
     """Logging filter to add `ContextVar` contents to log records as attributes."""
+
     def filter(self, record: logging.LogRecord) -> Literal[True]:
         """Add context variable contents to log record.
 
@@ -40,7 +41,9 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
 
     if not logger.hasHandlers():
         handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
@@ -52,20 +55,3 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
         logger.setLevel(logging.INFO)
 
     return logger
-
-
-def set_logger_context(**kwargs: Any) -> None:
-    """Set the `logger_context` `ContextVar`'s contents to the provided keyword arguments."""
-    logger_context.set(kwargs)
-
-
-def update_logger_context(**kwargs: Any) -> None:
-    """Update the `logger_context` `ContextVar`'s contents with the provided keyword arguments."""
-    context = logger_context.get({})
-    new_context = {**context, **kwargs}
-    logger_context.set(new_context)
-
-
-def clear_logger_context() -> None:
-    """Set `logger_context` `ContextVar`'s contents to an empty dictionary."""
-    logger_context.set({})
