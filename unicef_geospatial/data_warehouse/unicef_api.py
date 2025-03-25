@@ -8,20 +8,6 @@ BASE_URL = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest/"
 OUTPUT_FORMATS = Literal["sdmx-json", "csv"]
 
 
-def get_dataflow_list() -> list[dict[str, Any]]:
-    """Get list of available dataflows from UNICEF API.
-
-    Returns:
-        List[Dict[str, Any]]: List of dataflow dictionaries containing metadata
-    """
-    url = urllib.parse.urljoin(
-        BASE_URL,
-        "dataflow/all/all/latest/?format=sdmx-json&detail=full&references=none",
-    )
-    response = requests.get(url, timeout=200)
-    return response.json()["data"]["dataflows"]
-
-
 def get_data(
     dataflow_id: str,
     ref_areas: list[str] | None = None,
