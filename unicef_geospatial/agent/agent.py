@@ -101,13 +101,3 @@ def invoke_agent(agent: CompiledGraph, inputs: dict, tags: list[str] = []) -> di
     """
     langfuse_context.update_current_trace(tags=tags)
     return agent.invoke(inputs)
-
-
-def run_and_print_stream(agent: CompiledGraph, inputs: dict) -> None:
-    """Run a LangGraph agent and print its response stream.
-
-    Args:
-        agent: The compiled LangGraph agent to run
-        inputs: Dictionary of inputs to provide to the agent
-    """
-    print_stream(agent.stream(inputs, stream_mode="values"))
