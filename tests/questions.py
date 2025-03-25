@@ -17,7 +17,7 @@ medium_questions = {
 
 # multi dataset processing questions
 hard_questions = {
-    "How many children were globally affected by droughts in 2020?": "152539159",
+    "How many children are affected by coastal floods in Colombia?": "22714",
     "How many children are exposed to floods in South Asia region?": "XXXXXX",
     # south_asia = ["Afghanistan","Bangladesh","Bhutan","India","Sri Lanka","Maldives","Nepal","Pakistan",]
     "How many malnourished children face multi-hazard risk?": "XXXXXX",
