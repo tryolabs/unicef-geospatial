@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -7,7 +7,6 @@ class Message(BaseModel):
     content: str
     role: Literal["user", "assistant"]
     trace_id: str
-    feedback_given: Optional[Literal[0, 1]] = None
 
 
 class ReturnChunk(BaseModel):
