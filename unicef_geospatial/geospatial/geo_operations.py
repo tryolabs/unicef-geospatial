@@ -13,10 +13,6 @@ from utils.types import ALL_DATASETS, REDUCERS
 INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
 logger = get_logger(__name__)
 
-MAX_PIXELS = int(1e13)
-MIN_AREA_KM2 = 100
-MAX_VERTICES = 10
-
 
 @tool
 def get_dataset_image_and_metadata(

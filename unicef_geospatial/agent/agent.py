@@ -9,7 +9,6 @@ from langfuse.decorators import langfuse_context, observe
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
 from utils.initialize import get_tools
-from utils.output import print_stream
 from utils.prompts import system_prompt
 
 litellm.success_callback = ["langfuse"]
