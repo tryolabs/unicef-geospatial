@@ -1,13 +1,11 @@
 # Datasets
 # COUNTRY_BOUNDRIES_DATASET = "USDOS/LSIB_SIMPLE/2017"
-COUNTRY_BOUNDRIES_DATASET = "projects/unicef-ccri/assets/adm0_simple"
+BASE_ASSETS_PATH = "projects/unicef-ccri/assets"
+COUNTRY_BOUNDRIES_DATASET = f"{BASE_ASSETS_PATH}/adm0_simple"
 ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
-CHILDREN_DEMOGRAPHIC_DATASET = "projects/unicef-ccri/assets/childpop_constrained"
-HEATWAVE_DATASET = "projects/unicef-ccri/assets/heatwave/average_hwi"
-RIVER_FLOOD_DATASET = "projects/unicef-ccri/assets/river_flood_r100"
-COASTAL_FLOOD_DATASET = "projects/unicef-ccri/assets/coastal_flood_r100"
-PLUVIAL_FLOOD_DATASET = "projects/unicef-ccri/assets/JBA_FLSW_resampled"
-STORM_DATASET = "projects/unicef-ccri/assets/storm_giri_rp100"
+CHILDREN_DEMOGRAPHIC_DATASET = f"{BASE_ASSETS_PATH}/childpop_constrained"
+HEATWAVE_DATASET = f"{BASE_ASSETS_PATH}/heatwave/average_hwi"
+
 
 # Earth geometry
 EARTH_GEOMETRY_COORDS = [-180, 85, 0, 85, 180, 85, 180, -85, 0, -85, -180, -85]
@@ -17,10 +15,5 @@ EARTH_GEOMETRY_CRS = "EPSG:4326"
 # Paths
 BASE_PATH = "unicef_geospatial/data"
 PATH_TO_MAP = f"{BASE_PATH}/map_data.html"
-PATH_TO_RIVER_FLOOD = f"{BASE_PATH}/river_flood_image.json"
-PATH_TO_COASTAL_FLOOD = f"{BASE_PATH}/coastal_flood_image.json"
-PATH_TO_PLUVIAL_FLOOD = f"{BASE_PATH}/pluvial_flood_image.json"
 PATH_TO_HEATWAVE = f"{BASE_PATH}/heatwave_image.json"
 PATH_TO_VECTOR_DATA = f"{BASE_PATH}/map_zones_feature_collection.json"
-PATH_TO_DEMOGRAPHIC_IMAGE = f"{BASE_PATH}/demographic_image.json"
-PATH_TO_STORM = f"{BASE_PATH}/storm_image.json"

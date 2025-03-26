@@ -1,5 +1,3 @@
-import json
-
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
@@ -8,12 +6,10 @@ from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
-    CHILDREN_DEMOGRAPHIC_DATASET,
     COUNTRY_BOUNDRIES_DATASET,
-    PATH_TO_DEMOGRAPHIC_IMAGE,
     PATH_TO_VECTOR_DATA,
 )
-from utils.types import AREA_TYPES, DatasetMetadata
+from utils.types import AREA_TYPES
 
 logger = get_logger(__name__)
 
@@ -57,25 +53,6 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
         "value": PATH_TO_VECTOR_DATA,
         "input_arguments": {"area_name": area_name, "area_type": area_type},
     }
-
-
-def get_children_population_metadata() -> DatasetMetadata:
-    """Get children population metadata.
-
-    Retrieves demographic data from Earth Engine and saves it as a vector file.
-
-    Returns:
-        DatasetMetadata: The children population metadata
-    """
-    logger.info("Getting children population information")
-    metadata = DatasetMetadata(
-        path_to_image=PATH_TO_DEMOGRAPHIC_IMAGE,
-        asset_id=CHILDREN_DEMOGRAPHIC_DATASET,
-        description="Population of children between 0-18 years old.",
-        mosaic=True,
-    )
-
-    return metadata
 
 
 def standarize_country_name(country: str) -> str:
