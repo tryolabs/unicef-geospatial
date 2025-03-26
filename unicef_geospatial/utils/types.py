@@ -34,8 +34,13 @@ class DatasetMetadata(BaseModel):
 
 
 ALL_DATASETS = Literal[
-    "river_flood", "coastal_flood", "pluvial_flood", "children_population"
+    "river_flood",
+    "coastal_flood",
+    "pluvial_flood",
+    "children_population",
+    "tropical_storm",
 ]
+
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
 REDUCERS = Literal["mean", "max", "min", "sum", "median", "std"]

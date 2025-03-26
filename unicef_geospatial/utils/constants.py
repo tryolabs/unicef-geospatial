@@ -7,6 +7,7 @@ HEATWAVE_DATASET = "projects/unicef-ccri/assets/heatwave/average_hwi"
 RIVER_FLOOD_DATASET = "projects/unicef-ccri/assets/river_flood_r100"
 COASTAL_FLOOD_DATASET = "projects/unicef-ccri/assets/coastal_flood_r100"
 PLUVIAL_FLOOD_DATASET = "projects/unicef-ccri/assets/JBA_FLSW_resampled"
+STORM_DATASET = "projects/unicef-ccri/assets/storm_giri_rp100"
 
 # Earth geometry
 EARTH_GEOMETRY_COORDS = [-180, 85, 0, 85, 180, 85, 180, -85, 0, -85, -180, -85]
@@ -22,3 +23,4 @@ PATH_TO_PLUVIAL_FLOOD = f"{BASE_PATH}/pluvial_flood_image.json"
 PATH_TO_HEATWAVE = f"{BASE_PATH}/heatwave_image.json"
 PATH_TO_VECTOR_DATA = f"{BASE_PATH}/map_zones_feature_collection.json"
 PATH_TO_DEMOGRAPHIC_IMAGE = f"{BASE_PATH}/demographic_image.json"
+PATH_TO_STORM = f"{BASE_PATH}/storm_image.json"

@@ -8,6 +8,7 @@ from geospatial.floods import (
     get_pluvial_flood_metadata,
     get_river_flood_metadata,
 )
+from geospatial.storms import get_storm_metadata
 from google.cloud import storage
 from google.cloud.storage.bucket import Bucket
 from logging_config import get_logger
@@ -26,17 +27,19 @@ def get_dataset_metadata(dataset: ALL_DATASETS) -> DatasetMetadata:
         DatasetMetadata: The metadata for the specified dataset
     """
     logger.info(f"Getting metadata for dataset: {dataset}")
-    if dataset == "river_flood":
-        metadata = get_river_flood_metadata()
-    elif dataset == "coastal_flood":
-        metadata = get_coastal_flood_metadata()
-    elif dataset == "pluvial_flood":
-        metadata = get_pluvial_flood_metadata()
-    elif dataset == "children_population":
-        metadata = get_children_population_metadata()
-
-    else:
-        raise ValueError(f"Dataset {dataset} not supported")
+    match dataset:
+        case "river_flood":
+            metadata = get_river_flood_metadata()
+        case "coastal_flood":
+            metadata = get_coastal_flood_metadata()
+        case "pluvial_flood":
+            metadata = get_pluvial_flood_metadata()
+        case "tropical_storm":
+            metadata = get_storm_metadata()
+        case "children_population":
+            metadata = get_children_population_metadata()
+        case _:
+            raise ValueError(f"Dataset {dataset} not supported")
 
     metadata.input_arguments = {"dataset": dataset}
     return metadata
