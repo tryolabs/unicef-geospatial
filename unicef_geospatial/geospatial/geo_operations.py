@@ -93,7 +93,7 @@ def mask_image(path_to_image: str, path_to_mask: str) -> dict[str, str]:
 
 @tool
 def filter_image_by_threshold(
-    path_to_image: str, threshold: float, greater_than: bool = True
+    path_to_image: str, threshold: float
 ) -> dict[str, str | dict]:
     """Mask an Earth Engine image based on a threshold value.
 
@@ -103,8 +103,6 @@ def filter_image_by_threshold(
     Args:
         path_to_image: Path to the JSON file containing the Earth Engine image
         threshold: Numeric value to use as the threshold for filtering
-        greater_than: If True, keep values greater than threshold;
-            if False, keep values less than threshold
 
     Returns:
         dict: A dictionary containing:
@@ -123,7 +121,7 @@ def filter_image_by_threshold(
         )
     # Create a mask where values are less than threshold
     threshold_ee = ee.Number(threshold)
-    filtered_mask = image.gt(threshold_ee) if greater_than else image.lt(threshold_ee)
+    filtered_mask = image.lt(threshold_ee) if threshold < 0 else image.gt(threshold_ee)
     # Apply the mask to the original image
 
     path_to_filtered_vector_data = path_to_image.replace(".json", "_filtered.json")
@@ -134,7 +132,6 @@ def filter_image_by_threshold(
         "input_arguments": {
             "path_to_image": path_to_image,
             "threshold": threshold,
-            "greater_than": greater_than,
         },
     }
 
@@ -226,9 +223,9 @@ def reduce_image(
 
 @tool
 def build_map(
-    path_to_image: str,
+    path_to_images: list[str],
     path_to_vector_data: str,
-    name: str = "",
+    names: list[str] = [],
 ) -> dict:
     """Build a map from an image and vector data and save it to an HTML file.
 
@@ -236,28 +233,33 @@ def build_map(
     (e.g. administrative boundaries). The map is saved as an HTML file that can be viewed
     in a web browser.
 
+    Each image will be a different layer in the map.
+
     Args:
-        path_to_image: Path to the Earth Engine image file to display on the map
+        path_to_images: Path to the Earth Engine image files to display on the map
         path_to_vector_data: Path to the vector data file (e.g. GeoJSON) defining the
             boundaries to overlay the image on
-        name: The name of the map
+        names: The names of the layers in the map
         center: Whether to center the map on the vector data
 
     Returns:
         dict: A dictionary containing the path to the saved HTML map file under the key
             'path_to_map'
     """
-    logger.info(f"Building map with {path_to_image} and {path_to_vector_data}")
+    logger.info(f"Building map with {path_to_images} and {path_to_vector_data}")
     vector_data = load_vector_data(path_to_vector_data)
-    image = load_vector_data(path_to_image)
+    images = [load_vector_data(path) for path in path_to_images]
+    if len(names) != len(path_to_images):
+        raise ValueError("The number of names must be equal to the number of images")
+
     return {
         "path_to_map": image_to_html(
-            image=image, vector_data=vector_data, name=name, center=True
+            images=images, vector_data=vector_data, names=names, center=True
         ),
         "input_arguments": {
-            "path_to_image": path_to_image,
+            "path_to_images": path_to_images,
             "path_to_vector_data": path_to_vector_data,
-            "name": name,
+            "names": names,
         },
     }
 

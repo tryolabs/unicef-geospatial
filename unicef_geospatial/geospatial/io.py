@@ -11,17 +11,18 @@ logger = get_logger(__name__)
 
 
 def image_to_html(
-    image: Image,
+    images: list[Image],
     vector_data: FeatureCollection,
-    name: str = "",
+    names: list[str] = [],
     vis_params: dict = {},
     center: bool = True,
 ) -> str:
     """Converts an Earth Engine image to an HTML string."""
     logger.info("Converting image to HTML")
     demographic_map = geemap.Map()
-    clipped_image = image.clip(vector_data)
-    demographic_map.add_layer(clipped_image, vis_params, name)
+    for i, image in enumerate(images):
+        clipped_image = image.clip(vector_data)
+        demographic_map.add_layer(clipped_image, vis_params, names[i])
     if center:
         demographic_map.center_object(vector_data, max_error=0.1)
     demographic_map.to_html(PATH_TO_MAP)

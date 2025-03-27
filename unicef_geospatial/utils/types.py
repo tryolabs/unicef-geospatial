@@ -30,7 +30,6 @@ class DatasetMetadata(BaseModel):
     description: str
     mosaic: bool = False
     threshold: float | None = None
-    greater_than: bool | None = None
     input_arguments: dict[str, Any] = {}
 
 
