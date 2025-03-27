@@ -26,10 +26,10 @@ ee.Initialize(auth)
 
 # %%
 all_hazards = [
-    {
-        "id": "projects/unicef-ccri/assets/river_flood_r100",
-        "threshold": 0.01,
-    },
+    # {
+    #     "id": "projects/unicef-ccri/assets/river_flood_r100",
+    #     "threshold": 0.01,
+    # },
     # {
     #     "id": "projects/unicef-ccri/assets/coastal_flood_r100",
     #     "threshold": 0,
@@ -74,10 +74,10 @@ all_hazards = [
     #     "id": "projects/unicef-ccri/assets/FIRMS_MODIS_Mean_Annual_FRP_2001_2023",
     #     "threshold": 50,
     # },
-    # {
-    #     "id": "projects/unicef-ccri/assets/FIRMS_MODIS_Mean_Annual_Count_2001_2023",
-    #     "threshold": 10,
-    # },
+    {
+        "id": "projects/unicef-ccri/assets/FIRMS_MODIS_Mean_Annual_Count_2001_2023",
+        "threshold": 10,
+    },
     # {
     #     "id": "projects/unicef-ccri/assets/sand_dust_storm_annual",
     #     "threshold": 0,
@@ -157,7 +157,7 @@ def get_threshold(aois: ee.FeatureCollection, hazard_layer: ee.Image):
 
 
 # %%
-country = "CHN"
+country = "COL"
 for hazard in all_hazards:
     id = hazard["id"]
     threshold = hazard["threshold"]
@@ -241,4 +241,6 @@ Map.addLayer(exposed_population, {}, "Exposed Population")
 Map.addLayer(childpop, {}, "Child Population")
 Map.addLayer(aois, {}, "AOIs")
 Map
+# %%
+Map.to_html()
 # %%

@@ -50,4 +50,12 @@ DATASETS_METADATA = {
         threshold=50,
         greater_than=True,
     ),
+    ALL_DATASETS.FIRE: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/FIRMS_MODIS_Mean_Annual_Count_2001_2023",
+        path_to_image=f"{BASE_PATH}/fire_image.json",
+        description="Number of fire events in the last 24 years.",
+        mosaic=False,
+        threshold=10,
+        greater_than=True,
+    ),
 }
