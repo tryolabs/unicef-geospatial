@@ -66,4 +66,12 @@ DATASETS_METADATA = {
         threshold=0,
         greater_than=True,
     ),
+    ALL_DATASETS.AIR_POLLUTION: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/pm25_2013_2022_avg",
+        path_to_image=f"{BASE_PATH}/air_pollution_image.json",
+        description="Average annual PM2.5 concentration in the last 10 years.",
+        mosaic=False,
+        threshold=5,
+        greater_than=True,
+    ),
 }
