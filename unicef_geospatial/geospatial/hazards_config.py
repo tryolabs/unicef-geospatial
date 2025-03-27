@@ -58,4 +58,12 @@ DATASETS_METADATA = {
         threshold=10,
         greater_than=True,
     ),
+    ALL_DATASETS.SAND_DUST_STORM: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/sand_dust_storm_annual",
+        path_to_image=f"{BASE_PATH}/sand_dust_storm_image.json",
+        description="Number of sand dust storms in the last 24 years.",
+        mosaic=False,
+        threshold=0,
+        greater_than=True,
+    ),
 }

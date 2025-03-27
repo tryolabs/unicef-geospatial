@@ -42,6 +42,7 @@ class ALL_DATASETS(str, Enum):
     TROPICAL_STORM = "tropical_storm"
     AGRICULTURAL_DROUGHT = "agricultural_drought"
     FIRE = "fire"
+    SAND_DUST_STORM = "sand_dust_storm"
 
 
 def cast_dataset_to_enum(dataset: str) -> ALL_DATASETS:
