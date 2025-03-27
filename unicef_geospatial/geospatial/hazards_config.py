@@ -1,9 +1,9 @@
 from utils.constants import BASE_ASSETS_PATH, BASE_PATH
-from utils.types import DatasetMetadata
+from utils.types import ALL_DATASETS, DatasetMetadata
 
 # Earth Engine assets
 DATASETS_METADATA = {
-    "river_flood": DatasetMetadata(
+    ALL_DATASETS.RIVER_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/river_flood_r100",
         path_to_image=f"{BASE_PATH}/river_flood_image.json",
         threshold=0.01,
@@ -11,7 +11,7 @@ DATASETS_METADATA = {
         description="Zones of river flood. The value indicates the depth in meters.",
         mosaic=True,
     ),
-    "coastal_flood": DatasetMetadata(
+    ALL_DATASETS.COASTAL_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/coastal_flood_r100",
         path_to_image=f"{BASE_PATH}/coastal_flood_image.json",
         threshold=0,
@@ -19,7 +19,7 @@ DATASETS_METADATA = {
         description="Zones of coastal flood. The value is 1 if the zone is flooded, 0 otherwise.",
         mosaic=True,
     ),
-    "pluvial_flood": DatasetMetadata(
+    ALL_DATASETS.PLUVIAL_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/JBA_FLSW_resampled",
         path_to_image=f"{BASE_PATH}/pluvial_flood_image.json",
         threshold=0,
@@ -27,7 +27,7 @@ DATASETS_METADATA = {
         description="Zones of pluvial flood. The value indicates the depth in meters.",
         mosaic=False,
     ),
-    "tropical_storm": DatasetMetadata(
+    ALL_DATASETS.TROPICAL_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/storm_giri_rp100",
         path_to_image=f"{BASE_PATH}/storm_image.json",
         threshold=17.5,
@@ -35,7 +35,7 @@ DATASETS_METADATA = {
         description="Zones affected by tropical storms.",
         mosaic=True,
     ),
-    "children_population": DatasetMetadata(
+    ALL_DATASETS.CHILDREN_POPULATION: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/childpop_constrained",
         path_to_image=f"{BASE_PATH}/children_population_image.json",
         description="Population of children between 0-18 years old.",

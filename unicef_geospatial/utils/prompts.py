@@ -43,7 +43,7 @@ For quantitative analysis of GEE data:
 5. This will convert pixel values to a single statistic for the region
 
 In the GEE you have access to the following datasets:
-- {ALL_DATASETS}
+- {", ".join([dataset.value for dataset in ALL_DATASETS])}
 As well as heatwave data.
 
 For each query:

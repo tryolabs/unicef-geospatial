@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel
@@ -33,13 +34,17 @@ class DatasetMetadata(BaseModel):
     input_arguments: dict[str, Any] = {}
 
 
-ALL_DATASETS = Literal[
-    "river_flood",
-    "coastal_flood",
-    "pluvial_flood",
-    "children_population",
-    "tropical_storm",
-]
+class ALL_DATASETS(str, Enum):
+    RIVER_FLOOD = "river_flood"
+    COASTAL_FLOOD = "coastal_flood"
+    PLUVIAL_FLOOD = "pluvial_flood"
+    CHILDREN_POPULATION = "children_population"
+    TROPICAL_STORM = "tropical_storm"
+
+
+def cast_dataset_to_enum(dataset: str) -> ALL_DATASETS:
+    return ALL_DATASETS(dataset)
+
 
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
