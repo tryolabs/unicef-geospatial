@@ -38,6 +38,10 @@ def get_dataset_image_and_metadata(
         image = ImageCollection(metadata.asset_id).mosaic()
     else:
         image = Image(metadata.asset_id)
+        if dataset == ALL_DATASETS.AGRICULTURAL_DROUGHT:
+            # TODO: maybe this image should be preprocessed
+            image = image.updateMask(image.lte(100))
+
     save_vector_data(metadata.path_to_image, image)
     return {
         "path_to_image": metadata.path_to_image,

@@ -41,4 +41,13 @@ DATASETS_METADATA = {
         description="Population of children between 0-18 years old.",
         mosaic=True,
     ),
+    ALL_DATASETS.AGRICULTURAL_DROUGHT: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/ASI_cropland_avg_2014_2023",
+        path_to_image=f"{BASE_PATH}/agricultural_drought_image.json",
+        description="Average annual temperature of cropland in the last 10 years.\
+        Note: The image must be masked where the values is less than 100.",
+        mosaic=False,
+        threshold=50,
+        greater_than=True,
+    ),
 }
