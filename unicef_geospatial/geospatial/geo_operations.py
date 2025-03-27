@@ -28,7 +28,6 @@ def get_dataset_image_and_metadata(
             - path_to_image: Path to where the image is saved
             - description: Description of the dataset
             - threshold: Threshold value for filtering (if applicable)
-            - greater_than: Whether to filter values greater than threshold (if applicable)
             - input_arguments: Input arguments for the tool
 
     """
@@ -47,7 +46,6 @@ def get_dataset_image_and_metadata(
         "path_to_image": metadata.path_to_image,
         "description": metadata.description,
         "threshold": metadata.threshold,
-        "greater_than": metadata.greater_than,
         "input_arguments": {
             "dataset": dataset,
         },

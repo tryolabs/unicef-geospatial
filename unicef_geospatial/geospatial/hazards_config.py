@@ -7,7 +7,6 @@ DATASETS_METADATA = {
         asset_id=f"{BASE_ASSETS_PATH}/river_flood_r100",
         path_to_image=f"{BASE_PATH}/river_flood_image.json",
         threshold=0.01,
-        greater_than=True,
         description="Zones of river flood. The value indicates the depth in meters.",
         mosaic=True,
     ),
@@ -15,7 +14,6 @@ DATASETS_METADATA = {
         asset_id=f"{BASE_ASSETS_PATH}/coastal_flood_r100",
         path_to_image=f"{BASE_PATH}/coastal_flood_image.json",
         threshold=0,
-        greater_than=True,
         description="Zones of coastal flood. The value is 1 if the zone is flooded, 0 otherwise.",
         mosaic=True,
     ),
@@ -23,7 +21,6 @@ DATASETS_METADATA = {
         asset_id=f"{BASE_ASSETS_PATH}/JBA_FLSW_resampled",
         path_to_image=f"{BASE_PATH}/pluvial_flood_image.json",
         threshold=0,
-        greater_than=True,
         description="Zones of pluvial flood. The value indicates the depth in meters.",
         mosaic=False,
     ),
@@ -31,7 +28,6 @@ DATASETS_METADATA = {
         asset_id=f"{BASE_ASSETS_PATH}/storm_giri_rp100",
         path_to_image=f"{BASE_PATH}/storm_image.json",
         threshold=17.5,
-        greater_than=True,
         description="Zones affected by tropical storms.",
         mosaic=True,
     ),
@@ -48,7 +44,6 @@ DATASETS_METADATA = {
         Note: The image must be masked where the values is less than 100.",
         mosaic=False,
         threshold=50,
-        greater_than=True,
     ),
     ALL_DATASETS.FIRE: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/FIRMS_MODIS_Mean_Annual_Count_2001_2023",
@@ -56,7 +51,6 @@ DATASETS_METADATA = {
         description="Number of fire events in the last 24 years.",
         mosaic=False,
         threshold=10,
-        greater_than=True,
     ),
     ALL_DATASETS.SAND_DUST_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/sand_dust_storm_annual",
@@ -64,7 +58,6 @@ DATASETS_METADATA = {
         description="Number of sand dust storms in the last 24 years.",
         mosaic=False,
         threshold=0,
-        greater_than=True,
     ),
     ALL_DATASETS.AIR_POLLUTION: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/pm25_2013_2022_avg",
@@ -72,7 +65,6 @@ DATASETS_METADATA = {
         description="Average annual PM2.5 concentration in the last 10 years.",
         mosaic=False,
         threshold=5,
-        greater_than=True,
     ),
     ALL_DATASETS.PLASMODIUM_VIVAX: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/Pv_average_2013_2022",
@@ -80,7 +72,6 @@ DATASETS_METADATA = {
         description="Incidente rate of malaria due to Plasmodium vivax.",
         mosaic=False,
         threshold=0.001,
-        greater_than=True,
     ),
     ALL_DATASETS.PLASMODIUM_FALCIPARUM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/Pf_average_2013_2022",
@@ -88,6 +79,5 @@ DATASETS_METADATA = {
         description="Incidente rate of malaria due to Plasmodium falciparum.",
         mosaic=False,
         threshold=0.001,
-        greater_than=True,
     ),
 }
