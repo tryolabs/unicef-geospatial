@@ -74,4 +74,20 @@ DATASETS_METADATA = {
         threshold=5,
         greater_than=True,
     ),
+    ALL_DATASETS.PLASMODIUM_VIVAX: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/Pv_average_2013_2022",
+        path_to_image=f"{BASE_PATH}/plasmodium_vivax_image.json",
+        description="Incidente rate of malaria due to Plasmodium vivax.",
+        mosaic=False,
+        threshold=0.001,
+        greater_than=True,
+    ),
+    ALL_DATASETS.PLASMODIUM_FALCIPARUM: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/Pf_average_2013_2022",
+        path_to_image=f"{BASE_PATH}/plasmodium_falciparum_image.json",
+        description="Incidente rate of malaria due to Plasmodium falciparum.",
+        mosaic=False,
+        threshold=0.001,
+        greater_than=True,
+    ),
 }
