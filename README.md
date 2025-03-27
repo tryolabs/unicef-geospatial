@@ -101,7 +101,7 @@ The logs are stored in langfuse cloud. They are accesible [here](https://cloud.l
 To run the benchmark, after installing the dependencies, run the following command:
 
 ```bash
-uv run python tests/benchmark.py
+python -m pytest tests/benchmark.py -v --asyncio-mode=auto
 ```
 
 This will log the results in langfuse cloud.
