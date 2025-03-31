@@ -131,5 +131,6 @@ async def test_agent_question(question, expected, variation):
 
     assert is_correct, (
         f"Answer doesn't match expected value for question: {question}.\n"
-        f"Expected: {expected}\nGot: {answer_content}"
+        f"Expected: {expected}\nGot: {numerical_value}"
+        f"Full answer: {answer_content}"
     )

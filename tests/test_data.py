@@ -13,12 +13,12 @@ class Answer(BaseModel):
     value: int | None
 
 
-def extract_number_from_response(q: str, a: str) -> int | None:
+def extract_number_from_response(question: str, answer: str) -> int | None:
     """Extract numerical answer from response using an LLM.
 
     Args:
-        q: The question
-        a: The answer text
+        question: The question
+        answer: The answer text
 
     Returns:
         The extracted number or None if no number is found
@@ -46,8 +46,8 @@ def extract_number_from_response(q: str, a: str) -> int | None:
 
     result = chain.invoke(
         {
-            "question": q,
-            "answer": a,
+            "question": question,
+            "answer": answer,
             "format_instructions": parser.get_format_instructions(),
         }
     )
