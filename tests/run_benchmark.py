@@ -9,6 +9,8 @@ from langchain_core.messages import AIMessage
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath("unicef_geospatial"))
 
+from datetime import datetime
+
 from agent.agent import create_agent, invoke_agent
 from langfuse import Langfuse
 from logging_config import get_logger
@@ -29,11 +31,20 @@ session_id = str(uuid.uuid4())
 
 initialize_earth_engine("ee_auth.json")
 
-RESULTS_FILE = "results.tsv"
+RESULTS_PATH = "tests/results"
+
+if not os.path.exists(RESULTS_PATH):
+    os.makedirs(RESULTS_PATH)
+
+RESULTS_FILE = f"{RESULTS_PATH}/results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
 if os.path.exists(RESULTS_FILE):
     os.remove(RESULTS_FILE)
 
+with open(RESULTS_FILE, "w") as fh:
+    fh.write("question\tvariation\texpected\tvalue\tanswer\n")
+
 from tests.test_data import benchmark_list, extract_number_from_response
+
 # all_questions = {}
 # for question, answer in simple_questions.items():
 #     all_questions[question] = {"answer": answer, "category": "simple"}
@@ -43,7 +54,9 @@ from tests.test_data import benchmark_list, extract_number_from_response
 #     all_questions[question] = {"answer": answer, "category": "hard"}
 
 
-def check_answer(question: str, answer: str, expected_value: int) -> tuple[bool, int | None]:
+def check_answer(
+    question: str, answer: str, expected_value: int
+) -> tuple[bool, int | None]:
     """Check if the answer is correct."""
     # expected_value = all_questions[question]["answer"]
 
@@ -70,17 +83,15 @@ def check_answer(question: str, answer: str, expected_value: int) -> tuple[bool,
     return False, None
 
 
-@pytest.mark.parametrize("question,expected,reference", benchmark_list)
+@pytest.mark.parametrize("question,expected,variation", benchmark_list)
 @pytest.mark.asyncio
-async def test_agent_question(question, expected, reference):
+async def test_agent_question(question, expected, variation):
     """Test agent with a specific question."""
     trace_id = str(uuid.uuid4())
     message = Message(role="user", content=question, trace_id=trace_id)
     formatted_message = format_messages([message])
 
-
     agent = create_agent(session_id=session_id, temperature=0.0, trace_id=trace_id)
-
 
     response = invoke_agent(
         agent,
@@ -90,8 +101,6 @@ async def test_agent_question(question, expected, reference):
     )
 
     logger.info(f"Waiting for trace: {trace_id}")
-
-    print(response)
 
     assert response is not None, f"No response found for question: {question}"
 
@@ -110,8 +119,8 @@ async def test_agent_question(question, expected, reference):
     # is_correct, numerical_value = check_answer(question, answer_content, expected)
 
     with open(RESULTS_FILE, "a+") as fh:
-        answer = answer_content.replace('\n', '||')
-        fh.write(f"{question}\t{reference}\t{expected}\t{numerical_value}\t{answer}\n")
+        answer = answer_content.replace("\n", "||")
+        fh.write(f"{question}\t{variation}\t{expected}\t{numerical_value}\t{answer}\n")
 
     langfuse.score(
         trace_id=trace_id,
