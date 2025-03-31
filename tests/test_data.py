@@ -90,6 +90,24 @@ benchmark_questions = []
 
 benchmark_questions.append(
     BechmarkQuestion(
+        question="What's the percentage of births without a birth weight registered in Nigeria?",
+        answer=77,
+        variations=[
+            "percentage of births without a birth weight registered in Nigeria",
+        ],
+    )
+)
+benchmark_questions.append(
+    BechmarkQuestion(
+        question="What was the percentage of children vaccinated for tuberculosis in Ethiopia in 2020?",
+        answer=70,
+        variations=[
+            "percentage of children vaccinated for tuberculosis in Ethiopia in 2020",
+        ],
+    )
+)
+benchmark_questions.append(
+    BechmarkQuestion(
         question="How many children were exposed to costal floods in Colombia",
         answer=22714,
         variations=[

@@ -41,7 +41,7 @@ if os.path.exists(RESULTS_FILE):
     os.remove(RESULTS_FILE)
 
 with open(RESULTS_FILE, "w") as fh:
-    fh.write("question\tvariation\texpected\tvalue\tanswer\n")
+    fh.write("correct\tquestion\tvariation\texpected\tvalue\tanswer\n")
 
 from tests.test_data import benchmark_list, extract_number_from_response
 
@@ -120,7 +120,9 @@ async def test_agent_question(question, expected, variation):
 
     with open(RESULTS_FILE, "a+") as fh:
         answer = answer_content.replace("\n", "||")
-        fh.write(f"{question}\t{variation}\t{expected}\t{numerical_value}\t{answer}\n")
+        fh.write(
+            f"{is_correct}\t{question}\t{variation}\t{expected}\t{numerical_value}\t{answer}\n"
+        )
 
     langfuse.score(
         trace_id=trace_id,
@@ -129,8 +131,8 @@ async def test_agent_question(question, expected, variation):
         comment=f"Expected: {expected}, Got: {answer_content}",
     )
 
-    assert is_correct, (
-        f"Answer doesn't match expected value for question: {question}.\n"
-        f"Expected: {expected}\nGot: {numerical_value}"
-        f"Full answer: {answer_content}"
-    )
+    assert (
+        is_correct
+    ), f"Answer doesn't match expected value for question: {question}\n\
+        Expected: {expected}\nGot: {numerical_value}\n\
+        Full answer: {answer_content}"
