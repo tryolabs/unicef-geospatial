@@ -1,10 +1,11 @@
 import os
-from typing import Iterator
+from typing import AsyncGenerator
 
 import litellm
 from langchain.chat_models.base import BaseChatModel
 from langchain.tools import BaseTool
 from langchain_community.chat_models import ChatLiteLLM
+from langchain_core.messages import AIMessageChunk
 from langfuse.decorators import langfuse_context, observe
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
@@ -66,11 +67,11 @@ def create_agent(
 
 
 @observe
-def run_agent(
+async def run_agent(
     agent: CompiledGraph,
     inputs: dict,
     tags: list[str] = [],
-) -> Iterator[tuple[dict, str]]:
+) -> AsyncGenerator[tuple[dict, str], None]:
     """Run a LangGraph agent with the given inputs and stream the results.
 
     Args:
@@ -86,17 +87,20 @@ def run_agent(
         yield chunk
 
 
-@observe
-def invoke_agent(agent: CompiledGraph, inputs: dict, tags: list[str] = []) -> dict:
-    """Invoke a LangGraph agent and return its response.
-
-    Args:
-        agent: The compiled LangGraph agent to invoke
-        inputs: Dictionary of inputs to provide to the agent
-        tags: List of tags to associate with the Langfuse trace
-
-    Returns:
-        The agent's complete response
+async def extract_response_from_chain_of_thought(
+    messages: dict, full_response: str, session_id: str, trace_id: str
+) -> AsyncGenerator[AIMessageChunk, None]:
+    llm = get_llm(0.0, session_id, trace_id)
+    prompt = """You are a helpful assistant.
+    You are given the response from an agent in several steps of the thinking process and
+    a conversation history.
+    Your job is to generate a final response to the conversation history based on the
+    response from the agent. It must be concise and answer the question.
+    Here is the conversation history:
+    {conversation_history}
+    Here is the response from the agent:
+    {response}
     """
-    langfuse_context.update_current_trace(tags=tags)
-    return agent.invoke(inputs)
+    prompt = prompt.format(conversation_history=messages, response=full_response)
+    for chunk in llm.stream(prompt):
+        yield chunk

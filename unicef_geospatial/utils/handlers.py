@@ -2,7 +2,7 @@ import json
 import os
 from typing import AsyncGenerator
 
-from agent.agent import create_agent, get_llm, run_agent
+from agent.agent import create_agent, extract_response_from_chain_of_thought, run_agent
 from langchain_core.messages import AIMessageChunk, ToolMessage
 from logging_config import get_logger
 from utils.constants import PATH_TO_MAP
@@ -41,7 +41,9 @@ async def respond(messages, trace_id, session_id) -> AsyncGenerator[str, None]:
     temperature = float(os.getenv("TEMPERATURE", 0.0))
     agent = create_agent(session_id, thinking_trace_id, temperature)
     full_response = ""
-    for chunk in run_agent(agent, messages, langfuse_observation_id=thinking_trace_id):
+    async for chunk in run_agent(
+        agent, messages, langfuse_observation_id=thinking_trace_id
+    ):
         if isinstance(chunk[0], ToolMessage):
             try:
                 return_chunk = handle_tool_call(chunk[0], thinking_trace_id)
@@ -78,19 +80,10 @@ async def respond(messages, trace_id, session_id) -> AsyncGenerator[str, None]:
     yield "\n"
 
     response_trace_id = f"r_{trace_id}"
-    llm = get_llm(0.0, session_id, response_trace_id)
-    prompt = """You are a helpful assistant.
-    You are given the response from an agent in several steps of the thinking process and
-    a conversation history.
-    Your job is to generate a final response to the conversation history based on the
-    response from the agent. It must be concise and answer the question.
-    Here is the conversation history:
-    {conversation_history}
-    Here is the response from the agent:
-    {response}
-    """
-    prompt = prompt.format(conversation_history=messages, response=full_response)
-    for chunk in llm.stream(prompt):
+
+    async for chunk in extract_response_from_chain_of_thought(
+        messages, full_response, session_id, response_trace_id
+    ):
         yield json.dumps(
             ReturnChunk(
                 response=chunk.content,
