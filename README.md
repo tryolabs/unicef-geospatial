@@ -70,11 +70,11 @@ The `.env` file should be located in the root of the project and contain the fol
 - `LANGFUSE_PROJECT_ID`: The project id for the langfuse cloud.
 - `BACKEND_HOST`: The API host address.
 - `BACKEND_PORT`: The API port number.
-- `RELOAD`: Whether to reload the API on chage.
+- `RELOAD`: Whether to reload the API on chage. Recommended for development environment.
 - `PATH_TO_EE_AUTH`: The path to the earth engine auth file.
 
 For authentication into the google earth engine, you need a service account and download the credentials file.
-The file should be named `ee_auth.json` and placed in the root of the project. It should look like this:
+The file should be named `ee_auth.json` and placed in the. root of the project. It should look like this:
 
 ```json
 {
@@ -92,6 +92,19 @@ The file should be named `ee_auth.json` and placed in the root of the project. I
 }
 ```
 
+The frontend has its own `.env` file inside the `frontend` directory:
+
+```bash
+cd frontend
+cp .env.example .env
+```
+
+The frontend `.env` must include:
+
+- `VITE_BACKEND_URL`: The URL of the backend API
+- `VITE_HOST`: The host address for the frontend server
+- `VITE_PORT`: The port number for the frontend server
+
 ### Accessing the logs
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
@@ -101,10 +114,9 @@ The logs are stored in langfuse cloud. They are accesible [here](https://cloud.l
 To run the benchmark, after installing the dependencies, run the following command:
 
 ```bash
-python -m pytest tests/run_benchmark.py -n 8 -v
+uv run pytest tests/run_benchmark.py
 ```
 
-Make sure to change the value of -n (n_workers) accordingly.
 This will log the results in langfuse cloud and create a local file named [`results.tsv`](results.tsv)
 
 ### Project structure
