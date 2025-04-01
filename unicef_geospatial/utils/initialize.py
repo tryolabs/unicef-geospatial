@@ -13,8 +13,9 @@ from geospatial.geo_operations import (
     build_map,
     filter_image_by_threshold,
     get_dataset_image_and_metadata,
-    intersect_feature_collection,
+    intersect_feature_collections,
     mask_image,
+    merge_feature_collections,
     reduce_image,
 )
 from geospatial.heatwaves import get_heatwave_image
@@ -42,7 +43,8 @@ def get_tools() -> list[Callable]:
         # geospatial operation tools
         filter_image_by_threshold,
         mask_image,
-        intersect_feature_collection,
+        intersect_feature_collections,
+        merge_feature_collections,
         reduce_image,
         build_map,
         # geospatial querying tools

@@ -18,9 +18,9 @@ def image_to_html(
     center: bool = True,
 ) -> str:
     """Converts an Earth Engine image to an HTML string."""
-    logger.info("Converting image to HTML")
     demographic_map = geemap.Map()
     for i, image in enumerate(images):
+        logger.info(f"Adding layer {names[i]}")
         clipped_image = image.clip(vector_data)
         demographic_map.add_layer(clipped_image, vis_params, names[i])
     if center:
