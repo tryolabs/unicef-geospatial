@@ -3,7 +3,6 @@
 BASE_ASSETS_PATH = "projects/unicef-ccri/assets"
 COUNTRY_BOUNDRIES_DATASET = f"{BASE_ASSETS_PATH}/adm0_simple"
 ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
-CHILDREN_DEMOGRAPHIC_DATASET = f"{BASE_ASSETS_PATH}/childpop_constrained"
 HEATWAVE_DATASET = f"{BASE_ASSETS_PATH}/heatwave/average_hwi"
 
 

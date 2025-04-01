@@ -47,10 +47,6 @@ class ALL_DATASETS(str, Enum):
     PLASMODIUM_FALCIPARUM = "plasmodium_falciparum"
 
 
-def cast_dataset_to_enum(dataset: str) -> ALL_DATASETS:
-    return ALL_DATASETS(dataset)
-
-
 METRICS = Literal["frequency", "duration", "severity", "extreme_high_temp"]
 DECADES = Literal["1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"]
 REDUCERS = Literal["mean", "max", "min", "sum", "median", "std"]
