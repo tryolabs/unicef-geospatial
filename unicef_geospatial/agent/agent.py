@@ -96,6 +96,8 @@ async def extract_response_from_chain_of_thought(
     a conversation history.
     Your job is to generate a final response to the conversation history based on the
     response from the agent. It must be concise and answer the question.
+    You can only use the information provided in the response from the agent.
+    Do not add any information that is not provided in the response from the agent.
     Here is the conversation history:
     {conversation_history}
     Here is the response from the agent:

@@ -8,7 +8,7 @@ from geospatial.earth_engine import get_dataset_metadata
 from geospatial.io import image_to_html, load_vector_data, save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
-from utils.constants import PATH_TO_INTERSECTION
+from utils.constants import PATH_TO_INTERSECTION, PATH_TO_UNION
 from utils.types import ALL_DATASETS, REDUCERS
 
 logger = get_logger(__name__)
@@ -30,6 +30,9 @@ def get_dataset_image_and_metadata(
             - threshold: Threshold value for filtering (if applicable)
             - input_arguments: Input arguments for the tool
 
+    Use case:
+        Retrieve a global agricultural drought dataset to analyze drought conditions:
+        get_dataset_image_and_metadata(ALL_DATASETS.AGRICULTURAL_DROUGHT)
     """
     metadata = get_dataset_metadata(dataset)
     logger.info(f"Getting image from {metadata.asset_id}")
@@ -66,6 +69,10 @@ def mask_image(path_to_image: str, path_to_mask: str) -> dict[str, str]:
         dict: A dictionary containing:
             - path_to_image: Path to the saved masked image file
             - input_arguments: The original input arguments used for the operation
+
+    Use case:
+        Apply a land cover mask to a temperature dataset to analyze temperatures only in forested areas:
+        mask_image("temperature_data.json", "forest_mask.json")
     """
     image = load_vector_data(path_to_image)
     mask = load_vector_data(path_to_mask)
@@ -111,6 +118,10 @@ def filter_image_by_threshold(
 
     Raises:
         TypeError: If the loaded data is not an Earth Engine Image object
+
+    Use case:
+        Identify areas with extreme heat by filtering temperature data above 35°C:
+        filter_image_by_threshold("temperature_data.json", 35.0)
     """
     logger.info(f"Filtering image {path_to_image} by threshold: {threshold}")
     image = load_vector_data(path_to_image)
@@ -137,18 +148,32 @@ def filter_image_by_threshold(
 
 
 @tool
-def intersect_feature_collection(
+def intersect_feature_collections(
     paths_to_feature_collections: list[str],
-) -> str:
-    """Intersect a list of feature collections and return the resulting data.
+) -> dict:
+    """Perform a geometric intersection of multiple feature collections.
 
-    It is not possible to intersect images, just vector data.
+    This function loads feature collections from the provided paths and performs
+    a geometric intersection operation, returning features that exist in all collections.
+
+    Note: This operation only works with vector data (feature collections).
+    Images cannot be intersected using this method.
 
     Args:
-        paths_to_feature_collections: List of paths to the feature collections/images to intersect
+        paths_to_feature_collections: List of paths to the feature collections to intersect.
+            Each path should point to a valid Earth Engine FeatureCollection saved as JSON.
 
     Returns:
-        dict: Dictionary containing paths to the intersection result and HTML visualization
+        dict: A dictionary containing:
+            - path_to_vector_data: Path to the saved intersection result
+            - input_arguments: The original input arguments used for the operation
+
+    Raises:
+        ValueError: If no feature collections are provided or if any input is an Image
+
+    Use case:
+        Find areas that are both flood-prone and densely populated by intersecting flood hazard zones with population density data:
+        intersect_feature_collection(["flood_zones.json", "high_population_areas.json"])
     """
     logger.info("Intersecting data: %s", paths_to_feature_collections)
 
@@ -177,6 +202,58 @@ def intersect_feature_collection(
 
 
 @tool
+def merge_feature_collections(
+    paths_to_feature_collections: list[str],
+) -> dict:
+    """Merge multiple feature collections into a single combined collection.
+
+    This function loads feature collections from the provided paths and merges them
+    into a single feature collection containing all features from the input collections.
+
+    Note: This operation only works with vector data (feature collections).
+    Images cannot be merged using this method.
+
+    Args:
+        paths_to_feature_collections: List of paths to the feature collections to merge.
+            Each path should point to a valid Earth Engine FeatureCollection saved as JSON.
+
+    Returns:
+        dict: A dictionary containing:
+            - path_to_vector_data: Path to the saved merged result
+            - input_arguments: The original input arguments used for the operation
+
+    Raises:
+        ValueError: If no feature collections are provided or if any input is an Image
+
+    Use case:
+        Combine different hazard zones into a single dataset for analysis:
+        merge_feature_collections(["flood_zones.json", "drought_zones.json"])
+    """
+    logger.info("Unioning data: %s", paths_to_feature_collections)
+
+    if len(paths_to_feature_collections) == 0:
+        raise ValueError("No feature collections provided")
+
+    union = load_vector_data(paths_to_feature_collections[0])
+    if isinstance(union, Image):
+        raise ValueError("Image cannot be unioned")
+
+    for path in paths_to_feature_collections[1:]:
+        new_data = load_vector_data(path)
+        if isinstance(new_data, Image):
+            raise ValueError("Image cannot be unioned")
+        union = union.merge(new_data)
+
+    save_vector_data(PATH_TO_UNION, union)
+    return {
+        "path_to_vector_data": PATH_TO_UNION,
+        "input_arguments": {
+            "paths_to_feature_collections": paths_to_feature_collections
+        },
+    }
+
+
+@tool
 def reduce_image(
     path_to_image: str,
     path_to_geometry: str,
@@ -193,6 +270,10 @@ def reduce_image(
 
     Returns:
         dict: A dictionary containing the reduced value
+
+    Use case:
+        Calculate the average rainfall within specific administrative boundaries:
+        reduce_image("rainfall_data.json", "admin_boundaries.json", REDUCERS.MEAN)
     """
     logger.info(f"Reducing image with {reducer}")
     image = load_vector_data(path_to_image)
@@ -245,6 +326,11 @@ def build_map(
     Returns:
         dict: A dictionary containing the path to the saved HTML map file under the key
             'path_to_map'
+
+    Use case:
+        Create an interactive map showing drought severity and population density in a region:
+        build_map(["drought_data.json", "population_density.json"], "country_boundaries.json",
+                 ["Drought Severity", "Population Density"])
     """
     logger.info(f"Building map with {path_to_images} and {path_to_vector_data}")
     vector_data = load_vector_data(path_to_vector_data)
