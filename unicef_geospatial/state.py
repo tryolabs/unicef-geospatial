@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from logging_config import get_logger
+from utils.constants import BASE_PATH
 from utils.initialize import initialize_earth_engine
 
 
@@ -19,6 +20,10 @@ class AppState:
 
         # Initialize components
         initialize_earth_engine(os.getenv("PATH_TO_EE_AUTH"))
+
+        if not os.path.exists(BASE_PATH):
+            self.logger.info("Creating directory %s", BASE_PATH)
+            os.makedirs(BASE_PATH)
 
         # TODO: properly setup this
         self.app.add_middleware(
