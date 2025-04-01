@@ -8,9 +8,9 @@ from geospatial.earth_engine import get_dataset_metadata
 from geospatial.io import image_to_html, load_vector_data, save_vector_data
 from langchain.tools import tool
 from logging_config import get_logger
+from utils.constants import PATH_TO_INTERSECTION
 from utils.types import ALL_DATASETS, REDUCERS
 
-INTERSECTION_PATH = "unicef_geospatial/data/intersection.json"
 logger = get_logger(__name__)
 
 
@@ -167,9 +167,9 @@ def intersect_feature_collection(
             raise ValueError("Image cannot be intersected")
         intersection = intersection.map(lambda f: intersect_feature(f, new_data))
 
-    save_vector_data(INTERSECTION_PATH, intersection)
+    save_vector_data(PATH_TO_INTERSECTION, intersection)
     return {
-        "path_to_vector_data": INTERSECTION_PATH,
+        "path_to_vector_data": PATH_TO_INTERSECTION,
         "input_arguments": {
             "paths_to_feature_collections": paths_to_feature_collections
         },
