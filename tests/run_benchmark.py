@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import sys
@@ -14,7 +15,8 @@ from datetime import datetime
 from agent.agent import create_agent, run_agent
 from langfuse import Langfuse
 from logging_config import get_logger
-from utils.handlers import format_messages
+from utils.constants import BASE_PATH
+from utils.handlers import format_messages, respond
 from utils.initialize import initialize_earth_engine
 from utils.types import Message
 
@@ -56,35 +58,6 @@ from tests.test_data import benchmark_list, extract_number_from_response
 #     all_questions[question] = {"answer": answer, "category": "hard"}
 
 
-def check_answer(
-    question: str, answer: str, expected_value: int
-) -> tuple[bool, int | None]:
-    """Check if the answer is correct."""
-    # expected_value = all_questions[question]["answer"]
-
-    if str(expected_value) in answer:
-        return True, expected_value
-
-    numbers = re.findall(r"\d+(?:,\d+)*(?:\.\d+)?", answer)
-
-    if not numbers:
-        return False, None
-
-    for number_str in numbers:
-        try:
-            clean_number = number_str.replace(",", "")
-            value = float(clean_number)
-            expected_float = float(expected_value)
-            tolerance = expected_float * 0.01  # 1% tolerance
-
-            if abs(expected_float - value) <= tolerance:
-                return True, value
-        except (ValueError, TypeError):
-            continue
-
-    return False, None
-
-
 @pytest.mark.parametrize("question,expected,variation", benchmark_list)
 @pytest.mark.asyncio
 async def test_agent_question(question, expected, variation):
@@ -92,30 +65,16 @@ async def test_agent_question(question, expected, variation):
     trace_id = str(uuid.uuid4())
     message = Message(role="user", content=question, trace_id=trace_id)
     formatted_message = format_messages([message])
-
-    agent = create_agent(session_id=session_id, temperature=0.0, trace_id=trace_id)
-
-    full_response = ""
-    async for chunk in run_agent(
-        agent,
-        formatted_message,
-        tags=["test"],
-        langfuse_observation_id=trace_id,
-    ):
-        if isinstance(chunk[0], AIMessageChunk):
-            full_response += chunk[0].content
-
-    logger.info(f"Waiting for trace: {trace_id}")
-
-    assert full_response is not None, f"No response found for question: {question}"
-
-    response_trace_id = f"r_{trace_id}"
+    temp_dir = os.path.join(BASE_PATH, f"{trace_id}")
 
     final_answer = ""
-    async for chunk in extract_response_from_chain_of_thought(
-        formatted_message, full_response, session_id, response_trace_id
-    ):
-        final_answer += chunk.content
+    async for chunk in respond(formatted_message, trace_id, session_id, temp_dir):
+        try:
+            chunk = json.loads(chunk)
+        except json.JSONDecodeError:
+            continue
+        if chunk.get("trace_id", "").startswith("r_"):
+            final_answer += chunk.get("response", "")
 
     numerical_value = extract_number_from_response(question, final_answer)
     if numerical_value is None:
