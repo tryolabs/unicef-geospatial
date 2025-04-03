@@ -1,9 +1,11 @@
 import os
+from functools import partial
+from pathlib import Path
 from typing import AsyncGenerator
 
 import litellm
 from langchain.chat_models.base import BaseChatModel
-from langchain.tools import BaseTool
+from langchain.tools import BaseTool, StructuredTool
 from langchain_community.chat_models import ChatLiteLLM
 from langchain_core.messages import AIMessageChunk
 from langfuse.decorators import langfuse_context, observe
@@ -43,8 +45,9 @@ def get_llm(temperature: float, session_id: str, trace_id: str) -> BaseChatModel
 def create_agent(
     session_id: str,
     trace_id: str,
+    temp_dir: str = "",
     temperature: float = 0.0,
-    tools: list[BaseTool] = get_tools(),
+    tools: list[BaseTool] | None = None,
     system_prompt: str = system_prompt,
 ) -> CompiledGraph:
     """Create a LangGraph ReAct agent with the given LLM, tools and system prompt.
@@ -53,12 +56,16 @@ def create_agent(
         session_id: The session ID to use for the agent
         trace_id: The trace ID for tracking in Langfuse
         temperature: The temperature to use for the agent
+        temp_dir: str ="" to temporary directory for storing files
         tools: List of tools available to the agent
         system_prompt: System prompt to provide context to the agent
 
     Returns:
         A compiled LangGraph agent ready to be invoked
     """
+    if tools is None:
+        tools = get_tools(temp_dir)
+
     return create_react_agent(
         tools=tools,
         model=get_llm(temperature, session_id, trace_id),

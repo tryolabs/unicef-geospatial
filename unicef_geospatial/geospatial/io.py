@@ -1,11 +1,12 @@
 import json
+import os
 
 import geemap.foliumap as geemap
 from ee.deserializer import fromJSON
 from ee.featurecollection import FeatureCollection
 from ee.image import Image
 from logging_config import get_logger
-from utils.constants import PATH_TO_MAP
+from utils.constants import MAP_FILENAME
 
 logger = get_logger(__name__)
 
@@ -13,6 +14,7 @@ logger = get_logger(__name__)
 def image_to_html(
     images: list[Image],
     vector_data: FeatureCollection,
+    temp_dir: str = "",
     names: list[str] = [],
     vis_params: dict = {},
     center: bool = True,
@@ -25,11 +27,11 @@ def image_to_html(
         demographic_map.add_layer(clipped_image, vis_params, names[i])
     if center:
         demographic_map.center_object(vector_data, max_error=0.1)
-    demographic_map.to_html(PATH_TO_MAP)
-    return PATH_TO_MAP
+    demographic_map.to_html(os.path.join(temp_dir, MAP_FILENAME))
+    return MAP_FILENAME
 
 
-def save_vector_data(path: str, vector_data: FeatureCollection | Image) -> None:
+def save_ee_object(path: str, vector_data: FeatureCollection | Image) -> None:
     """Save a vector data to a file."""
     logger = get_logger(__name__)
     logger.info("Saving vector data to %s", path)
@@ -39,18 +41,18 @@ def save_vector_data(path: str, vector_data: FeatureCollection | Image) -> None:
         json.dump(serialized_vector_data, f)
 
 
-def load_vector_data(path_to_vector_data: str) -> FeatureCollection | Image:
+def load_vector_data(feature_collection_filename: str) -> FeatureCollection | Image:
     """Load vector data from a JSON file and convert to Earth Engine FeatureCollection or Image.
 
     Args:
-        path_to_vector_data: Path to the JSON file containing the vector data
+        feature_collection_filename: Path to the JSON file containing the vector data
 
     Returns:
         Either an Earth Engine FeatureCollection or Image object
     """
     try:
-        with open(path_to_vector_data, "r") as f:
-            logger.info(f"Going to load vector data from {path_to_vector_data}")
+        logger.info(f"Going to load vector data from {feature_collection_filename}")
+        with open(feature_collection_filename, "r") as f:
             vector_data = eval(f.read())
             vector_data = fromJSON(vector_data)
         # Get the info without converting to Python dict

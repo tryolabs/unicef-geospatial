@@ -1,8 +1,11 @@
+import os
+from pathlib import Path
+
 import ee
-from geospatial.geo_operations import save_vector_data
+from geospatial.geo_operations import save_ee_object
 from langchain.tools import tool
 from logging_config import get_logger
-from utils.constants import HEATWAVE_DATASET, PATH_TO_HEATWAVE
+from utils.constants import HEATWAVE_DATASET, HEATWAVE_FILENAME
 from utils.types import DECADES, METRICS
 
 logger = get_logger(__name__)
@@ -12,6 +15,7 @@ logger = get_logger(__name__)
 def get_heatwave_image(
     metric: METRICS,
     decade: DECADES,
+    temp_dir: str = "",
 ) -> dict:
     """Get the value of a heatwave metric for a specific zone and decade.
 
@@ -39,14 +43,14 @@ def get_heatwave_image(
     heatwave_tiff = image.select(band)
 
     try:
-        save_vector_data(PATH_TO_HEATWAVE, heatwave_tiff)
+        save_ee_object(os.path.join(temp_dir, HEATWAVE_FILENAME), heatwave_tiff)
     except Exception as e:
         logger.error(f"Error saving heatwave image: {e}")
         pass
 
     logger.info("Returning image")
     return {
-        "path_to_image": PATH_TO_HEATWAVE,
+        "image_filename": HEATWAVE_FILENAME,
         "input_arguments": {"metric": metric, "decade": decade},
     }
 

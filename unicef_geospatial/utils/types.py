@@ -25,7 +25,7 @@ class Chat(BaseModel):
 
 
 class DatasetMetadata(BaseModel):
-    path_to_image: str
+    image_filename: str
     asset_id: str
     description: str
     mosaic: bool = False

@@ -1,13 +1,16 @@
+import os
+from pathlib import Path
+
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
-from geospatial.io import save_vector_data
+from geospatial.io import save_ee_object
 from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
     COUNTRY_BOUNDRIES_DATASET,
-    PATH_TO_VECTOR_DATA,
+    feature_collection_filename,
 )
 from utils.types import AREA_TYPES
 
@@ -15,7 +18,9 @@ logger = get_logger(__name__)
 
 
 @tool
-def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
+def get_zone_of_area(
+    area_name: str, area_type: AREA_TYPES, temp_dir: str = ""
+) -> dict[str, str]:
     """Get the zone boundary for a specified area and save it as a vector file.
 
     Retrieves the boundary geometry for either a country or admin level 1 area from
@@ -47,10 +52,10 @@ def get_zone_of_area(area_name: str, area_type: AREA_TYPES) -> dict[str, str]:
         admin_level_1_boundries = FeatureCollection(ADMIN_LEVEL_1_BOUNDRIES_DATASET)
         area_boundry = admin_level_1_boundries.filter(Filter.eq("shapeName", area_name))
 
-    save_vector_data(PATH_TO_VECTOR_DATA, area_boundry)
+    save_ee_object(os.path.join(temp_dir, feature_collection_filename), area_boundry)
 
     return {
-        "value": PATH_TO_VECTOR_DATA,
+        "value": feature_collection_filename,
         "input_arguments": {"area_name": area_name, "area_type": area_type},
     }
 

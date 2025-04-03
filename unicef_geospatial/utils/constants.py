@@ -13,8 +13,8 @@ EARTH_GEOMETRY_CRS = "EPSG:4326"
 
 # Paths
 BASE_PATH = "unicef_geospatial/data"
-PATH_TO_MAP = f"{BASE_PATH}/map_data.html"
-PATH_TO_HEATWAVE = f"{BASE_PATH}/heatwave_image.json"
-PATH_TO_VECTOR_DATA = f"{BASE_PATH}/map_zones_feature_collection.json"
-PATH_TO_INTERSECTION = f"{BASE_PATH}/intersection.json"
-PATH_TO_UNION = f"{BASE_PATH}/union.json"
+MAP_FILENAME = "map_data.html"
+HEATWAVE_FILENAME = "heatwave_image.json"
+feature_collection_filename = "map_zones_feature_collection.json"
+INTERSECTION_FILENAME = "intersection.json"
+UNION_FILENAME = "union.json"

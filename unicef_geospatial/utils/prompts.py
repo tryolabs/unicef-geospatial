@@ -67,6 +67,7 @@ Everything between <Important Instructions> and </Important Instructions> is ver
 
    - Always use the appropriate threshold values when analyzing hazard data
    - Remember the difference between feature collections (vector) and images (raster)
+   - When using functions, make sure to check if it expects images or feature collections and be sure to provide the correct type of data
    - Use reduce_image with appropriate parameters for quantitative analysis
    - Complete every analysis with a visualization using build_map. This is very important.
    - Respond in the user's language

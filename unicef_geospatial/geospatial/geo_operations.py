@@ -1,3 +1,5 @@
+import os
+
 import ee
 from ee.errormargin import ErrorMargin
 from ee.feature import Feature
@@ -5,10 +7,10 @@ from ee.image import Image
 from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
 from geospatial.earth_engine import get_dataset_metadata
-from geospatial.io import image_to_html, load_vector_data, save_vector_data
+from geospatial.io import image_to_html, load_vector_data, save_ee_object
 from langchain.tools import tool
 from logging_config import get_logger
-from utils.constants import PATH_TO_INTERSECTION, PATH_TO_UNION
+from utils.constants import INTERSECTION_FILENAME, UNION_FILENAME
 from utils.types import ALL_DATASETS, REDUCERS
 
 logger = get_logger(__name__)
@@ -17,6 +19,7 @@ logger = get_logger(__name__)
 @tool
 def get_dataset_image_and_metadata(
     dataset: ALL_DATASETS,
+    temp_dir: str = "",
 ) -> dict[str, str]:
     """Get an image from Earth Engine and save it as a vector data.
 
@@ -25,7 +28,7 @@ def get_dataset_image_and_metadata(
 
     Returns:
         A dictionary containing the metadata for the dataset:
-            - path_to_image: Path to where the image is saved
+            - image_filename: Path to where the image is saved
             - description: Description of the dataset
             - threshold: Threshold value for filtering (if applicable)
             - input_arguments: Input arguments for the tool
@@ -33,6 +36,9 @@ def get_dataset_image_and_metadata(
     Use case:
         Retrieve a global agricultural drought dataset to analyze drought conditions:
         get_dataset_image_and_metadata(ALL_DATASETS.AGRICULTURAL_DROUGHT)
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
     metadata = get_dataset_metadata(dataset)
     logger.info(f"Getting image from {metadata.asset_id}")
@@ -44,9 +50,9 @@ def get_dataset_image_and_metadata(
             # TODO: maybe this image should be preprocessed
             image = image.updateMask(image.lte(100))
 
-    save_vector_data(metadata.path_to_image, image)
+    save_ee_object(os.path.join(temp_dir, metadata.image_filename), image)
     return {
-        "path_to_image": metadata.path_to_image,
+        "image_filename": metadata.image_filename,
         "description": metadata.description,
         "threshold": metadata.threshold,
         "input_arguments": {
@@ -56,26 +62,34 @@ def get_dataset_image_and_metadata(
 
 
 @tool
-def mask_image(path_to_image: str, path_to_mask: str) -> dict[str, str]:
+def mask_image(
+    image_filename: str, mask_image_filename: str, temp_dir: str = ""
+) -> dict[str, str]:
     """Mask an Earth Engine image based on a mask.
 
     A mask is a binary image that is used to mask the image.
 
+    This operation can only be used with images.
+
     Args:
-        path_to_image: Path to the JSON file containing the Earth Engine image
-        path_to_mask: Path to the JSON file containing the Earth Engine mask
+        image_filename: Path to the JSON file containing the Earth Engine image
+        mask_image_filename: Path to the JSON file containing the Earth Engine mask.
+                The mask should be a binary image.
 
     Returns:
         dict: A dictionary containing:
-            - path_to_image: Path to the saved masked image file
+            - image_filename: Path to the saved masked image file
             - input_arguments: The original input arguments used for the operation
 
     Use case:
         Apply a land cover mask to a temperature dataset to analyze temperatures only in forested areas:
         mask_image("temperature_data.json", "forest_mask.json")
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
-    image = load_vector_data(path_to_image)
-    mask = load_vector_data(path_to_mask)
+    image = load_vector_data(os.path.join(temp_dir, image_filename))
+    mask = load_vector_data(os.path.join(temp_dir, mask_image_filename))
     if not isinstance(image, Image):
         raise TypeError(
             f"Expected an Earth Engine Image object, but got {type(image).__name__}. "
@@ -87,20 +101,20 @@ def mask_image(path_to_image: str, path_to_mask: str) -> dict[str, str]:
             f"Please provide a valid mask path."
         )
     masked_image = image.updateMask(mask)
-    path_to_masked_image = path_to_image.replace(".json", "_masked.json")
-    save_vector_data(path_to_masked_image, masked_image)
+    path_to_masked_image = image_filename.replace(".json", "_masked.json")
+    save_ee_object(os.path.join(temp_dir, path_to_masked_image), masked_image)
     return {
-        "path_to_image": path_to_masked_image,
+        "image_filename": path_to_masked_image,
         "input_arguments": {
-            "path_to_image": path_to_image,
-            "path_to_mask": path_to_mask,
+            "image_filename": image_filename,
+            "mask_image_filename": mask_image_filename,
         },
     }
 
 
 @tool
 def filter_image_by_threshold(
-    path_to_image: str, threshold: float
+    image_filename: str, threshold: float, temp_dir: str = ""
 ) -> dict[str, str | dict]:
     """Mask an Earth Engine image based on a threshold value.
 
@@ -108,12 +122,12 @@ def filter_image_by_threshold(
     The result is a binary image where the values are either 0 or 1.
 
     Args:
-        path_to_image: Path to the JSON file containing the Earth Engine image
+        image_filename: Path to the JSON file containing the Earth Engine image
         threshold: Numeric value to use as the threshold for filtering
 
     Returns:
         dict: A dictionary containing:
-            - path_to_image: Path to the saved masked image file
+            - image_filename: Path to the saved masked image file
             - input_arguments: The original input arguments used for the operation
 
     Raises:
@@ -122,9 +136,12 @@ def filter_image_by_threshold(
     Use case:
         Identify areas with extreme heat by filtering temperature data above 35°C:
         filter_image_by_threshold("temperature_data.json", 35.0)
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
-    logger.info(f"Filtering image {path_to_image} by threshold: {threshold}")
-    image = load_vector_data(path_to_image)
+    logger.info(f"Filtering image {image_filename} by threshold: {threshold}")
+    image = load_vector_data(os.path.join(temp_dir, image_filename))
     if not isinstance(image, Image):
         raise TypeError(
             f"Expected an Earth Engine Image object, but got {type(image).__name__}. "
@@ -135,13 +152,13 @@ def filter_image_by_threshold(
     filtered_mask = image.lt(threshold_ee) if threshold < 0 else image.gt(threshold_ee)
     # Apply the mask to the original image
 
-    path_to_filtered_vector_data = path_to_image.replace(".json", "_filtered.json")
+    path_to_filtered_vector_data = image_filename.replace(".json", "_filtered.json")
 
-    save_vector_data(path_to_filtered_vector_data, filtered_mask)
+    save_ee_object(os.path.join(temp_dir, path_to_filtered_vector_data), filtered_mask)
     return {
-        "path_to_image": path_to_filtered_vector_data,
+        "image_filename": path_to_filtered_vector_data,
         "input_arguments": {
-            "path_to_image": path_to_image,
+            "image_filename": image_filename,
             "threshold": threshold,
         },
     }
@@ -149,7 +166,7 @@ def filter_image_by_threshold(
 
 @tool
 def intersect_feature_collections(
-    paths_to_feature_collections: list[str],
+    paths_to_feature_collections: list[str], temp_dir: str = ""
 ) -> dict:
     """Perform a geometric intersection of multiple feature collections.
 
@@ -165,7 +182,7 @@ def intersect_feature_collections(
 
     Returns:
         dict: A dictionary containing:
-            - path_to_vector_data: Path to the saved intersection result
+            - feature_collection_filename: Path to the saved intersection result
             - input_arguments: The original input arguments used for the operation
 
     Raises:
@@ -174,27 +191,32 @@ def intersect_feature_collections(
     Use case:
         Find areas that are both flood-prone and densely populated by intersecting flood hazard zones with population density data:
         intersect_feature_collection(["flood_zones.json", "high_population_areas.json"])
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
     logger.info("Intersecting data: %s", paths_to_feature_collections)
 
     if len(paths_to_feature_collections) == 0:
         raise ValueError("No feature collections provided")
 
-    intersection = load_vector_data(paths_to_feature_collections[0])
+    intersection = load_vector_data(
+        os.path.join(temp_dir, paths_to_feature_collections[0])
+    )
     if isinstance(intersection, Image):
         # if images are intersected, the values of each are changed
         # only feature collections can be intersected
         raise ValueError("Image cannot be intersected")
 
     for path in paths_to_feature_collections[1:]:
-        new_data = load_vector_data(path)
+        new_data = load_vector_data(os.path.join(temp_dir, path))
         if isinstance(new_data, Image):
             raise ValueError("Image cannot be intersected")
         intersection = intersection.map(lambda f: intersect_feature(f, new_data))
 
-    save_vector_data(PATH_TO_INTERSECTION, intersection)
+    save_ee_object(os.path.join(temp_dir, INTERSECTION_FILENAME), intersection)
     return {
-        "path_to_vector_data": PATH_TO_INTERSECTION,
+        "feature_collection_filename": INTERSECTION_FILENAME,
         "input_arguments": {
             "paths_to_feature_collections": paths_to_feature_collections
         },
@@ -203,7 +225,7 @@ def intersect_feature_collections(
 
 @tool
 def merge_feature_collections(
-    paths_to_feature_collections: list[str],
+    paths_to_feature_collections: list[str], temp_dir: str = ""
 ) -> dict:
     """Merge multiple feature collections into a single combined collection.
 
@@ -219,7 +241,7 @@ def merge_feature_collections(
 
     Returns:
         dict: A dictionary containing:
-            - path_to_vector_data: Path to the saved merged result
+            - feature_collection_filename: Path to the saved merged result
             - input_arguments: The original input arguments used for the operation
 
     Raises:
@@ -228,25 +250,28 @@ def merge_feature_collections(
     Use case:
         Combine different hazard zones into a single dataset for analysis:
         merge_feature_collections(["flood_zones.json", "drought_zones.json"])
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
     logger.info("Unioning data: %s", paths_to_feature_collections)
 
     if len(paths_to_feature_collections) == 0:
         raise ValueError("No feature collections provided")
 
-    union = load_vector_data(paths_to_feature_collections[0])
+    union = load_vector_data(os.path.join(temp_dir, paths_to_feature_collections[0]))
     if isinstance(union, Image):
         raise ValueError("Image cannot be unioned")
 
     for path in paths_to_feature_collections[1:]:
-        new_data = load_vector_data(path)
+        new_data = load_vector_data(os.path.join(temp_dir, path))
         if isinstance(new_data, Image):
             raise ValueError("Image cannot be unioned")
         union = union.merge(new_data)
 
-    save_vector_data(PATH_TO_UNION, union)
+    save_ee_object(os.path.join(temp_dir, UNION_FILENAME), union)
     return {
-        "path_to_vector_data": PATH_TO_UNION,
+        "feature_collection_filename": UNION_FILENAME,
         "input_arguments": {
             "paths_to_feature_collections": paths_to_feature_collections
         },
@@ -255,16 +280,17 @@ def merge_feature_collections(
 
 @tool
 def reduce_image(
-    path_to_image: str,
-    path_to_geometry: str,
+    image_filename: str,
+    feature_collection_filename: str,
     reducer: REDUCERS,
+    temp_dir: str = "",
     scale: int = 100,
 ) -> dict:
     """Reduce an image by applying a reducer to its pixels.
 
     Args:
-        path_to_image: The path to the image to reduce
-        path_to_geometry: The path to the geometry to reduce the image to
+        image_filename: The path to the image to reduce
+        feature_collection_filename: The path to the geometry to reduce the image to
         reducer: The reducer to apply
         scale: The scale of the image. It should be 100 unless otherwise specified.
 
@@ -274,10 +300,15 @@ def reduce_image(
     Use case:
         Calculate the average rainfall within specific administrative boundaries:
         reduce_image("rainfall_data.json", "admin_boundaries.json", REDUCERS.MEAN)
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
     logger.info(f"Reducing image with {reducer}")
-    image = load_vector_data(path_to_image)
-    feature_collection = load_vector_data(path_to_geometry)
+    image = load_vector_data(os.path.join(temp_dir, image_filename))
+    feature_collection = load_vector_data(
+        os.path.join(temp_dir, feature_collection_filename)
+    )
     reduced = image.reduceRegions(
         reducer=getattr(Reducer, reducer)(),
         collection=feature_collection,
@@ -294,8 +325,8 @@ def reduce_image(
     return {
         "total_sum": total_sum,
         "input_arguments": {
-            "path_to_image": path_to_image,
-            "path_to_geometry": path_to_geometry,
+            "image_filename": image_filename,
+            "feature_collection_filename": feature_collection_filename,
             "reducer": reducer,
             "scale": scale,
         },
@@ -304,8 +335,9 @@ def reduce_image(
 
 @tool
 def build_map(
-    path_to_images: list[str],
-    path_to_vector_data: str,
+    image_filenames: list[str],
+    feature_collection_filename: str,
+    temp_dir: str = "",
     names: list[str] = [],
 ) -> dict:
     """Build a map from an image and vector data and save it to an HTML file.
@@ -317,34 +349,45 @@ def build_map(
     Each image will be a different layer in the map.
 
     Args:
-        path_to_images: Path to the Earth Engine image files to display on the map
-        path_to_vector_data: Path to the vector data file (e.g. GeoJSON) defining the
+        image_filenames: Path to the Earth Engine image files to display on the map
+        feature_collection_filename: Path to the vector data file (e.g. GeoJSON) defining the
             boundaries to overlay the image on
         names: The names of the layers in the map
         center: Whether to center the map on the vector data
 
     Returns:
-        dict: A dictionary containing the path to the saved HTML map file under the key
-            'path_to_map'
+        dict: A dictionary containing the name of the saved HTML map file under the key
+            'map_filename'
 
     Use case:
         Create an interactive map showing drought severity and population density in a region:
         build_map(["drought_data.json", "population_density.json"], "country_boundaries.json",
                  ["Drought Severity", "Population Density"])
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
     """
-    logger.info(f"Building map with {path_to_images} and {path_to_vector_data}")
-    vector_data = load_vector_data(path_to_vector_data)
-    images = [load_vector_data(path) for path in path_to_images]
-    if len(names) != len(path_to_images):
+    logger.info(
+        f"Building map with {image_filenames} and {feature_collection_filename}"
+    )
+    vector_data = load_vector_data(os.path.join(temp_dir, feature_collection_filename))
+    images = [
+        load_vector_data(os.path.join(temp_dir, path)) for path in image_filenames
+    ]
+    if len(names) != len(image_filenames):
         raise ValueError("The number of names must be equal to the number of images")
 
     return {
-        "path_to_map": image_to_html(
-            images=images, vector_data=vector_data, names=names, center=True
+        "map_filename": image_to_html(
+            images=images,
+            vector_data=vector_data,
+            names=names,
+            center=True,
+            temp_dir=temp_dir,
         ),
         "input_arguments": {
-            "path_to_images": path_to_images,
-            "path_to_vector_data": path_to_vector_data,
+            "image_filenames": image_filenames,
+            "feature_collection_filename": feature_collection_filename,
             "names": names,
         },
     }
