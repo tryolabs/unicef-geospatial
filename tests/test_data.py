@@ -36,6 +36,7 @@ def extract_number_from_response(question: str, answer: str) -> int | None:
     {answer}
     
     Extract the number that answers the question, or return None if no number is found.
+    If the answer includes something like "There is none people exposed to this hazard", return 0.
     {format_instructions}
     """
     )
