@@ -48,6 +48,7 @@ def get_dataset_image_and_metadata(
         image = Image(metadata.asset_id)
         if dataset == ALL_DATASETS.AGRICULTURAL_DROUGHT:
             # TODO: maybe this image should be preprocessed
+            logger.info("Updating mask for agricultural drought")
             image = image.updateMask(image.lte(100))
 
     save_ee_object(os.path.join(temp_dir, metadata.image_filename), image)
@@ -103,12 +104,14 @@ def mask_image(
     if not isinstance(image, Image):
         raise TypeError(
             f"Expected an Earth Engine Image object, but got {type(image).__name__}. "
-            f"Please provide a valid image path."
+            f"Please provide a valid image path. "
+            f"{os.path.join(temp_dir, image_filename)} was invalid."
         )
     if not isinstance(mask, Image):
         raise TypeError(
             f"Expected an Earth Engine Image object, but got {type(mask).__name__}. "
-            f"Please provide a valid mask path."
+            f"Please provide a valid mask path. "
+            f"{os.path.join(temp_dir, mask_image_filename)} was invalid."
         )
     masked_image = image.updateMask(mask)
     path_to_masked_image = image_filename.replace(".json", "_masked.json")
@@ -189,6 +192,7 @@ def intersect_feature_collections(
     Args:
         paths_to_feature_collections: List of paths to the feature collections to intersect.
             Each path should point to a valid Earth Engine FeatureCollection saved as JSON.
+            All inputs must be vector data (feature collections), not images.
 
     Returns:
         dict: A dictionary containing:

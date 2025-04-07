@@ -42,7 +42,7 @@ DATASETS_METADATA = {
         image_filename="agricultural_drought_image.json",
         description="Average annual temperature of cropland in the last 10 years.",
         mosaic=False,
-        threshold=50,
+        threshold=30,
     ),
     ALL_DATASETS.FIRE: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/FIRMS_MODIS_Mean_Annual_Count_2001_2023",

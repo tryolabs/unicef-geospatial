@@ -25,19 +25,35 @@ langfuse = Langfuse(
     public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
     host=os.environ["LANGFUSE_HOST"],
 )
-# Check if session ID exists in environment, otherwise create it
-# This ensures all parallel processes use the same session ID
-if "TEST_SESSION_ID" not in os.environ:
-    os.environ["TEST_SESSION_ID"] = str(uuid.uuid4())
-session_id = os.environ["TEST_SESSION_ID"]
 
-initialize_earth_engine("ee_auth.json")
-
+# Define path for test results and session ID file
 RESULTS_PATH = "tests/results"
 
 if not os.path.exists(RESULTS_PATH):
     os.makedirs(RESULTS_PATH)
 
+# Use a file to share session ID across processes
+SESSION_FILE = os.path.join(RESULTS_PATH, ".session_id")
+
+# Read existing session ID or create a new one
+try:
+    if os.path.exists(SESSION_FILE):
+        with open(SESSION_FILE, "r") as f:
+            session_id = f.read().strip()
+            logger.info(f"Using existing session ID: {session_id}")
+    else:
+        session_id = str(uuid.uuid4())
+        with open(SESSION_FILE, "w") as f:
+            f.write(session_id)
+            logger.info(f"Created new session ID: {session_id}")
+except Exception as e:
+    logger.error(f"Error handling session ID file: {e}")
+    session_id = str(uuid.uuid4())
+    logger.info(f"Using fallback session ID: {session_id}")
+
+initialize_earth_engine("ee_auth.json")
+
+# Create results file
 RESULTS_FILE = f"{RESULTS_PATH}/results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
 if os.path.exists(RESULTS_FILE):
     os.remove(RESULTS_FILE)
