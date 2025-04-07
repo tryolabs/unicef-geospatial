@@ -67,14 +67,19 @@ def mask_image(
 ) -> dict[str, str]:
     """Mask an Earth Engine image based on a mask.
 
-    A mask is a binary image that is used to mask the image.
+    Masking an image means applying a binary filter to it, where pixels are retained only
+    where the mask has non-zero values. This effectively "cuts out" or preserves only the
+    areas of interest defined by the mask, while setting all other areas to no-data values.
+
+    The mask should be a binary image where:
+    - Values of 1 (or non-zero) indicate areas to keep in the original image
+    - Values of 0 indicate areas to mask out (set to no-data)
 
     This operation can only be used with images.
 
     Args:
         image_filename: Path to the JSON file containing the Earth Engine image
-        mask_image_filename: Path to the JSON file containing the Earth Engine mask.
-                The mask should be a binary image.
+        mask_image_filename: Path to the JSON file containing the Earth Engine binary image mask.
 
     Returns:
         dict: A dictionary containing:
