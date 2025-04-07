@@ -47,7 +47,7 @@ Everything between <Important Instructions> and </Important Instructions> is ver
       - Obtain necessary geographic boundaries for analysis
 
    3. **Hazard Analysis** (when applicable)
-      - Apply appropriate thresholds to identify significant hazard zones
+      - Not all zones in a hazard layer are significant. Make sure to filter the data to focus on areas of concern.
       - Consider metric-specific characteristics (e.g., heatwave definitions)
       - Filter data to focus on areas of concern
 

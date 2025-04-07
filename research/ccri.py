@@ -29,78 +29,97 @@ all_hazards = [
     # {
     #     "id": "projects/unicef-ccri/assets/river_flood_r100",
     #     "threshold": 0.01,
+    #     "name": "river_flood_100yr_jrc_2024",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/coastal_flood_r100",
     #     "threshold": 0,
+    #     "name": "coastal_flood_100yr_jrc_2024",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/JBA_FLSW_resampled",
     #     "threshold": 0,
+    #     "name": "pluvial_flood_100yr_jbl_2024",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/storm_giri_rp100",
     #     "threshold": 17.5,
+    #     "name": "tropical_storm_100yr_giri_2024",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/ASI_cropland_avg_2014_2023",
-    #     "threshold": 50,
+    #     "threshold": 30,
+    #     "name": "agricultural_drought_fao_1984-2023",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/sma_copernicus_avg_2015_2024",
     #     "threshold": -1,
+    #     "name": "drought_sma_copernicus_1984-2023",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/spi_copernicus_avg_2015_2024",
     #     "threshold": -1,
+    #     "name": "drought_spi_copernicus_1984-2023",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/heatwave_frequency_2014_2023_avg",
     #     "threshold": "Mean",
-    # },
+    #     "name": "heatwave_frequency_ecmwf_2014-2024",
+    # },  # 6.03
     # {
     #     "id": "projects/unicef-ccri/assets/heatwave_duration_2014_2023_avg",
     #     "threshold": "Mean",
-    # },
+    #     "name": "heatwave_duration_ecmwf_2014-2024",
+    # },  # 35.99
     # {
     #     "id": "projects/unicef-ccri/assets/heatwave_severity_2014_2023_avg",
     #     "threshold": "Mean",
-    # },
+    #     "name": "heatwave_severity_ecmwf_2014-2024",
+    # },  # 21.19
     # {
     #     "id": "projects/unicef-ccri/assets/extreme_heat_days_2014_2023_avg",
     #     "threshold": 35,
+    #     "name": "extreme_heat_ecmwf_2014-2024",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/FIRMS_MODIS_Mean_Annual_FRP_2001_2023",
-    #     "threshold": 50,
+    #     "threshold": "Mean",
+    #     "name": "fire_FRP_nasa_2001-2024",
     # },
     {
         "id": "projects/unicef-ccri/assets/FIRMS_MODIS_Mean_Annual_Count_2001_2023",
-        "threshold": 10,
+        "threshold": "Mean",
+        "name": "fire_frequency_nasa_2001-2023",
     },
     # {
     #     "id": "projects/unicef-ccri/assets/sand_dust_storm_annual",
     #     "threshold": 0,
+    #     "name": "sand_dust_storm_unccd_2024",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/pm25_2013_2022_avg",
     #     "threshold": 5,
+    #     "name": "air_pollution_pm25_2012-2022",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/Pv_average_2013_2022",
     #     "threshold": 0.001,
+    #     "name": "vectorborne_malariapv_2012-2022",
     # },
     # {
     #     "id": "projects/unicef-ccri/assets/Pf_average_2013_2022",
     #     "threshold": 0.001,
+    #     "name": "vectorborne_malariapf_2012-2022",
     # },
 ]
 
 
-def get_threshold(aois: ee.FeatureCollection, hazard_layer: ee.Image):
+def get_threshold(hazard_layer: ee.Image):
     print("Calculating mean threshold")
     # Create a land-sea mask by converting the reprojected country boundaries to a raster.
     # Land pixels will have a value of 1 and sea pixels will be 0.
+    aois = ee.FeatureCollection("projects/unicef-ccri/assets/" + "adm0" + "_simple")
+
     referenceImage = ee.Image(
         "projects/unicef-ccri/assets/heatwave_frequency_2014_2023_avg"
     )
@@ -115,12 +134,7 @@ def get_threshold(aois: ee.FeatureCollection, hazard_layer: ee.Image):
         ee.Image(1)
         .clip(countryBoundariesReprojected)
         .unmask(0)
-        .reproject(
-            {
-                "crs": targetCRS,
-                "scale": targetScale,
-            }
-        )
+        .reproject(crs=targetCRS, scale=targetScale)
         .rename("landsea_mask")
     )
 
@@ -143,104 +157,109 @@ def get_threshold(aois: ee.FeatureCollection, hazard_layer: ee.Image):
     # Compute the mean hazard value over the global land area.
     threshold = (
         hazard_layer_masked.reduceRegion(
-            {
-                "reducer": ee.Reducer.mean(),
-                "geometry": global_geometry,
-                "scale": hazard_layer.projection().nominalScale(),
-                "bestEffort": True,
-            }
+            reducer=ee.Reducer.mean(),
+            geometry=global_geometry,
+            scale=hazard_layer.projection().nominalScale(),
+            bestEffort=True,
         )
         .values()
         .get(0)
     )
-    print("Mean threshold on land:", threshold)
+    return ee.Number(threshold)
 
 
 # %%
-country = "COL"
+countries = ["AGO", "NIC", "URY", "COL"]
+full_df = pd.DataFrame(columns=["country", "id", "value"])
 for hazard in all_hazards:
-    id = hazard["id"]
-    threshold = hazard["threshold"]
-    print(f"Processing {id} with threshold {threshold}")
-    if (
-        id == "projects/unicef-ccri/assets/river_flood_r100"
-        or id == "projects/unicef-ccri/assets/coastal_flood_r100"
-        or id == "projects/unicef-ccri/assets/storm_giri_rp100"
-    ):
-        hazard_layer = ee.ImageCollection(id).mosaic()
-    else:
-        hazard_layer = ee.Image(id)
-
-    childpop = ee.ImageCollection(
-        "projects/unicef-ccri/assets/childpop_constrained"
-    ).mosaic()
-
-    aois = ee.FeatureCollection("projects/unicef-ccri/assets/" + "adm0" + "_simple")
-    if country:
-        print("Filtering by country")
-        aois = aois.filter(ee.Filter.eq("ISO3", country))
-
-    if threshold == "Mean":
-        threshold = get_threshold(aois, hazard_layer)
-
-    if id == "projects/unicef-ccri/assets/ASI_cropland_avg_2014_2023":
-        print("Updating mask for agricultural drought")
-        hazard_layer = hazard_layer.updateMask(hazard_layer.lte(100))
-        exposed_population = childpop.updateMask(hazard_layer.gt(ee.Number(threshold)))
-    else:
-        # For other hazards, decide on the mask based on whether TH is negative or positive.
-        if threshold < 0:
-            print("Updating mask for negative threshold")
-            # For negative thresholds, mask where the hazard is less than TH.
-            exposed_population = childpop.updateMask(
-                hazard_layer.lt(ee.Number(threshold))
-            )
+    df_hazard = pd.DataFrame(columns=["country", "id", "value"])
+    for country in countries:
+        id = hazard["id"]
+        threshold = hazard["threshold"]
+        print(f"Processing {id} with threshold {threshold} for {country}")
+        if (
+            id == "projects/unicef-ccri/assets/river_flood_r100"
+            or id == "projects/unicef-ccri/assets/coastal_flood_r100"
+            or id == "projects/unicef-ccri/assets/storm_giri_rp100"
+        ):
+            hazard_layer = ee.ImageCollection(id).mosaic()
         else:
-            print("Updating mask for positive threshold")
-            # For positive thresholds, mask where the hazard is greater than TH.
-            exposed_population = childpop.updateMask(
-                hazard_layer.gt(ee.Number(threshold))
-            )
+            hazard_layer = ee.Image(id)
 
-    populationByAOI = exposed_population.reduceRegions(
-        collection=aois,
-        reducer=ee.Reducer.sum(),
-        scale=100,
-        crs="EPSG:4326",
-    )
+        childpop = ee.ImageCollection(
+            "projects/unicef-ccri/assets/childpop_constrained"
+        ).mosaic()
 
-    finalCollection = populationByAOI.map(
-        lambda feature: feature.set("child_population_exposed", feature.get("sum"))
-    )
+        aois = ee.FeatureCollection("projects/unicef-ccri/assets/" + "adm0" + "_simple")
+        if country:
+            print("Filtering by country")
+            aois = aois.filter(ee.Filter.eq("ISO3", country))
 
-    res = finalCollection.getInfo()
+        if threshold == "Mean":
+            threshold = get_threshold(hazard_layer)
+        else:
+            threshold = ee.Number(threshold)
+        threshold_value = threshold.getInfo()
 
-    print(f"Finish processing, {id} with threshold {threshold}", flush=True)
-    print("Saving results to csv", flush=True)
+        if id == "projects/unicef-ccri/assets/ASI_cropland_avg_2014_2023":
+            print("Updating mask for agricultural drought")
+            hazard_layer = hazard_layer.updateMask(hazard_layer.lte(100))
+            exposed_population = childpop.updateMask(hazard_layer.gt(threshold))
+        else:
+            # For other hazards, decide on the mask based on whether TH is negative or positive.
+            if threshold_value < 0:
+                print("Updating mask for negative threshold")
+                # For negative thresholds, mask where the hazard is less than TH.
+                exposed_population = childpop.updateMask(hazard_layer.lt(threshold))
+            else:
+                print("Updating mask for positive threshold")
+                # For positive thresholds, mask where the hazard is greater than TH.
+                exposed_population = childpop.updateMask(hazard_layer.gt(threshold))
 
-    # Convert results to DataFrame
-    features = res["features"]
-    data = []
-    for feature in features:
-        properties = feature["properties"]
-        data.append(properties)
+        populationByAOI = exposed_population.reduceRegions(
+            collection=aois,
+            reducer=ee.Reducer.sum(),
+            scale=100,
+            crs="EPSG:4326",
+        )
 
-    df = pd.DataFrame(data)
+        finalCollection = populationByAOI.map(
+            lambda feature: feature.set("child_population_exposed", feature.get("sum"))
+        )
+
+        res = finalCollection.getInfo()
+        print(
+            f"Finish processing, {id} with threshold {threshold_value} for {country}",
+            flush=True,
+        )
+
+        # Convert results to DataFrame
+        features = res["features"]
+        data = []
+        for feature in features:
+            properties = feature["properties"]
+            data.append(properties)
+
+        df = pd.DataFrame(data)
+        df_hazard.loc[len(df_hazard)] = [country, id, df["child_population_exposed"]]
+        full_df.loc[len(full_df)] = [country, id, df["child_population_exposed"]]
+
     # Export to CSV
     output_dir = Path("./output")
     output_dir.mkdir(exist_ok=True)
-    output_file = output_dir / f"{id.split('/')[-1]}_exposure_adm0.csv"
-    df.to_csv(output_file, index=False)
+    output_file = output_dir / f"{hazard['name']}_exposure_adm0.csv"
+    df_hazard.to_csv(output_file, index=False)
     print(f"Results exported to {output_file}")
+
+# output_file = Path("./output/all_hazards_exposure_adm0.csv")
+# full_df.to_csv(output_file, index=False)
+
+# # %%
+# Map = geemap.Map()
+# Map.addLayer(hazard_layer, {}, "Hazard")
+# Map.addLayer(exposed_population, {}, "Exposed Population")
+# Map.addLayer(childpop, {}, "Child Population")
+# Map.addLayer(aois, {}, "AOIs")
+# Map
 # %%
-df.head()
-# %%
-Map = geemap.Map()
-Map.addLayer(hazard_layer, {}, "Hazard")
-Map.addLayer(exposed_population, {}, "Exposed Population")
-Map.addLayer(childpop, {}, "Child Population")
-Map.addLayer(aois, {}, "AOIs")
-Map
-# %%
-Map.to_html()
-# %%
+# # %%

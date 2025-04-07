@@ -40,8 +40,7 @@ DATASETS_METADATA = {
     ALL_DATASETS.AGRICULTURAL_DROUGHT: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/ASI_cropland_avg_2014_2023",
         image_filename="agricultural_drought_image.json",
-        description="Average annual temperature of cropland in the last 10 years.\
-        Note: The image must be masked where the values is less than 100.",
+        description="Average annual temperature of cropland in the last 10 years.",
         mosaic=False,
         threshold=50,
     ),
@@ -50,7 +49,7 @@ DATASETS_METADATA = {
         image_filename="fire_image.json",
         description="Number of fire events in the last 24 years.",
         mosaic=False,
-        threshold=10,
+        threshold=4.9,
     ),
     ALL_DATASETS.SAND_DUST_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/sand_dust_storm_annual",
@@ -62,7 +61,7 @@ DATASETS_METADATA = {
     ALL_DATASETS.AIR_POLLUTION: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/pm25_2013_2022_avg",
         image_filename="air_pollution_image.json",
-        description="Average annual PM2.5 concentration in the last 10 years.",
+        description="Average annual PM2.5 concentration in the last 10 years. This is a proxy for air pollution.",
         mosaic=False,
         threshold=5,
     ),

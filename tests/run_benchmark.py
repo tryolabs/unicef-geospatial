@@ -1,18 +1,15 @@
 import json
 import os
-import re
 import sys
 import uuid
 
 import pytest
-from langchain_core.messages import AIMessageChunk
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath("unicef_geospatial"))
 
 from datetime import datetime
 
-from agent.agent import create_agent, run_agent
 from langfuse import Langfuse
 from logging_config import get_logger
 from utils.constants import BASE_PATH
@@ -20,8 +17,7 @@ from utils.handlers import format_messages, respond
 from utils.initialize import initialize_earth_engine
 from utils.types import Message
 
-from tests.questions import hard_questions, medium_questions, simple_questions
-from unicef_geospatial.agent.agent import extract_response_from_chain_of_thought
+from tests.test_data import benchmark_list, extract_number_from_response
 
 logger = get_logger(__name__)
 langfuse = Langfuse(
@@ -29,8 +25,11 @@ langfuse = Langfuse(
     public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
     host=os.environ["LANGFUSE_HOST"],
 )
-# same run of tests share the session
-session_id = str(uuid.uuid4())
+# Check if session ID exists in environment, otherwise create it
+# This ensures all parallel processes use the same session ID
+if "TEST_SESSION_ID" not in os.environ:
+    os.environ["TEST_SESSION_ID"] = str(uuid.uuid4())
+session_id = os.environ["TEST_SESSION_ID"]
 
 initialize_earth_engine("ee_auth.json")
 
@@ -47,7 +46,6 @@ with open(RESULTS_FILE, "w") as fh:
     logger.info(f"Writing results to {RESULTS_FILE}")
     fh.write("correct\tquestion\tvariation\texpected\tvalue\tanswer\n")
 
-from tests.test_data import benchmark_list, extract_number_from_response
 
 # all_questions = {}
 # for question, answer in simple_questions.items():
@@ -68,7 +66,9 @@ async def test_agent_question(question, expected, variation):
     temp_dir = os.path.join(BASE_PATH, f"{trace_id}")
 
     final_answer = ""
-    async for chunk in respond(formatted_message, trace_id, session_id, temp_dir):
+    async for chunk in respond(
+        formatted_message, trace_id, session_id, temp_dir, tags=["benchmark"]
+    ):
         try:
             chunk = json.loads(chunk)
         except json.JSONDecodeError:

@@ -38,7 +38,7 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
 
 
 async def respond(
-    messages, trace_id, session_id, temp_dir: str = ""
+    messages, trace_id, session_id, temp_dir: str = "", tags: list[str] = []
 ) -> AsyncGenerator[str, None]:
     # Create the temp directory
     logger.info(f"Creating temp directory: {temp_dir}")
@@ -55,7 +55,7 @@ async def respond(
         )
         full_response = ""
         async for chunk in run_agent(
-            agent, messages, langfuse_observation_id=thinking_trace_id
+            agent, messages, langfuse_observation_id=thinking_trace_id, tags=tags
         ):
             if isinstance(chunk[0], ToolMessage):
                 try:

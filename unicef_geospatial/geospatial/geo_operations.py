@@ -30,7 +30,7 @@ def get_dataset_image_and_metadata(
         A dictionary containing the metadata for the dataset:
             - image_filename: Path to where the image is saved
             - description: Description of the dataset
-            - threshold: Threshold value for filtering (if applicable)
+            - threshold: Threshold value. If the values are above this threshold, the area is considered hazard zone.
             - input_arguments: Input arguments for the tool
 
     Use case:
@@ -71,6 +71,8 @@ def mask_image(
     where the mask has non-zero values. This effectively "cuts out" or preserves only the
     areas of interest defined by the mask, while setting all other areas to no-data values.
 
+    This is the operation used to intersect two images.
+
     The mask should be a binary image where:
     - Values of 1 (or non-zero) indicate areas to keep in the original image
     - Values of 0 indicate areas to mask out (set to no-data)
@@ -87,8 +89,11 @@ def mask_image(
             - input_arguments: The original input arguments used for the operation
 
     Use case:
-        Apply a land cover mask to a temperature dataset to analyze temperatures only in forested areas:
-        mask_image("temperature_data.json", "forest_mask.json")
+        Get the zone of exposed children to a hazard.
+        mask_image(
+            "child_population_data.json",
+            "hazard_data.json",
+        )
 
     Note:
         Do not provide a value for temp_dir, it will be handled automatically.
@@ -139,7 +144,7 @@ def filter_image_by_threshold(
         TypeError: If the loaded data is not an Earth Engine Image object
 
     Use case:
-        Identify areas with extreme heat by filtering temperature data above 35°C:
+        Identify hazard areas with values above a threshold.
         filter_image_by_threshold("temperature_data.json", 35.0)
 
     Note:
