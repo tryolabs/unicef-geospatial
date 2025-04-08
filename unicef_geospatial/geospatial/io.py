@@ -24,7 +24,38 @@ def image_to_html(
     for i, image in enumerate(images):
         logger.info(f"Adding layer {names[i]}")
         clipped_image = image.clip(vector_data)
-        demographic_map.add_layer(clipped_image, vis_params, names[i])
+        # Apply mask to show only non-zero values
+        masked_image = clipped_image.updateMask(clipped_image.gt(0))
+
+        if vis_params == {}:
+            max_value = list(
+                masked_image.reduceRegion(
+                    reducer="max",
+                    geometry=vector_data.geometry(),
+                    scale=1000,
+                    maxPixels=1e9,
+                )
+                .getInfo()
+                .values()
+            )[0]
+
+            vis_params = {
+                "min": 0,
+                "max": max_value,
+                "palette": [
+                    "#f7fbff",
+                    "#deebf7",
+                    "#c6dbef",
+                    "#9ecae1",
+                    "#6baed6",
+                    "#4292c6",
+                    "#2171b5",
+                    "#08519c",
+                    "#08306b",
+                ],
+            }
+
+        demographic_map.add_layer(masked_image, vis_params, names[i])
     if center:
         demographic_map.center_object(vector_data, max_error=0.1)
     demographic_map.to_html(os.path.join(temp_dir, MAP_FILENAME))
