@@ -4,6 +4,7 @@ import sys
 import uuid
 
 import pytest
+from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath("unicef_geospatial"))
@@ -18,6 +19,8 @@ from utils.initialize import initialize_earth_engine
 from utils.types import Message
 
 from tests.test_data import benchmark_list, extract_number_from_response
+
+load_dotenv(override=True)
 
 logger = get_logger(__name__)
 langfuse = Langfuse(
