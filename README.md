@@ -49,6 +49,12 @@ npm run dev
 
 This will start a local server at `http://127.0.0.1:5173`.
 
+### Authentication
+
+The application includes JWT authentication with predefined users. The users are saved in the `users.json` file.
+
+Authentication can be enabled/disabled by setting the `VITE_AUTH_ENABLED` environment variable in the frontend's `.env` file.
+
 ### Secrets
 
 The project uses [python-dotenv](https://github.com/theskumar/python-dotenv) to load environment variables from a `.env` file.
@@ -72,6 +78,9 @@ The `.env` file should be located in the root of the project and contain the fol
 - `BACKEND_PORT`: The API port number.
 - `RELOAD`: Whether to reload the API on chage. Recommended for development environment.
 - `PATH_TO_EE_AUTH`: The path to the earth engine auth file.
+- `JWT_SECRET_KEY`: Secret key for JWT token generation (required for authentication).
+- `JWT_ALGORITHM`: Algorithm used for JWT token generation (default is HS256).
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: Expiration time for JWT tokens in minutes.
 
 For authentication into the google earth engine, you need a service account and download the credentials file.
 The file should be named `ee_auth.json` and placed in the. root of the project. It should look like this:
@@ -104,6 +113,7 @@ The frontend `.env` must include:
 - `VITE_BACKEND_URL`: The URL of the backend API
 - `VITE_HOST`: The host address for the frontend server
 - `VITE_PORT`: The port number for the frontend server
+- `VITE_AUTH_ENABLED`: Whether to enable authentication (true/false)
 
 ### Accessing the logs
 

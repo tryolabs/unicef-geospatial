@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import MapContainer from "./components/MapContainer.js";
 import ChatSection from "./components/ChatSection.js";
 import UserGuide from "./components/UserGuide.js";
+import Login from "./components/Login.js";
 import { Message } from "./types/Message.js";
+import { LoginCredentials } from "./types/Auth.js";
+import AuthService from "./services/AuthService.js";
 
 function generateUUID(): string {
   // TODO: use an external library to generate a UUID
@@ -26,10 +29,45 @@ function App() {
   >([]);
   const [mapHTML, setMapHTML] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     setSessionId(generateUUID());
+    const authEnabled = import.meta.env.VITE_AUTH_ENABLED === "true";
+    if (authEnabled) {
+      checkAuthentication();
+    } else {
+      setIsAuthenticated(true);
+    }
   }, []);
+
+  async function checkAuthentication() {
+    if (AuthService.isAuthenticated()) {
+      try {
+        const user = await AuthService.getCurrentUser();
+        if (user) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Authentication check failed:", error);
+        setIsAuthenticated(false);
+      }
+    }
+  }
+
+  async function handleLogin(credentials: LoginCredentials): Promise<void> {
+    setLoginError(null);
+    try {
+      const data = await AuthService.login(credentials);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error("Login failed:", error);
+      setLoginError("Invalid username or password");
+    }
+  }
 
   // Sends user question to the server
   async function askQuestion(question: string): Promise<void> {
@@ -54,7 +92,10 @@ function App() {
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ask`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...AuthService.getAuthHeaders(),
+        },
         body: JSON.stringify(body),
       });
 
@@ -265,6 +306,10 @@ function App() {
 
   function switchTab(tab: "chat" | "tools"): void {
     setActiveTab(tab);
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} loginError={loginError} />;
   }
 
   return (

@@ -6,6 +6,7 @@ unicef_geospatial/data/
 ee_auth.json
 research/output/
 tests/results/
+users.json
 
 # Frontend
 # Logs
