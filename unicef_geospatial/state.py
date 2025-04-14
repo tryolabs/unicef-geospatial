@@ -28,8 +28,8 @@ class AppState:
         # TODO: properly setup this
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],  # Allows all origins
+            allow_origins=[os.getenv("FRONTEND_ORIGIN")],
             allow_credentials=True,
-            allow_methods=["*"],  # Allows all methods
-            allow_headers=["*"],  # Allows all headers
+            allow_methods=["GET", "POST"],
+            allow_headers=["Authorization", "Content-Type"],
         )

@@ -1,8 +1,6 @@
 import os
 import uuid
-from pathlib import Path
 
-from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from state import AppState
 from utils.constants import BASE_PATH
