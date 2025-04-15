@@ -1,4 +1,4 @@
-from utils.constants import BASE_ASSETS_PATH, BASE_PATH
+from utils.constants import BASE_ASSETS_PATH
 from utils.types import ALL_DATASETS, DatasetMetadata
 
 # Earth Engine assets

@@ -2,7 +2,7 @@ import os
 from typing import List
 
 import ee
-from geospatial.hazards_config import DATASETS_METADATA
+from geospatial.hazards_metadata import DATASETS_METADATA
 from google.cloud import storage
 from google.cloud.storage.bucket import Bucket
 from logging_config import get_logger
