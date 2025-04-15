@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
 
   let host = "0.0.0.0";
   let port = 5173;
+  const backendUrl = env.VITE_BACKEND_URL || "http://localhost:8000";
 
   if (env.VITE_HOST) {
     host = env.VITE_HOST;
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => {
   }
 
   console.log(`Server will start on host: ${host} and port: ${port}`);
+  console.log(`API requests will be proxied to: ${backendUrl}`);
 
   return {
     plugins: [react()],
@@ -23,6 +25,14 @@ export default defineConfig(({ mode }) => {
       host,
       port,
       strictPort: true,
+      proxy: {
+        // Proxy all /api requests to the backend
+        "/api": {
+          target: backendUrl,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ""),
+        },
+      },
     },
     build: {
       outDir: "dist",

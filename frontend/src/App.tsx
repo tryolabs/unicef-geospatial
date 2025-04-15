@@ -6,7 +6,7 @@ import Login from "./components/Login.js";
 import { Message } from "./types/Message.js";
 import { LoginCredentials } from "./types/Auth.js";
 import AuthService from "./services/AuthService.js";
-
+import { API_URL } from "./utils/constants.js";
 function generateUUID(): string {
   // TODO: use an external library to generate a UUID
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
@@ -90,7 +90,7 @@ function App() {
       };
       console.log(body);
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ask`, {
+      const response = await fetch(`${API_URL}/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

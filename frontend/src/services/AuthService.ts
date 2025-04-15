@@ -1,6 +1,5 @@
 import { AuthToken, LoginCredentials } from "../types/Auth";
-
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+import { API_URL } from "../utils/constants";
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthToken> {
