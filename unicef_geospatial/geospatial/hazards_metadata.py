@@ -3,12 +3,22 @@ from utils.types import ALL_DATASETS, DatasetMetadata
 
 # Earth Engine assets
 DATASETS_METADATA = {
+    ALL_DATASETS.CHILDREN_POPULATION: DatasetMetadata(
+        asset_id=f"{BASE_ASSETS_PATH}/childpop_constrained",
+        image_filename="children_population_image.json",
+        description="Population of children between 0-18 years old.",
+        mosaic=True,
+        source_name="WorldPop",
+        source_url="https://www.worldpop.org/",
+    ),
     ALL_DATASETS.RIVER_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/river_flood_r100",
         image_filename="river_flood_image.json",
         threshold=0.01,
         description="Zones of river flood. The value indicates the depth in meters.",
         mosaic=True,
+        source_name="Joint Research Center",
+        source_url="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/",
     ),
     ALL_DATASETS.COASTAL_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/coastal_flood_r100",
@@ -16,6 +26,8 @@ DATASETS_METADATA = {
         threshold=0,
         description="Zones of coastal flood. The value is 1 if the zone is flooded, 0 otherwise.",
         mosaic=True,
+        source_name="Joint Research Center",
+        source_url="https://data.jrc.ec.europa.eu/dataset/9e5ba6f1-8d03-4834-8488-2353e504560f",
     ),
     ALL_DATASETS.PLUVIAL_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/JBA_FLSW_resampled",
@@ -23,6 +35,8 @@ DATASETS_METADATA = {
         threshold=0,
         description="Zones of pluvial flood. The value indicates the depth in meters.",
         mosaic=False,
+        source_name="TBD",
+        source_url="TBD",
     ),
     ALL_DATASETS.TROPICAL_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/storm_giri_rp100",
@@ -30,12 +44,8 @@ DATASETS_METADATA = {
         threshold=17.5,
         description="Zones affected by tropical storms.",
         mosaic=True,
-    ),
-    ALL_DATASETS.CHILDREN_POPULATION: DatasetMetadata(
-        asset_id=f"{BASE_ASSETS_PATH}/childpop_constrained",
-        image_filename="children_population_image.json",
-        description="Population of children between 0-18 years old.",
-        mosaic=True,
+        source_name="STORM",
+        source_url="https://data.4tu.nl/datasets/0ea98bdd-5772-4da8-ae97-99735e891aff/4",
     ),
     ALL_DATASETS.AGRICULTURAL_DROUGHT: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/ASI_cropland_avg_2014_2023",
@@ -43,6 +53,8 @@ DATASETS_METADATA = {
         description="Average annual temperature of cropland in the last 10 years.",
         mosaic=False,
         threshold=30,
+        source_name="Food and Agriculture Organization of the United Nations",
+        source_url="https://www.fao.org/giews/earthobservation/asis/index_1.jsp?lang=en",
     ),
     ALL_DATASETS.FIRE: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/FIRMS_MODIS_Mean_Annual_Count_2001_2023",
@@ -50,6 +62,8 @@ DATASETS_METADATA = {
         description="Number of fire events in the last 24 years.",
         mosaic=False,
         threshold=4.9,
+        source_name="EMOPS RAPS",
+        source_url="https://github.com/emopsraps/Wildfire_LandDegradation",
     ),
     ALL_DATASETS.SAND_DUST_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/sand_dust_storm_annual",
@@ -57,6 +71,8 @@ DATASETS_METADATA = {
         description="Number of sand dust storms in the last 24 years.",
         mosaic=False,
         threshold=0,
+        source_name="UNCCD",
+        source_url="https://www.unccd.int/data-knowledge",
     ),
     ALL_DATASETS.AIR_POLLUTION: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/pm25_2013_2022_avg",
@@ -64,6 +80,8 @@ DATASETS_METADATA = {
         description="Average annual PM2.5 concentration in the last 10 years. This is a proxy for air pollution.",
         mosaic=False,
         threshold=5,
+        source_name="ACAG",
+        source_url="https://sites.wustl.edu/acag/datasets/surface-pm2-5/",
     ),
     ALL_DATASETS.PLASMODIUM_VIVAX: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/Pv_average_2013_2022",
@@ -71,6 +89,8 @@ DATASETS_METADATA = {
         description="Incidente rate of malaria due to Plasmodium vivax.",
         mosaic=False,
         threshold=0.001,
+        source_name="Malaria Atlas Project",
+        source_url="https://apps.who.int/malaria/maps/threats/#/download",
     ),
     ALL_DATASETS.PLASMODIUM_FALCIPARUM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/Pf_average_2013_2022",
@@ -78,5 +98,7 @@ DATASETS_METADATA = {
         description="Incidente rate of malaria due to Plasmodium falciparum.",
         mosaic=False,
         threshold=0.001,
+        source_name="Malaria Atlas Project",
+        source_url="https://apps.who.int/malaria/maps/threats/#/download",
     ),
 }

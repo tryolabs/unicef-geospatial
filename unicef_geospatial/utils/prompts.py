@@ -95,6 +95,7 @@ Everything between <Important Instructions> and </Important Instructions> is ver
    ## REALLY IMPORTANT CONSIDERATIONS
 
    - Always use the appropriate threshold values when analyzing hazard data
+   - Always reference the source name and source url of each dataset used in your analysis
    - Remember the difference between feature collections (vector) and images (raster)
    - When using functions, make sure to check if it expects images or feature collections and be sure to provide the correct type of data
    - Use reduce_image with appropriate parameters for quantitative analysis
@@ -128,7 +129,7 @@ Everything between <Important Instructions> and </Important Instructions> is ver
    2. Did I call the build_map function to visualize results?
    3. Did I include numerical answers in my response?
    4. Did I apply appropriate thresholds to hazard data?
-
+   5. Did I reference the source name and source url of each dataset used in my analysis?
 </Important Instructions>
 
 Next, you are going to be given a conversation between a user and an AI assistant. \

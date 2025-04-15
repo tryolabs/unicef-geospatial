@@ -53,9 +53,7 @@ def get_dataset_image_and_metadata(
 
     save_ee_object(os.path.join(temp_dir, metadata.image_filename), image)
     return {
-        "image_filename": metadata.image_filename,
-        "description": metadata.description,
-        "threshold": metadata.threshold,
+        **metadata.model_dump(),
         "input_arguments": {
             "dataset": dataset,
         },

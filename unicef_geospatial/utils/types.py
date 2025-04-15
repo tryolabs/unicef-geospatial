@@ -28,6 +28,8 @@ class DatasetMetadata(BaseModel):
     image_filename: str
     asset_id: str
     description: str
+    source_name: str
+    source_url: str
     mosaic: bool = False
     threshold: float | None = None
     input_arguments: dict[str, Any] = {}
