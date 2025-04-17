@@ -161,17 +161,101 @@ def filter_image_by_threshold(
     # Create a mask where values are less than threshold
     threshold_ee = ee.Number(threshold)
     filtered_mask = image.lt(threshold_ee) if threshold < 0 else image.gt(threshold_ee)
-    # Apply the mask to the original image
 
     path_to_filtered_vector_data = image_filename.replace(".json", "_filtered.json")
-
     save_ee_object(os.path.join(temp_dir, path_to_filtered_vector_data), filtered_mask)
+
     return {
         "image_filename": path_to_filtered_vector_data,
         "input_arguments": {
             "image_filename": image_filename,
             "threshold": threshold,
         },
+    }
+
+
+@tool
+def union_binary_images(paths_to_binary_images: list[str], temp_dir: str = "") -> dict:
+    """Union two binary images.
+
+    This function loads binary images from the provided paths and performs
+    a union operation, returning a new binary image where any of the input images
+    have values of 1.
+
+    Args:
+        paths_to_binary_images: List of paths to the binary images to union.
+            Each path should point to a valid Earth Engine Image saved as JSON.
+
+    Returns:
+        dict: A dictionary containing:
+            - image_filename: Path to the saved union result
+            - input_arguments: The original input arguments used for the operation
+
+    Use case:
+        Union two binary images to find areas that are either hazard zones.
+        union_binary_images(["flood_zones.json", "drought_zones.json"])
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
+    """
+    logger.info("Unioning binary images: %s", paths_to_binary_images)
+    if len(paths_to_binary_images) == 0:
+        raise ValueError("No binary images provided")
+
+    # Unmask the image to ensue non-data is treated as 0
+    union = load_vector_data(os.path.join(temp_dir, paths_to_binary_images[0])).unmask(
+        0
+    )
+    for path in paths_to_binary_images[1:]:
+        new_data = load_vector_data(os.path.join(temp_dir, path)).unmask(0)
+        union = union.Or(new_data)
+
+    save_ee_object(os.path.join(temp_dir, UNION_FILENAME), union)
+    return {
+        "image_filename": UNION_FILENAME,
+        "input_arguments": {"paths_to_binary_images": paths_to_binary_images},
+    }
+
+
+@tool
+def intersect_binary_images(
+    paths_to_binary_images: list[str], temp_dir: str = ""
+) -> dict:
+    """Intersect two binary images.
+
+    This function loads binary images from the provided paths and performs
+    an intersection operation, returning a new binary image where all the input images
+    have values of 1.
+
+    Args:
+        paths_to_binary_images: List of paths to the binary images to intersect.
+            Each path should point to a valid Earth Engine Image saved as JSON.
+
+    Returns:
+        dict: A dictionary containing:
+            - image_filename: Path to the saved intersection result
+            - input_arguments: The original input arguments used for the operation
+
+    Use case:
+        Intersect two binary images to find areas that are both hazard zones.
+        intersect_binary_images(["flood_zones.json", "drought_zones.json"])
+
+    Note:
+        Do not provide a value for temp_dir, it will be handled automatically.
+    """
+    logger.info("Intersecting binary images: %s", paths_to_binary_images)
+    if len(paths_to_binary_images) == 0:
+        raise ValueError("No binary images provided")
+
+    intersection = load_vector_data(os.path.join(temp_dir, paths_to_binary_images[0]))
+    for path in paths_to_binary_images[1:]:
+        new_data = load_vector_data(os.path.join(temp_dir, path))
+        intersection = intersection.And(new_data)
+
+    save_ee_object(os.path.join(temp_dir, INTERSECTION_FILENAME), intersection)
+    return {
+        "image_filename": INTERSECTION_FILENAME,
+        "input_arguments": {"paths_to_binary_images": paths_to_binary_images},
     }
 
 

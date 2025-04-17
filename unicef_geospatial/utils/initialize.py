@@ -14,10 +14,12 @@ from geospatial.geo_operations import (
     build_map,
     filter_image_by_threshold,
     get_dataset_image_and_metadata,
+    intersect_binary_images,
     intersect_feature_collections,
     mask_image,
     merge_feature_collections,
     reduce_image,
+    union_binary_images,
 )
 from geospatial.heatwaves import get_heatwave_image
 from langchain.tools import StructuredTool
@@ -48,6 +50,8 @@ def get_tools(temp_dir: str = "") -> list[Callable]:
         intersect_feature_collections,
         merge_feature_collections,
         reduce_image,
+        intersect_binary_images,
+        union_binary_images,
         build_map,
         # geospatial querying tools
         get_heatwave_image,
