@@ -89,6 +89,8 @@ def benchmark_to_list(benchmark: Benchmark) -> list:
 
 benchmark_questions = []
 
+# DataWarehouse Questions
+
 # benchmark_questions.append(
 #     BechmarkQuestion(
 #         question="What's the percentage of births without a birth weight registered in Nigeria?",
@@ -108,74 +110,120 @@ benchmark_questions = []
 #     )
 # )
 
-data = {
-    "river_floods": {
-        "Angola": 714157,
-        "Nicaragua": 38704,
-        "Uruguay": 47840,
-        "Colombia": 797908,
+# Multi-Hazard Questions
+# data_single_hazard = {
+#     "river floods": {
+#         "Angola": 714157,
+#         "Nicaragua": 38704,
+#         "Uruguay": 47840,
+#         "Colombia": 797908,
+#     },
+#     "coastal floods": {
+#         "Angola": 6909,
+#         "Nicaragua": 3977,
+#         "Uruguay": 910,
+#         "Colombia": 22714,
+#     },
+#     "pluvial floods": {
+#         "Angola": 8671705,
+#         "Nicaragua": 1178148,
+#         "Uruguay": 613335,
+#         "Colombia": 8158365,
+#     },
+#     "tropical storms": {
+#         "Angola": 0,
+#         "Nicaragua": 2024094,
+#         "Uruguay": 0,
+#         "Colombia": 1748864,
+#     },
+#     "agricultural drought": {
+#         "Angola": 40791,
+#         "Nicaragua": 0,
+#         "Uruguay": 0,
+#         "Colombia": 8077,
+#     },
+#     "fire": {
+#         "Angola": 5394005,
+#         "Nicaragua": 89740,
+#         "Uruguay": 120480,
+#         "Colombia": 157301,
+#     },
+#     "sand and dust storms": {
+#         "Angola": 1027946,
+#         "Nicaragua": 43,
+#         "Uruguay": 88,
+#         "Colombia": 32659,
+#     },
+#     "air pollution": {
+#         "Angola": 16338870,
+#         "Nicaragua": 1976847,
+#         "Uruguay": 604115,
+#         "Colombia": 11212840,
+#     },
+#     "vectorborne malaria pv": {
+#         "Angola": 0,
+#         "Nicaragua": 441785,
+#         "Uruguay": 0,
+#         "Colombia": 6174789,
+#     },
+#     "vectorborne malaria pf": {
+#         "Angola": 15984150,
+#         "Nicaragua": 77840,
+#         "Uruguay": 0,
+#         "Colombia": 366051,
+#     },
+# }
+
+data_multi_hazard = {
+    # and river and coastal floods
+    "river and coastal floods": {
+        "Colombia": 12368,
+        "Angola": 1293,
+        "Nicaragua": 2039,
+        "Uruguay": 807,
     },
-    "coastal_floods": {
-        "Angola": 6909,
-        "Nicaragua": 3977,
-        "Uruguay": 910,
-        "Colombia": 22714,
+    # or river or coastal floods
+    "river or coastal floods": {
+        "Colombia": 808254,
+        "Angola": 719773,
+        "Nicaragua": 40642,
+        "Uruguay": 47943,
     },
-    "pluvial_floods": {
-        "Angola": 8671705,
-        "Nicaragua": 1178148,
-        "Uruguay": 613335,
-        "Colombia": 8158365,
-    },
-    "tropical_storms": {
+    # and malaria
+    "both kinds of malaria": {
+        "Colombia": 366034,
         "Angola": 0,
-        "Nicaragua": 2024094,
+        "Nicaragua": 44914,
         "Uruguay": 0,
-        "Colombia": 1748864,
     },
-    "agricultural_drought": {
-        "Angola": 40791,
-        "Nicaragua": 0,
+    # or malaria
+    "any kind of malaria": {
+        "Colombia": 6174806,
+        "Angola": 15984153,
+        "Nicaragua": 474711,
         "Uruguay": 0,
-        "Colombia": 8077,
     },
-    "fire": {
-        "Angola": 5394005,
-        "Nicaragua": 89740,
-        "Uruguay": 120480,
-        "Colombia": 157301,
+    # and floods
+    "all kinds of floods": {
+        "Colombia": 12035,
+        "Angola": 367,
+        "Nicaragua": 1693,
+        "Uruguay": 724,
     },
-    "sand_dust_storm": {
-        "Angola": 1027946,
-        "Nicaragua": 43,
-        "Uruguay": 88,
-        "Colombia": 32659,
-    },
-    "air_pollution": {
-        "Angola": 16338870,
-        "Nicaragua": 1976847,
-        "Uruguay": 604115,
-        "Colombia": 11212840,
-    },
-    "vectorborne_malaria_pv": {
-        "Angola": 0,
-        "Nicaragua": 441785,
-        "Uruguay": 0,
-        "Colombia": 6174789,
-    },
-    "vectorborne_malaria_pf": {
-        "Angola": 15984150,
-        "Nicaragua": 77840,
-        "Uruguay": 0,
-        "Colombia": 366051,
+    # or floods
+    "some kind of flood": {
+        "Colombia": 8191207,
+        "Angola": 8974501,
+        "Nicaragua": 1190525,
+        "Uruguay": 620872,
     },
 }
-
 # Iterate through data to create benchmark questions
-for hazard, countries in data.items():
+# Combine single and multi-hazard data
+# data = {**data_single_hazard, **data_multi_hazard}
+data = data_multi_hazard
+for hazard_name, countries in data.items():
     for country, value in countries.items():
-        hazard_name = hazard.replace("_", " ")
-
         benchmark_questions.append(
             BechmarkQuestion(
                 question=f"How many children were exposed to {hazard_name} in {country}",
