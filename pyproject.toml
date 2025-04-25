@@ -27,4 +27,5 @@ dependencies = [
     "setuptools>=75.8.0",
     "uvicorn>=0.34.0",
     "vulture>=2.14",
+    "xyzservices @ git+https://github.com/geopandas/xyzservices.git",
 ]
