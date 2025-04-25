@@ -24,8 +24,8 @@ const MapContainer = React.memo(({ mapHTML }: MapContainerProps) => {
             <div id="map"></div>
             <script>
               const map = L.map('map').setView([20, 0], 2);
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+              L.tileLayer('https://geoservices.un.org/arcgis/rest/services/ClearMap_WebTopo/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© United Nations'
               }).addTo(map);
             </script>
           </body>
