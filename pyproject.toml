@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "earthengine-api>=1.5",
     "fastapi>=0.115.8",
-    "geemap @ git+https://github.com/gee-community/geemap.git",
+    "geemap",
     "ipykernel>=6.29.5",
     "langchain>=0.3.18",
     "langchain-cohere>=0.4.2",
@@ -29,3 +29,6 @@ dependencies = [
     "vulture>=2.14",
     "xyzservices @ git+https://github.com/geopandas/xyzservices.git",
 ]
+
+[tool.uv.sources]
+geemap = { git = "https://github.com/gee-community/geemap.git" }
