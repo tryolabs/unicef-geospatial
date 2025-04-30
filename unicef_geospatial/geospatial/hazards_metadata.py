@@ -1,5 +1,29 @@
-from utils.constants import BASE_ASSETS_PATH
+from langchain.tools import tool
+from utils.constants import BASE_ASSETS_PATH, CCRI_METADATA_FILENAME
 from utils.types import ALL_DATASETS, DatasetMetadata
+
+
+@tool
+def get_ccri_metadata(temp_dir: str = "") -> str:
+    """Get the metadata for the CCRI dataset.
+
+    This function reads and returns the contents of the CCRI technical documentation file.
+
+    Args:
+        temp_dir: Temporary directory path. This parameter is not used but is required
+                 for compatibility with the tool framework.
+
+    Returns:
+        The complete text content of the CCRI technical documentation as a string.
+
+    Note:
+        The documentation contains detailed information about the CCRI methodology,
+        data sources, and technical specifications for the Climate Change Risk Index.
+    """
+    with open(CCRI_METADATA_FILENAME, "r") as f:
+        metadata = f.read()
+    return metadata
+
 
 # Earth Engine assets
 DATASETS_METADATA = {

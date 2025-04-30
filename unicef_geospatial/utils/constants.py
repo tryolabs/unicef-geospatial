@@ -18,3 +18,6 @@ HEATWAVE_FILENAME = "heatwave_image.json"
 feature_collection_filename = "map_zones_feature_collection.json"
 INTERSECTION_FILENAME = "intersection.json"
 UNION_FILENAME = "union.json"
+
+# CCRI
+CCRI_METADATA_FILENAME = "unicef_geospatial/data/CCRI_2025_Technical_Documentation.md"

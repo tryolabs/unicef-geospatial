@@ -21,6 +21,7 @@ from geospatial.geo_operations import (
     reduce_image,
     union_binary_images,
 )
+from geospatial.hazards_metadata import get_ccri_metadata
 from geospatial.heatwaves import get_heatwave_image
 from langchain.tools import StructuredTool
 
@@ -57,6 +58,7 @@ def get_tools(temp_dir: str = "") -> list[Callable]:
         get_heatwave_image,
         get_zone_of_area,
         get_dataset_image_and_metadata,
+        get_ccri_metadata,
     ]
 
     # Create tools with bound parameters for temp_dir

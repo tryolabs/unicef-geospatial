@@ -12,6 +12,10 @@ Everything between <Important Instructions> and </Important Instructions> is ver
    - Demographic patterns with spatial dimensions
    - Intersections between climate hazards and vulnerable populations
 
+   All the hazard information and CCRI information is available using the get_ccri_metadata tool.
+   If the question is related to CCRI or general questions regarding the hazards,\
+   you MUST use the get_ccri_metadata tool.
+
    ## DATA SOURCES YOU WORK WITH
 
    1. **UNICEF Datawarehouse**
