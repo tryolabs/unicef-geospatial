@@ -62,12 +62,14 @@ initialize_earth_engine("ee_auth.json")
 
 # Create results file
 NUMERICAL_RESULTS_FILE = (
-    f"{RESULTS_PATH}/numerical_results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
+    f"{RESULTS_PATH}/numerical/results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
 )
 TEXTUAL_RESULTS_FILE = (
-    f"{RESULTS_PATH}/textual_results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
+    f"{RESULTS_PATH}/textual/results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
 )
 for file in [NUMERICAL_RESULTS_FILE, TEXTUAL_RESULTS_FILE]:
+    if not os.path.exists(os.path.dirname(file)):
+        os.makedirs(os.path.dirname(file))
     if os.path.exists(file):
         os.remove(file)
 
