@@ -18,7 +18,11 @@ from utils.handlers import format_messages, respond
 from utils.initialize import initialize_earth_engine
 from utils.types import Message
 
-from tests.test_data import benchmark_list, extract_number_from_response
+from tests.test_data import (
+    benchmark_list,
+    extract_number_from_response,
+    score_textual_answer,
+)
 
 load_dotenv(override=True)
 
@@ -57,27 +61,31 @@ except Exception as e:
 initialize_earth_engine("ee_auth.json")
 
 # Create results file
-RESULTS_FILE = f"{RESULTS_PATH}/results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
-if os.path.exists(RESULTS_FILE):
-    os.remove(RESULTS_FILE)
+NUMERICAL_RESULTS_FILE = (
+    f"{RESULTS_PATH}/numerical_results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
+)
+TEXTUAL_RESULTS_FILE = (
+    f"{RESULTS_PATH}/textual_results_{datetime.now().strftime('%Y%m%d_%H:%M')}.tsv"
+)
+for file in [NUMERICAL_RESULTS_FILE, TEXTUAL_RESULTS_FILE]:
+    if os.path.exists(file):
+        os.remove(file)
 
-with open(RESULTS_FILE, "w") as fh:
-    logger.info(f"Writing results to {RESULTS_FILE}")
+with open(NUMERICAL_RESULTS_FILE, "w") as fh:
+    logger.info(f"Writing numerical results to {NUMERICAL_RESULTS_FILE}")
     fh.write("correct\tquestion\tvariation\texpected\tvalue\tanswer\n")
+with open(TEXTUAL_RESULTS_FILE, "w") as fh:
+    logger.info(f"Writing textual results to {TEXTUAL_RESULTS_FILE}")
+    fh.write(
+        "question\tvariation\texpected\tanswer\tfaithfulness_score\t"
+        "faithfulness_justification\tcompleteness_score\tcompleteness_justification\t"
+        "conciseness_score\tconciseness_justification\n"
+    )
 
 
-# all_questions = {}
-# for question, answer in simple_questions.items():
-#     all_questions[question] = {"answer": answer, "category": "simple"}
-# for question, answer in medium_questions.items():
-#     all_questions[question] = {"answer": answer, "category": "medium"}
-# for question, answer in hard_questions.items():
-#     all_questions[question] = {"answer": answer, "category": "hard"}
-
-
-@pytest.mark.parametrize("question,expected,variation", benchmark_list)
+@pytest.mark.parametrize("question,expected,response_type,variation", benchmark_list)
 @pytest.mark.asyncio
-async def test_agent_question(question, expected, variation):
+async def test_agent_question(question, expected, response_type, variation):
     """Test agent with a specific question."""
     trace_id = str(uuid.uuid4())
     message = Message(role="user", content=question, trace_id=trace_id)
@@ -94,16 +102,27 @@ async def test_agent_question(question, expected, variation):
             continue
         if chunk.get("trace_id", "").startswith("r_"):
             final_answer += chunk.get("response", "")
+    if response_type == "numerical":
+        evaluate_numerical_answer(
+            "r_" + trace_id, question, expected, final_answer, variation
+        )
+    else:
+        evaluate_textual_answer(
+            "r_" + trace_id, question, expected, final_answer, variation
+        )
 
-    numerical_value = extract_number_from_response(question, final_answer)
+
+def evaluate_numerical_answer(
+    trace_id: str, question: str, expected: int, answer: str, variation: str
+) -> bool:
+    numerical_value = extract_number_from_response(question, answer)
     if numerical_value is None:
         is_correct = False
     else:
         tolerance = expected * 0.01
         is_correct = abs(numerical_value - expected) <= tolerance
-
-    with open(RESULTS_FILE, "a+") as fh:
-        answer = final_answer.replace("\n", "||")
+    with open(NUMERICAL_RESULTS_FILE, "a+") as fh:
+        answer = answer.replace("\n", "||")
         fh.write(
             f"{is_correct}\t{question}\t{variation}\t{expected}\t{numerical_value}\t{answer}\n"
         )
@@ -112,7 +131,7 @@ async def test_agent_question(question, expected, variation):
         trace_id=trace_id,
         name="answer_correctness",
         value="correct" if is_correct else "incorrect",
-        comment=f"Expected: {expected}, Got: {final_answer}",
+        comment=f"Expected: {expected}, Got: {answer}",
     )
 
     assert (
@@ -120,3 +139,40 @@ async def test_agent_question(question, expected, variation):
     ), f"Answer doesn't match expected value for question: {question}\n\
         Expected: {expected}\nGot: {numerical_value}\n\
         Full answer: {answer}"
+
+
+def evaluate_textual_answer(
+    trace_id: str, question: str, expected: str, answer: str, variation: str
+) -> bool:
+    result = score_textual_answer(question, expected, answer)
+
+    with open(TEXTUAL_RESULTS_FILE, "a+") as fh:
+        fh.write(
+            f"{question}\t{variation}\t{expected}\t{answer}\t"
+            f"{result.faithfulness.result}\t{result.faithfulness.justification}\t"
+            f"{result.completeness.result}\t{result.completeness.justification}\t"
+            f"{result.conciseness.result}\t{result.conciseness.justification}\n"
+        )
+
+    langfuse.score(
+        trace_id=trace_id,
+        name="faithfulness",
+        value=result.faithfulness.result,
+        comment=result.faithfulness.justification,
+    )
+
+    langfuse.score(
+        trace_id=trace_id,
+        name="completeness",
+        value=result.completeness.result,
+        comment=result.completeness.justification,
+    )
+
+    langfuse.score(
+        trace_id=trace_id,
+        name="conciseness",
+        value=result.conciseness.result,
+        comment=result.conciseness.justification,
+    )
+
+    assert True
