@@ -32,32 +32,33 @@ class AppState:
 
         @self.app.middleware("http")
         async def ip_filter_middleware(request: Request, call_next):
-            frontend_origin = os.getenv("FRONTEND_ORIGIN", "")
-            frontend_ip = None
+            frontend_origins = os.getenv("FRONTEND_ORIGIN", "").split(",")
+            allowed_hostnames_ips = []
 
-            # Parse the frontend origin to extract the hostname
-            if frontend_origin:
-                parsed_url = urlparse(frontend_origin)
-                hostname = parsed_url.hostname
+            if frontend_origins:
+                for origin_url_str in frontend_origins:
+                    parsed_url = urlparse(origin_url_str.strip())
+                    hostname = parsed_url.hostname
+                    if hostname:
+                        allowed_hostnames_ips.append(hostname)
+                        try:
+                            ip_address = socket.gethostbyname(hostname)
+                            if ip_address not in allowed_hostnames_ips:
+                                allowed_hostnames_ips.append(ip_address)
+                        except socket.gaierror:
+                            self.logger.warning(
+                                f"Could not resolve hostname: {hostname} from FRONTEND_ORIGIN"
+                            )
 
-                if hostname:
-                    # Resolve hostname to IP
-                    try:
-                        frontend_ip = socket.gethostbyname(hostname)
-                    except socket.gaierror:
-                        self.logger.warning(f"Could not resolve hostname: {hostname}")
-
-            # Always allow localhost for development
-            allowed_ips = ["127.0.0.1", "localhost"]
-            if frontend_ip:
-                allowed_ips.append(frontend_ip)
+            if "localhost" not in allowed_hostnames_ips:
+                allowed_hostnames_ips.append("localhost")
 
             client_ip = request.client.host if request.client else None
 
             # Check if client IP is in allowed list
-            if client_ip not in allowed_ips:
+            if client_ip not in allowed_hostnames_ips:
                 self.logger.warning(
-                    f"Blocked request from unauthorized IP: {client_ip}"
+                    f"Blocked request from unauthorized IP/hostname: {client_ip}. Allowed: {allowed_hostnames_ips}"
                 )
                 return JSONResponse(
                     status_code=403,
@@ -68,7 +69,7 @@ class AppState:
 
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=[os.getenv("FRONTEND_ORIGIN")],
+            allow_origins=os.getenv("FRONTEND_ORIGIN").split(","),
             allow_credentials=True,
             allow_methods=["GET", "POST"],
             allow_headers=["Authorization", "Content-Type"],
