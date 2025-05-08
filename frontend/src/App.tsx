@@ -61,7 +61,7 @@ function App() {
   async function handleLogin(credentials: LoginCredentials): Promise<void> {
     setLoginError(null);
     try {
-      const data = await AuthService.login(credentials);
+      await AuthService.login(credentials);
       setIsAuthenticated(true);
     } catch (error) {
       console.error("Login failed:", error);
