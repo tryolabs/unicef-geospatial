@@ -34,7 +34,6 @@ def initialize_earth_engine(path_to_ee_auth: str) -> None:
     email = key_dict["client_email"]
 
     auth = ee.ServiceAccountCredentials(email=email, key_data=key_file)
-    ee.Authenticate()
     ee.Initialize(auth)
 
 
