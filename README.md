@@ -53,6 +53,8 @@ This will start a local server at `http://127.0.0.1:5173`.
 
 The application includes JWT authentication with predefined users. The users are saved in the `users.json` file.
 
+There is a file example of the `users.json` in the `users_example.json` file.
+
 Authentication can be enabled/disabled by setting the `VITE_AUTH_ENABLED` environment variable in the frontend's `.env` file.
 
 ### Secrets
@@ -157,7 +159,3 @@ This will log the results in langfuse cloud and create a local file named [`resu
 - `interact_geospatial.py`: Research on how to use langchain agents to interact with a geospatial data.
 - `pandas_ai.py`: Research on how to use pandas-ai to interact with a unicef dataframe.
 - `unicef_geospatial_ee.py`: Research on how to use google earth engine to interact with a geospatial data, creating an interactive map.
-
-```
-
-```
