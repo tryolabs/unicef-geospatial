@@ -3,10 +3,9 @@ data/
 .DS_Store
 *.pyc
 unicef_geospatial/data/
-ee_auth.json
 research/output/
 tests/results/
-users.json
+.secrets/
 
 # Frontend
 # Logs
