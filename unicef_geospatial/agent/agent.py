@@ -1,11 +1,9 @@
 import os
-from functools import partial
-from pathlib import Path
 from typing import AsyncGenerator
 
 import litellm
 from langchain.chat_models.base import BaseChatModel
-from langchain.tools import BaseTool, StructuredTool
+from langchain.tools import BaseTool
 from langchain_community.chat_models import ChatLiteLLM
 from langchain_core.messages import AIMessageChunk
 from langfuse.decorators import langfuse_context, observe
@@ -32,6 +30,7 @@ def get_llm(temperature: float, session_id: str, trace_id: str) -> BaseChatModel
     return ChatLiteLLM(
         model=os.getenv("MODEL_NAME", "gpt-4o-mini"),
         temperature=temperature,
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
         model_kwargs={
             "metadata": {
                 "session_id": session_id,

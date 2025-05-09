@@ -1,0 +1,52 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: unicef_geospatial/Dockerfile
+    ports:
+      - "${BACKEND_PORT_HOST:-8000}:${BACKEND_PORT_CONTAINER:-8000}"
+    env_file:
+      - .env
+    environment:
+      BACKEND_PORT: ${BACKEND_PORT_CONTAINER:-8000}
+    volumes:
+      - ./unicef_geospatial:/app/unicef_geospatial # For development
+      - ./run.py:/app/run.py # For development
+    secrets:
+      - ee_auth_secret
+      - users
+      - llm_api_key
+      - langfuse_secret_key
+    networks:
+      - unicef_net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT_HOST:-5173}:${FRONTEND_PORT_CONTAINER:-5173}"
+    environment:
+      # Nginx in the frontend Dockerfile listens on 5173 by default
+      # The VITE_BACKEND_URL should point to the API service name on the Docker network
+      VITE_BACKEND_URL: http://api:${BACKEND_PORT_CONTAINER:-8000}
+    depends_on:
+      - api
+    networks:
+      - unicef_net
+    restart: unless-stopped
+
+networks:
+  unicef_net:
+    driver: bridge
+
+secrets:
+  ee_auth_secret:
+    file: ./.secrets/ee_auth.json 
+  users:
+    file: ./.secrets/users.json
+  llm_api_key:
+    file: ./.secrets/openai_api_key.txt
+  langfuse_secret_key:
+    file: ./.secrets/langfuse_secret_key.txt

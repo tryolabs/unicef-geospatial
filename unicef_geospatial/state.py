@@ -15,6 +15,12 @@ class AppState:
         self.app = FastAPI()
         self.logger = get_logger(__name__)
 
+        with open(os.getenv("PATH_TO_LANGFUSE_SECRET_KEY"), "r") as f:
+            os.environ["LANGFUSE_SECRET_KEY"] = f.read()
+
+        with open(os.getenv("PATH_TO_LLM_API_KEY"), "r") as f:
+            os.environ["OPENAI_API_KEY"] = f.read()
+
         self._init_app()
 
     def _init_app(self) -> None:

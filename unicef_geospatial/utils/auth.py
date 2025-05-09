@@ -38,9 +38,7 @@ class UserInDB(User):
 def get_users():
     """Load users from the users.json file."""
     try:
-        with open(
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "users.json"), "r"
-        ) as f:
+        with open(os.getenv("USERS_FILE"), "r") as f:
             return json.load(f)
     except FileNotFoundError:
         # Return empty list if file not found

@@ -1,0 +1,38 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.nox/
+.tox/
+.venv/
+env/
+venv/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE / OS specific
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+
+# Other
+*.log 
