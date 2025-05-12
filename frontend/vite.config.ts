@@ -16,9 +16,6 @@ export default defineConfig(({ mode }) => {
     port = parseInt(env.VITE_PORT, 10);
   }
 
-  console.log(`Server will start on host: ${host} and port: ${port}`);
-  console.log(`API requests will be proxied to: ${backendUrl}`);
-
   return {
     plugins: [react()],
     server: {
