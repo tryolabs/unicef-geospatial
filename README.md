@@ -13,8 +13,7 @@ https://github.com/user-attachments/assets/c4d4a8e6-a248-4231-b9dc-abbe9f13e11f
 
 ### Installing dependencies
 
-This project is run using Docker and Docker Compose. Ensure you have Docker Desktop (or Docker Engine with the Compose plugin) installed on your system.
-Docker will handle the installation of all necessary dependencies, including the Google Cloud CLI, as defined in the `Dockerfile` and `docker-compose.yml` files.
+This project is run using Docker and Docker Compose. Ensure you have Docker installed on your system. Docker will handle the installation of all necessary dependencies
 
 You will also need to set up the required secrets as detailed in the "Secrets" section below.
 
@@ -38,57 +37,22 @@ To stop the services:
 docker-compose down
 ```
 
-### Authentication
-
-The application includes JWT authentication with predefined users. The users are saved in the `users.json` file insi.
-
-There is a file example of the `users.json` in the `users_example.json` file.
-
-Authentication can be enabled/disabled by setting the `VITE_AUTH_ENABLED` environment variable in the frontend's `.env` file.
-
 ### Secrets
 
 The project uses a combination of a root `.env` file for general configuration and a `secrets` directory for sensitive files managed by Docker Compose.
-
-First, copy the example `.env.example` file to a new file called `.env` in the project root:
-
-```bash
-cp .env.example .env
-```
-
-The `.env` file should be located in the root of the project and contain the following variables. This file is used by `docker-compose` to set environment variables for the services and is also copied into the API service image.
-
-- `OPENAI_API_KEY`: The API key for OpenAI.
-- `MODEL_NAME`: The name of the OpenAI model to use.
-- `TEMPERATURE = 0.0`: The temperature of the agent.
-- `LANGFUSE_PUBLIC_KEY`: The public key for the langfuse cloud.
-- `LANGFUSE_SECRET_KEY`: The secret key for the langfuse cloud.
-- `LANGFUSE_HOST`: The host URL for the langfuse cloud.
-- `LANGFUSE_PROJECT_ID`: The project id for the langfuse cloud.
-- `BACKEND_HOST`: The API host address (used by the application if needed, typically `0.0.0.0` inside Docker).
-- `BACKEND_PORT`: The API port number (used by the application if needed, typically `8000` inside Docker).
-- `BACKEND_PORT_HOST`: The host port to map to the backend container's port (default: 8000).
-- `BACKEND_PORT_CONTAINER`: The backend container's internal port (default: 8000).
-- `FRONTEND_PORT_HOST`: The host port to map to the frontend container's port (default: 5173).
-- `FRONTEND_PORT_CONTAINER`: The frontend container's internal port (default: 5173).
-- `RELOAD`: Whether to reload the API on change. Recommended for development environment.
-- `PATH_TO_EE_AUTH`: Path to the Earth Engine authentication file. When running with Docker, set this to `/run/secrets/ee_auth_secret`.
-- `JWT_SECRET_KEY`: Secret key for JWT token generation (required for authentication).
-- `JWT_ALGORITHM`: Algorithm used for JWT token generation (default is HS256).
-- `ACCESS_TOKEN_EXPIRE_MINUTES`: Expiration time for JWT tokens in minutes.
 
 **Docker Secrets Directory**
 
 `docker-compose.yml` expects certain sensitive files to be present in a `./.secrets/` directory in the project root. Create this directory if it doesn't exist. There is a directory example with the needed secrets in the `./.secrets.example/` directory
 
 ```bash
-cp -r .secrets.example ./secrets
+cp -r .secrets.example ./.secrets
 ```
 
-The following files must be placed inside the `./secrets/` directory:
+The following files must be placed inside the `./.secrets/` directory:
 
 1.  **Earth Engine Authentication File**:
-    The Google Earth Engine service account credentials file should be named `ee_auth.json` and placed in `./secrets/ee_auth.json`.
+    The Google Earth Engine service account credentials file should be named `ee_auth.json` and placed in `./.secrets/ee_auth.json`.
     It should look like this:
 
     ```json
@@ -110,7 +74,7 @@ The following files must be placed inside the `./secrets/` directory:
     Remember to set `PATH_TO_EE_AUTH=/run/secrets/ee_auth_secret` in your root `.env` file so the application can find this file inside the container.
 
 2.  **User Definitions File**:
-    The `users.json` file should be placed in `./.secrets/users.json`. This file is used for JWT authentication.
+    The `users.json` file should be placed in `./.secrets/users.json`. This file is used for JWT authentication, and should have pairs of `username`, `hashed_password`.
 
 3.  **OpenAI API Key File**:
     Create a file named `openai_api_key.txt` in the `./.secrets/` directory. This file should contain your OpenAI API key as plain text.
@@ -118,12 +82,39 @@ The following files must be placed inside the `./secrets/` directory:
     Ensure the `PATH_TO_LLM_API_KEY` variable is also set in your root `.env` file.
 
 4.  **Langfuse Secret Key File**:
-    Create a file named `langfuse_secret_key.txt` in the `./secrets/` directory. This file should contain your Langfuse secret key as plain text.
-    Example: `./secrets/langfuse_secret_key.txt`
+    Create a file named `langfuse_secret_key.txt` in the `./.secrets/` directory. This file should contain your Langfuse secret key as plain text.
+    Example: `./.secrets/langfuse_secret_key.txt`
     ```
     yourLangfuseSecretKeyHere
     ```
     Ensure the `PATH_TO_LANGFUSE_SECRET_KEY` variable is also set in your root `.env` file.
+
+Then, copy the example `.env.example` file to a new file called `.env` in the project root:
+
+```bash
+cp .env.example .env
+```
+
+The `.env` file should be located in the root of the project and contain the following variables. This file is used by `docker-compose` to set environment variables for the services and is also copied into the API service image.
+
+- `PATH_TO_LLM_API_KEY`: The path to the secret API key.
+- `MODEL_NAME`: The name of the OpenAI model to use.
+- `TEMPERATURE`: The temperature of the agent.
+- `LANGFUSE_PUBLIC_KEY`: The public key for the langfuse cloud.
+- `PATH_TO_LANGFUSE_SECRET_KEY`: The path to the secret key for the langfuse cloud.
+- `LANGFUSE_HOST`: The host URL for the langfuse cloud.
+- `LANGFUSE_PROJECT_ID`: The project id for the langfuse cloud.
+- `BACKEND_HOST`: The API host address.
+- `BACKEND_PORT`: The API port number.
+- `BACKEND_PORT_HOST`: The host port to map to the backend container's port.
+- `BACKEND_PORT_CONTAINER`: The backend container's internal port.
+- `RELOAD`: Whether to reload the API on change. Recommended for development environment.
+- `FRONTEND_ORIGIN`: Allowed frontend origins.
+- `PATH_TO_EE_AUTH`: Path to the Earth Engine authentication file. When running with Docker, set this to `/run/secrets/ee_auth_secret`.
+- `JWT_SECRET_KEY`: Secret key for JWT token generation (required for authentication).
+- `JWT_ALGORITHM`: Algorithm used for JWT token generation (default is HS256).
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: Expiration time for JWT tokens in minutes.
+- `PATH_TO_USERS_FILE`: The path to the secret users file.
 
 **Frontend Environment Variables**
 
@@ -141,6 +132,14 @@ The frontend `.env` must include:
 - `VITE_PORT`: The port number for the frontend server
 - `VITE_AUTH_ENABLED`: Whether to enable authentication (true/false)
 
+### Authentication
+
+The application includes JWT authentication with predefined users. The users are saved in the `users.json` file insi.
+
+There is a file example of the `users.json` in the `users_example.json` file.
+
+Authentication can be enabled/disabled by setting the `VITE_AUTH_ENABLED` environment variable in the frontend's `.env` file.
+
 ### Accessing the logs
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
@@ -156,6 +155,8 @@ To run the benchmark, after installing the dependencies, run the following comma
 This will log the results in langfuse cloud and create a local file named [`results.tsv`](results.tsv)
 
 ### Project structure
+
+TODO: change this
 
 - `unicef_geospatial/`: The main project for working with geospatial data.
 
@@ -173,9 +174,13 @@ This will log the results in langfuse cloud and create a local file named [`resu
 
 #### Notebooks
 
+TODO: change this
+
 - `interactive_map.ipynb`: Ask questions in natural language about heatwave data.
 
 #### Research
+
+TODO: change this
 
 - `api_research.py`: Research on the unicef api, transform the sdmx-json to pandas dataframe.
 - `ee_upload_images.py`: Upload heatwave data to google earth engine.
