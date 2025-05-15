@@ -4,7 +4,6 @@ import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
 from geospatial.io import save_ee_object
-from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
@@ -16,7 +15,6 @@ from utils.types import AREA_TYPES
 logger = get_logger(__name__)
 
 
-@tool
 def get_zone_of_area(
     area_name: str, area_type: AREA_TYPES, temp_dir: str = ""
 ) -> dict[str, str]:

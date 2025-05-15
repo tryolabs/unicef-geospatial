@@ -1,9 +1,7 @@
 import os
-from pathlib import Path
 
 import ee
 from geospatial.geo_operations import save_ee_object
-from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import HEATWAVE_DATASET, HEATWAVE_FILENAME
 from utils.types import DECADES, METRICS
@@ -11,7 +9,6 @@ from utils.types import DECADES, METRICS
 logger = get_logger(__name__)
 
 
-@tool
 def get_heatwave_image(
     metric: METRICS,
     decade: DECADES,

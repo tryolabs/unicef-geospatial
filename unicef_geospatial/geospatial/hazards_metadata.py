@@ -1,9 +1,7 @@
-from langchain.tools import tool
 from utils.constants import BASE_ASSETS_PATH, CCRI_METADATA_FILENAME
 from utils.types import ALL_DATASETS, DatasetMetadata
 
 
-@tool
 def get_ccri_metadata(temp_dir: str = "") -> str:
     """Get the metadata for the CCRI dataset.
 

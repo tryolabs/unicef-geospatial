@@ -8,7 +8,6 @@ from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
 from geospatial.earth_engine import get_dataset_metadata
 from geospatial.io import image_to_html, load_vector_data, save_ee_object
-from langchain.tools import tool
 from logging_config import get_logger
 from utils.constants import INTERSECTION_FILENAME, UNION_FILENAME
 from utils.types import ALL_DATASETS, REDUCERS
@@ -16,7 +15,6 @@ from utils.types import ALL_DATASETS, REDUCERS
 logger = get_logger(__name__)
 
 
-@tool
 def get_dataset_image_and_metadata(
     dataset: ALL_DATASETS,
     temp_dir: str = "",
@@ -60,7 +58,6 @@ def get_dataset_image_and_metadata(
     }
 
 
-@tool
 def mask_image(
     image_filename: str, mask_image_filename: str, temp_dir: str = ""
 ) -> dict[str, str]:
@@ -123,7 +120,6 @@ def mask_image(
     }
 
 
-@tool
 def filter_image_by_threshold(
     image_filename: str, threshold: float, temp_dir: str = ""
 ) -> dict[str, str | dict]:
@@ -174,7 +170,6 @@ def filter_image_by_threshold(
     }
 
 
-@tool
 def union_binary_images(paths_to_binary_images: list[str], temp_dir: str = "") -> dict:
     """Union two binary images.
 
@@ -217,7 +212,6 @@ def union_binary_images(paths_to_binary_images: list[str], temp_dir: str = "") -
     }
 
 
-@tool
 def intersect_binary_images(
     paths_to_binary_images: list[str], temp_dir: str = ""
 ) -> dict:
@@ -259,7 +253,6 @@ def intersect_binary_images(
     }
 
 
-@tool
 def intersect_feature_collections(
     paths_to_feature_collections: list[str], temp_dir: str = ""
 ) -> dict:
@@ -319,7 +312,6 @@ def intersect_feature_collections(
     }
 
 
-@tool
 def merge_feature_collections(
     paths_to_feature_collections: list[str], temp_dir: str = ""
 ) -> dict:
@@ -374,7 +366,6 @@ def merge_feature_collections(
     }
 
 
-@tool
 def reduce_image(
     image_filename: str,
     feature_collection_filename: str,
@@ -429,7 +420,6 @@ def reduce_image(
     }
 
 
-@tool
 def build_map(
     image_filenames: list[str],
     feature_collection_filename: str,

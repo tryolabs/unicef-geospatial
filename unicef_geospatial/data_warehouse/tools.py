@@ -7,12 +7,10 @@ from data_warehouse.unicef_api import (
     get_indicators_information,
 )
 from geospatial.demographic import get_country_code
-from langchain.tools import tool
 
 logger = getLogger(__name__)
 
 
-@tool
 def get_all_indicators_for_dataflow(
     dataflow_id: str,
 ) -> dict[str, str]:
@@ -32,7 +30,6 @@ def get_all_indicators_for_dataflow(
     }
 
 
-@tool
 def get_available_dataflows_info() -> str:
     """Get the available dataflows and their descriptions.
 
@@ -46,7 +43,6 @@ def get_available_dataflows_info() -> str:
     }
 
 
-@tool
 def get_data_for_dataflow(
     dataflow_id: str,
     ref_areas: str,
