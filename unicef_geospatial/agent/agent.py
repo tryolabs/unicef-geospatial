@@ -1,22 +1,19 @@
 import os
-from typing import AsyncGenerator
+
+# TODO: remove el Any, check below the type
+from typing import Any, AsyncGenerator, Callable
 
 import litellm
-from langchain.chat_models.base import BaseChatModel
-from langchain.tools import BaseTool
-from langchain_community.chat_models import ChatLiteLLM
-from langchain_core.messages import AIMessageChunk
 from langfuse.decorators import langfuse_context, observe
-from langgraph.graph.graph import CompiledGraph
-from langgraph.prebuilt import create_react_agent
-from utils.initialize import get_tools
-from utils.prompts import system_prompt
+from llama_index.core.agent.workflow import AgentStream, ReActAgent, ToolCallResult
+from llama_index.llms.litellm import LiteLLM
+from utils.prompts import header_prompt, system_prompt
 
 litellm.success_callback = ["langfuse"]
 litellm.failure_callback = ["langfuse"]
 
 
-def get_llm(temperature: float, session_id: str, trace_id: str) -> BaseChatModel:
+def get_llm(temperature: float, session_id: str, trace_id: str) -> LiteLLM:
     """Get the LLM model.
 
     Args:
@@ -27,7 +24,7 @@ def get_llm(temperature: float, session_id: str, trace_id: str) -> BaseChatModel
     Returns:
         A configured ChatLiteLLM instance
     """
-    return ChatLiteLLM(
+    return LiteLLM(
         model=os.getenv("MODEL_NAME", "gpt-4o-mini"),
         temperature=temperature,
         openai_api_key=os.getenv("OPENAI_API_KEY"),
@@ -44,37 +41,40 @@ def get_llm(temperature: float, session_id: str, trace_id: str) -> BaseChatModel
 def create_agent(
     session_id: str,
     trace_id: str,
-    temp_dir: str = "",
     temperature: float = 0.0,
-    tools: list[BaseTool] | None = None,
+    tools: list[Callable] | None = None,
     system_prompt: str = system_prompt,
-) -> CompiledGraph:
+) -> ReActAgent:
     """Create a LangGraph ReAct agent with the given LLM, tools and system prompt.
 
     Args:
         session_id: The session ID to use for the agent
         trace_id: The trace ID for tracking in Langfuse
         temperature: The temperature to use for the agent
-        temp_dir: str ="" to temporary directory for storing files
         tools: List of tools available to the agent
         system_prompt: System prompt to provide context to the agent
 
     Returns:
         A compiled LangGraph agent ready to be invoked
     """
-    if tools is None:
-        tools = get_tools(temp_dir)
-
-    return create_react_agent(
+    agent = ReActAgent(
         tools=tools,
-        model=get_llm(temperature, session_id, trace_id),
-        state_modifier=system_prompt,
+        llm=get_llm(temperature, session_id, trace_id),
+        system_prompt=system_prompt,
     )
+
+    agent.update_prompts(
+        {
+            "react_header": header_prompt,
+        }
+    )
+
+    return agent
 
 
 @observe
 async def run_agent(
-    agent: CompiledGraph,
+    agent: ReActAgent,
     inputs: dict,
     tags: list[str] = [],
 ) -> AsyncGenerator[tuple[dict, str], None]:
@@ -89,26 +89,11 @@ async def run_agent(
         Chunks of the agent's response stream
     """
     langfuse_context.update_current_trace(tags=tags)
-    for chunk in agent.stream(inputs, stream_mode="messages"):
+    handler = agent.run(str(inputs))
+
+    async for chunk in handler.stream_events():
         yield chunk
 
+    response = await handler
 
-async def extract_response_from_chain_of_thought(
-    messages: dict, full_response: str, session_id: str, trace_id: str
-) -> AsyncGenerator[AIMessageChunk, None]:
-    llm = get_llm(0.0, session_id, trace_id)
-    prompt = """You are a helpful assistant.
-    You are given the response from an agent in several steps of the thinking process and
-    a conversation history.
-    Your job is to generate a final response to the conversation history based on the
-    response from the agent. It must be concise and answer the question.
-    You can only use the information provided in the response from the agent.
-    Do not add any information that is not provided in the response from the agent.
-    Here is the conversation history:
-    {conversation_history}
-    Here is the response from the agent:
-    {response}
-    """
-    prompt = prompt.format(conversation_history=messages, response=full_response)
-    for chunk in llm.stream(prompt):
-        yield chunk
+    yield response
