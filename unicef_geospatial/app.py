@@ -15,7 +15,7 @@ from utils.auth import (
     get_current_user,
 )
 from utils.constants import BASE_PATH
-from utils.handlers import format_messages, respond
+from utils.handlers import format_messages, handle_response
 from utils.output import format_dict
 from utils.types import Chat
 
@@ -78,7 +78,7 @@ async def ask(
     app_state.logger.info("Running agent with inputs %s", format_dict(messages))
 
     return StreamingResponse(
-        respond(
+        handle_response(
             messages,
             trace_id,
             session_id,

@@ -11,12 +11,12 @@ class Message(BaseModel):
 
 
 class ReturnChunk(BaseModel):
-    response: str
-    tool_call: str
     trace_id: str
-    is_html: bool
-    html_content: str
-    is_finished: bool
+    response: str = ""
+    tool_call: str = ""
+    is_html: bool = False
+    html_content: str = ""
+    is_finished: bool = False
 
 
 class Chat(BaseModel):
