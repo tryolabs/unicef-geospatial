@@ -27,8 +27,8 @@ def get_zone_of_area(
     Earth Engine and saves it as a GeoJSON file.
 
     Args:
-        area_name: Name of the area to get boundary for. Must match names in the
-            corresponding Earth Engine dataset.
+        area_name: Name of the area to get boundary for.
+                If it is a country, it should be the ISO 3166-1 alpha-3 code.
         area_type: Type of area - either 'country' or 'admin1'. Determines which
             dataset to query.
 

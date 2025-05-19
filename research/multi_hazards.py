@@ -13,7 +13,7 @@ os.environ["PYTHONPATH"] = str(Path(__file__).parent.parent) + "/unicef_geospati
 import ee
 import geemap
 
-auth_path = Path("../ee_auth.json")
+auth_path = Path("../.secrets/ee_auth.json")
 auth_file = auth_path.read_text()
 auth_dict = json.loads(auth_file)
 email = auth_dict["client_email"]
