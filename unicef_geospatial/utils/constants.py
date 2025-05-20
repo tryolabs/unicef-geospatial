@@ -15,7 +15,7 @@ EARTH_GEOMETRY_CRS = "EPSG:4326"
 BASE_PATH = "unicef_geospatial/data"
 MAP_FILENAME = "map_data.html"
 HEATWAVE_FILENAME = "heatwave_image.json"
-feature_collection_filename = "map_zones_feature_collection.json"
+FEATURE_COLLECTION_FILENAME = "map_zones_feature_collection.json"
 INTERSECTION_FILENAME = "intersection.json"
 UNION_FILENAME = "union.json"
 

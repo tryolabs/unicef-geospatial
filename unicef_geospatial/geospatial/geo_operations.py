@@ -344,8 +344,8 @@ def merge_feature_collections(
         ValueError: If no feature collections are provided or if any input is an Image
 
     Use case:
-        Combine different hazard zones into a single dataset for analysis:
-        merge_feature_collections(["flood_zones.json", "drought_zones.json"])
+        Combine different country areas into a single feature collection.
+        merge_feature_collections(["uruguay.json", "argentina.json"])
 
     Note:
         Do not provide a value for temp_dir, it will be handled automatically.

@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pycountry
 from ee.featurecollection import FeatureCollection
@@ -10,7 +9,7 @@ from logging_config import get_logger
 from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
     COUNTRY_BOUNDRIES_DATASET,
-    feature_collection_filename,
+    FEATURE_COLLECTION_FILENAME,
 )
 from utils.types import AREA_TYPES
 
@@ -52,10 +51,12 @@ def get_zone_of_area(
         admin_level_1_boundries = FeatureCollection(ADMIN_LEVEL_1_BOUNDRIES_DATASET)
         area_boundry = admin_level_1_boundries.filter(Filter.eq("shapeName", area_name))
 
-    save_ee_object(os.path.join(temp_dir, feature_collection_filename), area_boundry)
+    filename = FEATURE_COLLECTION_FILENAME.replace(".json", f"_{area_name}.json")
+
+    save_ee_object(os.path.join(temp_dir, filename), area_boundry)
 
     return {
-        "value": feature_collection_filename,
+        "value": filename,
         "input_arguments": {"area_name": area_name, "area_type": area_type},
     }
 
