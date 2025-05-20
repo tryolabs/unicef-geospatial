@@ -53,15 +53,6 @@ DATASETS_METADATA = {
         source_name="Joint Research Center",
         source_url="https://data.jrc.ec.europa.eu/dataset/9e5ba6f1-8d03-4834-8488-2353e504560f",
     ),
-    ALL_DATASETS.PLUVIAL_FLOOD: DatasetMetadata(
-        asset_id=f"{BASE_ASSETS_PATH}/JBA_FLSW_resampled",
-        image_filename="pluvial_flood_image.json",
-        threshold=0,
-        description="Zones of pluvial flood. The value indicates the depth in meters.",
-        mosaic=False,
-        source_name="TBD",
-        source_url="TBD",
-    ),
     ALL_DATASETS.TROPICAL_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/storm_giri_rp100",
         image_filename="storm_image.json",

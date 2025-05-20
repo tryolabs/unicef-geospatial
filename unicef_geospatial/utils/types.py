@@ -38,7 +38,6 @@ class DatasetMetadata(BaseModel):
 class ALL_DATASETS(str, Enum):
     RIVER_FLOOD = "river_flood"
     COASTAL_FLOOD = "coastal_flood"
-    PLUVIAL_FLOOD = "pluvial_flood"
     CHILDREN_POPULATION = "children_population"
     TROPICAL_STORM = "tropical_storm"
     AGRICULTURAL_DROUGHT = "agricultural_drought"
