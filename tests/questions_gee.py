@@ -69,12 +69,6 @@ data_single_hazard = (
             "Uruguay": 529360,
             "Colombia": 19277,
         },
-        "pluvial floods": {
-            "Angola": 8671705,
-            "Nicaragua": 1178148,
-            "Uruguay": 613335,
-            "Colombia": 8158365,
-        },
         "river floods": {
             "Angola": 714157,
             "Nicaragua": 38704,
