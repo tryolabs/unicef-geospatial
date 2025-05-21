@@ -21,3 +21,4 @@ UNION_FILENAME = "union.json"
 
 # CCRI
 CCRI_METADATA_FILENAME = "unicef_geospatial/data/CCRI_2025_Technical_Documentation.md"
+CCRI_METADATA_PERSIST_DIR = "unicef_geospatial/data/vector_index"

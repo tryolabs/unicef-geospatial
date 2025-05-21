@@ -1,26 +1,40 @@
-from utils.constants import BASE_ASSETS_PATH, CCRI_METADATA_FILENAME
+from llama_index.core import StorageContext, load_index_from_storage
+from llama_index.core.retrievers import VectorIndexRetriever
+from utils.constants import (
+    BASE_ASSETS_PATH,
+    CCRI_METADATA_PERSIST_DIR,
+)
 from utils.types import ALL_DATASETS, DatasetMetadata
 
+vector_index = load_index_from_storage(
+    StorageContext.from_defaults(persist_dir=CCRI_METADATA_PERSIST_DIR)
+)
 
-def get_ccri_metadata(temp_dir: str = "") -> str:
+
+def get_ccri_metadata(query: str, temp_dir: str = "") -> str:
     """Get the metadata for the CCRI dataset.
 
-    This function reads and returns the contents of the CCRI technical documentation file.
+    The documentation contains detailed information about the CCRI methodology,
+    data sources, and technical specifications for the Climate Change Risk Index.
+
+    This function uses a vector index to search the CCRI technical documentation.
+    It returns the most relevant information from the documentation based on the query.
 
     Args:
+        query: The query to search the CCRI technical documentation.
         temp_dir: Temporary directory path. This parameter is not used but is required
                  for compatibility with the tool framework.
 
     Returns:
-        The complete text content of the CCRI technical documentation as a string.
-
-    Note:
-        The documentation contains detailed information about the CCRI methodology,
-        data sources, and technical specifications for the Climate Change Risk Index.
+        The most relevant chunks from the CCRI technical documentation as a string.
     """
-    with open(CCRI_METADATA_FILENAME, "r") as f:
-        metadata = f.read()
-    return metadata
+    retriever = VectorIndexRetriever(
+        index=vector_index,
+        similarity_top_k=5,
+    )
+
+    response = retriever.retrieve(query)
+    return "\n".join([r.text for r in response])
 
 
 # Earth Engine assets
