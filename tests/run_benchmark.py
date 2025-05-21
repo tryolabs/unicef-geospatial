@@ -27,11 +27,19 @@ from tests.test_data import (
 load_dotenv(override=True)
 
 logger = get_logger(__name__)
+
+with open(os.environ["PATH_TO_LANGFUSE_SECRET_KEY"], "r") as f:
+    secret_key = f.read().strip()
+
 langfuse = Langfuse(
-    secret_key=os.environ["LANGFUSE_SECRET_KEY"],
+    secret_key=secret_key,
     public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
     host=os.environ["LANGFUSE_HOST"],
 )
+
+
+with open(os.environ["PATH_TO_LLM_API_KEY"], "r") as f:
+    os.environ["OPENAI_API_KEY"] = f.read().strip()
 
 # Define path for test results and session ID file
 RESULTS_PATH = "tests/results"
@@ -58,7 +66,7 @@ except Exception as e:
     session_id = str(uuid.uuid4())
     logger.info(f"Using fallback session ID: {session_id}")
 
-initialize_earth_engine("ee_auth.json")
+initialize_earth_engine(os.environ["PATH_TO_EE_AUTH"])
 
 # Create results file
 NUMERICAL_RESULTS_FILE = (

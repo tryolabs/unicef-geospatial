@@ -1,106 +1,106 @@
 from tests.types import BechmarkQuestion
 
 # Multi-Hazard Questions
-data_single_hazard = (
-    {
-        "agricultural drought": {
-            "Angola": 4099009,
-            "Nicaragua": 878626,
-            "Uruguay": 233589,
-            "Colombia": 3149198,
-        },
-        "air pollution": {
-            "Angola": 16338870,
-            "Nicaragua": 1976847,
-            "Uruguay": 604115,
-            "Colombia": 11212840,
-        },
-        "coastal floods": {
-            "Angola": 6909,
-            "Nicaragua": 3977,
-            "Uruguay": 910,
-            "Colombia": 22714,
-        },
-        "drought SPEI": {
-            "Angola": 573838,
-            "Nicaragua": 6326,
-            "Uruguay": 119691,
-            "Colombia": 2361523,
-        },
-        "drought SPI": {
-            "Angola": 114626,
-            "Nicaragua": 6326,
-            "Uruguay": 115915,
-            "Colombia": 1438632,
-        },
-        "extreme heat": {
-            "Angola": 2360001,
-            "Nicaragua": 574883,
-            "Uruguay": 0,
-            "Colombia": 1272004,
-        },
-        "fire frequency": {
-            "Angola": 5394005,
-            "Nicaragua": 89740,
-            "Uruguay": 120480,
-            "Colombia": 157301,
-        },
-        "fire intensity": {
-            "Angola": 1154385,
-            "Nicaragua": 72040,
-            "Uruguay": 60119,
-            "Colombia": 589614,
-        },
-        "heatwave duration": {
-            "Angola": 13274160,
-            "Nicaragua": 1974811,
-            "Uruguay": 0,
-            "Colombia": 9452636,
-        },
-        "heatwave frequency": {
-            "Angola": 13974860,
-            "Nicaragua": 1971445,
-            "Uruguay": 0,
-            "Colombia": 10066570,
-        },
-        "heatwave severity": {
-            "Angola": 0,
-            "Nicaragua": 0,
-            "Uruguay": 529360,
-            "Colombia": 19277,
-        },
-        "river floods": {
-            "Angola": 714157,
-            "Nicaragua": 38704,
-            "Uruguay": 47840,
-            "Colombia": 797908,
-        },
-        "sand and dust storms": {
-            "Angola": 1027946,
-            "Nicaragua": 43,
-            "Uruguay": 88,
-            "Colombia": 32659,
-        },
-        "tropical storms": {
-            "Angola": 0,
-            "Nicaragua": 2024094,
-            "Uruguay": 0,
-            "Colombia": 1748864,
-        },
-        "vectorborne malaria pv": {
-            "Angola": 0,
-            "Nicaragua": 441785,
-            "Uruguay": 0,
-            "Colombia": 6174789,
-        },
-        "vectorborne malaria pf": {
-            "Angola": 15984150,
-            "Nicaragua": 77840,
-            "Uruguay": 0,
-            "Colombia": 366051,
-        },
+data_single_hazard = {
+    "agricultural drought": {
+        "Angola": 4099009,
+        "Nicaragua": 878626,
+        "Uruguay": 233589,
+        "Colombia": 3149198,
     },
-)
+    "air pollution": {
+        "Angola": 16338870,
+        "Nicaragua": 1976847,
+        "Uruguay": 604115,
+        "Colombia": 11212840,
+    },
+    "coastal floods": {
+        "Angola": 6909,
+        "Nicaragua": 3977,
+        "Uruguay": 910,
+        "Colombia": 22714,
+    },
+    "drought SPEI": {
+        "Angola": 573838,
+        "Nicaragua": 6326,
+        "Uruguay": 119691,
+        "Colombia": 2361523,
+    },
+    "drought SPI": {
+        "Angola": 114626,
+        "Nicaragua": 6326,
+        "Uruguay": 115915,
+        "Colombia": 1438632,
+    },
+    "extreme heat": {
+        "Angola": 2360001,
+        "Nicaragua": 574883,
+        "Uruguay": 0,
+        "Colombia": 1272004,
+    },
+    "fire frequency": {
+        "Angola": 5394005,
+        "Nicaragua": 89740,
+        "Uruguay": 120480,
+        "Colombia": 157301,
+    },
+    "fire intensity": {
+        "Angola": 1154385,
+        "Nicaragua": 72040,
+        "Uruguay": 60119,
+        "Colombia": 589614,
+    },
+    "heatwave duration": {
+        "Angola": 13274160,
+        "Nicaragua": 1974811,
+        "Uruguay": 0,
+        "Colombia": 9452636,
+    },
+    "heatwave frequency": {
+        "Angola": 13974860,
+        "Nicaragua": 1971445,
+        "Uruguay": 0,
+        "Colombia": 10066570,
+    },
+    "heatwave severity": {
+        "Angola": 0,
+        "Nicaragua": 0,
+        "Uruguay": 529360,
+        "Colombia": 19277,
+    },
+    "river floods": {
+        "Angola": 714157,
+        "Nicaragua": 38704,
+        "Uruguay": 47840,
+        "Colombia": 797908,
+    },
+    "sand and dust storms": {
+        "Angola": 1027946,
+        "Nicaragua": 43,
+        "Uruguay": 88,
+        "Colombia": 32659,
+    },
+    "tropical storms": {
+        "Angola": 0,
+        "Nicaragua": 2024094,
+        "Uruguay": 0,
+        "Colombia": 1748864,
+    },
+    "vectorborne malaria pv": {
+        "Angola": 0,
+        "Nicaragua": 441785,
+        "Uruguay": 0,
+        "Colombia": 6174789,
+    },
+    "vectorborne malaria pf": {
+        "Angola": 15984150,
+        "Nicaragua": 77840,
+        "Uruguay": 0,
+        "Colombia": 366051,
+    },
+}
+
+
 data_multi_hazard = {
     # and river and coastal floods
     "river and coastal floods": {
