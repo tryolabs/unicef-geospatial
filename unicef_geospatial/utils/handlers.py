@@ -4,7 +4,6 @@ import os
 import shutil
 from typing import AsyncGenerator
 
-from agent.agent import create_agent, run_agent
 from llama_index.core.agent.workflow import AgentOutput, AgentStream, ToolCallResult
 from llama_index.core.workflow import StopEvent
 from logging_config import get_logger
@@ -56,6 +55,8 @@ async def respond(
     messages, trace_id, session_id, temp_dir: str = "", tags: list[str] = []
 ):
     """Process messages and generate a response using the agent."""
+    from agent.agent import create_agent, run_agent
+
     thinking_trace_id = f"th_{trace_id}"
     response_trace_id = f"r_{trace_id}"
     temperature = float(os.getenv("TEMPERATURE", 0.0))
@@ -75,7 +76,7 @@ async def respond(
         agent,
         messages,
         session_id=session_id,
-        langfuse_observation_id=thinking_trace_id,
+        trace_id=thinking_trace_id,
         tags=tags,
     ):
         match chunk:

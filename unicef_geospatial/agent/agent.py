@@ -1,16 +1,16 @@
 import os
-
-# TODO: remove el Any, check below the type
-from typing import Any, AsyncGenerator, Callable
+from typing import AsyncGenerator, Callable
 
 import litellm
-from langfuse.decorators import langfuse_context, observe
-from llama_index.core.agent.workflow import AgentStream, ReActAgent, ToolCallResult
+from langfuse.llama_index import LlamaIndexInstrumentor
+from llama_index.core.agent.workflow import ReActAgent
 from llama_index.llms.litellm import LiteLLM
 from utils.prompts import header_prompt, system_prompt
 
 litellm.success_callback = ["langfuse"]
 litellm.failure_callback = ["langfuse"]
+
+instrumentor = LlamaIndexInstrumentor()
 
 
 def get_llm(temperature: float, session_id: str, trace_id: str) -> LiteLLM:
@@ -72,10 +72,11 @@ def create_agent(
     return agent
 
 
-@observe
 async def run_agent(
     agent: ReActAgent,
     inputs: dict,
+    trace_id: str,
+    session_id: str,
     tags: list[str] = [],
 ) -> AsyncGenerator[tuple[dict, str], None]:
     """Run a LangGraph agent with the given inputs and stream the results.
@@ -88,12 +89,15 @@ async def run_agent(
     Yields:
         Chunks of the agent's response stream
     """
-    langfuse_context.update_current_trace(tags=tags)
+    instrumentor.start()
     handler = agent.run(str(inputs))
 
-    async for chunk in handler.stream_events():
-        yield chunk
+    with instrumentor.observe(trace_id=trace_id, session_id=session_id, tags=tags):
+        async for chunk in handler.stream_events():
+            yield chunk
 
-    response = await handler
+        response = await handler
+
+    instrumentor.flush()
 
     yield response
