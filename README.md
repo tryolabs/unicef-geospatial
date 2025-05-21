@@ -140,6 +140,14 @@ There is a file example of the `users.json` in the `users_example.json` file.
 
 Authentication can be enabled/disabled by setting the `VITE_AUTH_ENABLED` environment variable in the frontend's `.env` file.
 
+### Processing CCRI 2025 Technical Documentation
+
+To process the document of the technical documentation, run the script `process_ccri_doc.py`:
+
+```bash
+uv run python unicef_geospatial/process_ccri_doc.py
+```
+
 ### Accessing the logs
 
 The logs are stored in langfuse cloud. They are accesible [here](https://cloud.langfuse.com/organization/cm6gkfzm100dxo9t33ydvuyxw).
