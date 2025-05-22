@@ -6,10 +6,6 @@ from utils.constants import (
 )
 from utils.types import ALL_DATASETS, DatasetMetadata
 
-vector_index = load_index_from_storage(
-    StorageContext.from_defaults(persist_dir=CCRI_METADATA_PERSIST_DIR)
-)
-
 
 def get_ccri_metadata(query: str, temp_dir: str = "") -> str:
     """Get the metadata for the CCRI dataset.
@@ -28,6 +24,10 @@ def get_ccri_metadata(query: str, temp_dir: str = "") -> str:
     Returns:
         The most relevant chunks from the CCRI technical documentation as a string.
     """
+    vector_index = load_index_from_storage(
+        StorageContext.from_defaults(persist_dir=CCRI_METADATA_PERSIST_DIR)
+    )
+
     retriever = VectorIndexRetriever(
         index=vector_index,
         similarity_top_k=5,
