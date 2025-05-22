@@ -16,44 +16,38 @@ def image_to_html(
     vector_data: FeatureCollection,
     temp_dir: str = "",
     names: list[str] = [],
-    vis_params: dict = {},
+    color_palettes: list[list[str]] = [],
     center: bool = True,
 ) -> str:
     """Converts an Earth Engine image to an HTML string."""
     demographic_map = geemap.Map(basemap="UN.ClearMap")
+
+    default_color_palette = ["#F4E7E1", "#FF9B45", "#D5451B", "#521C0D"]
+
     for i, image in enumerate(images):
         logger.info(f"Adding layer {names[i]}")
         clipped_image = image.clip(vector_data)
         # Apply mask to show only non-zero values
         masked_image = clipped_image.updateMask(clipped_image.gt(0))
 
-        if vis_params == {}:
-            max_value = list(
-                masked_image.reduceRegion(
-                    reducer="max",
-                    geometry=vector_data.geometry(),
-                    scale=1000,
-                    maxPixels=1e9,
-                )
-                .getInfo()
-                .values()
-            )[0]
+        max_value = list(
+            masked_image.reduceRegion(
+                reducer="max",
+                geometry=vector_data.geometry(),
+                scale=1000,
+                maxPixels=1e9,
+            )
+            .getInfo()
+            .values()
+        )[0]
 
-            vis_params = {
-                "min": 0,
-                "max": max_value,
-                "palette": [
-                    "#f7fbff",
-                    "#deebf7",
-                    "#c6dbef",
-                    "#9ecae1",
-                    "#6baed6",
-                    "#4292c6",
-                    "#2171b5",
-                    "#08519c",
-                    "#08306b",
-                ],
-            }
+        vis_params = {
+            "min": 0,
+            "max": max_value,
+            "palette": (
+                color_palettes[i] if color_palettes[i] != [] else default_color_palette
+            ),
+        }
 
         demographic_map.add_layer(masked_image, vis_params, names[i])
     if center:

@@ -423,6 +423,7 @@ def reduce_image(
 def build_map(
     image_filenames: list[str],
     feature_collection_filename: str,
+    color_palettes: list[list[str]],
     temp_dir: str = "",
     names: list[str] = [],
 ) -> dict:
@@ -438,6 +439,7 @@ def build_map(
         image_filenames: Path to the Earth Engine image files to display on the map
         feature_collection_filename: Path to the vector data file (e.g. GeoJSON) defining the
             boundaries to overlay the image on
+        color_palettes: The color palettes to use for the layers
         names: The names of the layers in the map
         center: Whether to center the map on the vector data
 
@@ -467,6 +469,7 @@ def build_map(
         "map_filename": image_to_html(
             images=images,
             vector_data=vector_data,
+            color_palettes=color_palettes,
             names=names,
             center=True,
             temp_dir=temp_dir,

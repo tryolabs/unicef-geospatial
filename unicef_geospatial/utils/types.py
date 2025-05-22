@@ -33,6 +33,7 @@ class DatasetMetadata(BaseModel):
     mosaic: bool = False
     threshold: float | None = None
     input_arguments: dict[str, Any] = {}
+    color_palette: list[str] = []
 
 
 class ALL_DATASETS(str, Enum):

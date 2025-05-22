@@ -46,6 +46,7 @@ DATASETS_METADATA = {
         mosaic=True,
         source_name="WorldPop",
         source_url="https://www.worldpop.org/",
+        color_palettes=["#F4E7E1", "#FF9B45", "#D5451B", "#521C0D"],
     ),
     ALL_DATASETS.RIVER_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/river_flood_r100",
@@ -55,6 +56,7 @@ DATASETS_METADATA = {
         mosaic=True,
         source_name="Joint Research Center",
         source_url="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/",
+        color_palette=["#daf8e4", "#97ebdb", "#00c2c7", "#0086ad", "#005582"],
     ),
     ALL_DATASETS.COASTAL_FLOOD: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/coastal_flood_r100",
@@ -64,6 +66,7 @@ DATASETS_METADATA = {
         mosaic=True,
         source_name="Joint Research Center",
         source_url="https://data.jrc.ec.europa.eu/dataset/9e5ba6f1-8d03-4834-8488-2353e504560f",
+        color_palette=["#daf8e4", "#97ebdb", "#00c2c7", "#0086ad", "#005582"],
     ),
     ALL_DATASETS.TROPICAL_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/storm_giri_rp100",
@@ -73,6 +76,7 @@ DATASETS_METADATA = {
         mosaic=True,
         source_name="STORM",
         source_url="https://data.4tu.nl/datasets/0ea98bdd-5772-4da8-ae97-99735e891aff/4",
+        color_palette=["#8196ab", "#57728f", "#2e5073", "#24405c", "#1b3045"],
     ),
     ALL_DATASETS.AGRICULTURAL_DROUGHT: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/ASI_return_level_100yr",
@@ -82,6 +86,7 @@ DATASETS_METADATA = {
         threshold=30,
         source_name="Food and Agriculture Organization of the United Nations",
         source_url="https://www.fao.org/giews/earthobservation/asis/index_1.jsp?lang=en",
+        color_palette=["#fbeebb", "#f7cf89", "#fc9550", "#e85b3f", "#8f2c4a"],
     ),
     ALL_DATASETS.DROUGHT_SPEI: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/spei12_period_mean_2014_2024",
@@ -91,6 +96,7 @@ DATASETS_METADATA = {
         threshold=-1,
         source_name="Copernicus",
         source_url="https://cds.climate.copernicus.eu/",
+        color_palette=["#fbeebb", "#f7cf89", "#fc9550", "#e85b3f", "#8f2c4a"],
     ),
     ALL_DATASETS.DROUGHT_SPI: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/spi12_period_mean_2014_2024",
@@ -100,6 +106,7 @@ DATASETS_METADATA = {
         threshold=-1,
         source_name="Copernicus",
         source_url="https://cds.climate.copernicus.eu/",
+        color_palette=["#fbeebb", "#f7cf89", "#fc9550", "#e85b3f", "#8f2c4a"],
     ),
     ALL_DATASETS.HEATWAVE_FREQUENCY: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/heatwave_frequency_return_level_100yr",
@@ -109,6 +116,7 @@ DATASETS_METADATA = {
         threshold=16.8,
         source_name="ECMWF",
         source_url="https://www.ecmwf.int/",
+        color_palette=["#f8f800", "#f8c800", "#f89800", "#f86800", "#f83000"],
     ),
     ALL_DATASETS.HEATWAVE_DURATION: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/heatwave_duration_return_level_100yr",
@@ -118,6 +126,7 @@ DATASETS_METADATA = {
         threshold=89.8,
         source_name="ECMWF",
         source_url="https://www.ecmwf.int/",
+        color_palette=["#f8f800", "#f8c800", "#f89800", "#f86800", "#f83000"],
     ),
     ALL_DATASETS.HEATWAVE_SEVERITY: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/heatwave_severity_return_level_100yr",
@@ -127,6 +136,7 @@ DATASETS_METADATA = {
         threshold=3.8,
         source_name="ECMWF",
         source_url="https://www.ecmwf.int/",
+        color_palette=["#f8f800", "#f8c800", "#f89800", "#f86800", "#f83000"],
     ),
     ALL_DATASETS.EXTREME_HEAT: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/high_temp_degree_days_return_level_100yr",
@@ -136,6 +146,7 @@ DATASETS_METADATA = {
         threshold=35,
         source_name="ECMWF",
         source_url="https://www.ecmwf.int/",
+        color_palette=["#f8f800", "#f8c800", "#f89800", "#f86800", "#f83000"],
     ),
     ALL_DATASETS.FIRE_FRP: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/FIRMS_FRP_90th_percentile",
@@ -145,6 +156,7 @@ DATASETS_METADATA = {
         threshold=37.8,
         source_name="NASA",
         source_url="https://firms.modaps.eosdis.nasa.gov/",
+        color_palette=["#e17a57", "#c74b4b", "#a13b3b", "#852b2b", "#6b0808"],
     ),
     ALL_DATASETS.FIRE: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/FIRMS_count_90th_percentile",
@@ -154,6 +166,7 @@ DATASETS_METADATA = {
         threshold=4.9,
         source_name="NASA",
         source_url="https://firms.modaps.eosdis.nasa.gov/",
+        color_palette=["#e17a57", "#c74b4b", "#a13b3b", "#852b2b", "#6b0808"],
     ),
     ALL_DATASETS.SAND_DUST_STORM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/sand_dust_storm_annual",
@@ -163,6 +176,7 @@ DATASETS_METADATA = {
         threshold=0,
         source_name="UNCCD",
         source_url="https://www.unccd.int/data-knowledge",
+        color_palette=["#ebca97", "#a27f47", "#be7437", "#782a1d", "#1c0f09"],
     ),
     ALL_DATASETS.AIR_POLLUTION: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/pm25_p90_1998_2023",
@@ -172,6 +186,7 @@ DATASETS_METADATA = {
         threshold=5,
         source_name="ACAG",
         source_url="https://sites.wustl.edu/acag/datasets/surface-pm2-5/",
+        color_palette=["#cec0b8", "#b2a59b", "#9a9381", "#7a745d", "#6f634b"],
     ),
     ALL_DATASETS.PLASMODIUM_VIVAX: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/Pv_average_2013_2022",
@@ -181,6 +196,7 @@ DATASETS_METADATA = {
         threshold=0.001,
         source_name="Malaria Atlas Project",
         source_url="https://apps.who.int/malaria/maps/threats/#/download",
+        color_palette=["#cec0b8", "#b2a59b", "#9a9381", "#7a745d", "#6f634b"],
     ),
     ALL_DATASETS.PLASMODIUM_FALCIPARUM: DatasetMetadata(
         asset_id=f"{BASE_ASSETS_PATH}/Pf_average_2013_2022",
@@ -190,5 +206,6 @@ DATASETS_METADATA = {
         threshold=0.001,
         source_name="Malaria Atlas Project",
         source_url="https://apps.who.int/malaria/maps/threats/#/download",
+        color_palette=["#cec0b8", "#b2a59b", "#9a9381", "#7a745d", "#6f634b"],
     ),
 }
