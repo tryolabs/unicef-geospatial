@@ -2,15 +2,21 @@ import os
 from typing import AsyncGenerator, Callable
 
 import litellm
+import yaml
 from langfuse.llama_index import LlamaIndexInstrumentor
 from llama_index.core.agent.workflow import ReActAgent
 from llama_index.llms.litellm import LiteLLM
-from utils.prompts import header_prompt, system_prompt
 
 litellm.success_callback = ["langfuse"]
 litellm.failure_callback = ["langfuse"]
 
 instrumentor = LlamaIndexInstrumentor()
+
+with open("unicef_geospatial/utils/prompts.yaml", "r") as f:
+    prompts = yaml.safe_load(f)
+
+header_prompt = prompts["header_prompt"]
+system_prompt = prompts["system_prompt"]
 
 
 def get_llm(temperature: float, session_id: str, trace_id: str) -> LiteLLM:
