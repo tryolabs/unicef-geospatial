@@ -4,6 +4,7 @@ import sys
 import uuid
 
 import pytest
+import yaml
 from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -92,6 +93,12 @@ with open(TEXTUAL_RESULTS_FILE, "w") as fh:
         "conciseness_score\tconciseness_justification\n"
     )
 
+with open("unicef_geospatial/utils/prompts.yaml", "r") as f:
+    prompts = yaml.safe_load(f)
+
+extract_number_prompt = prompts["extract_number_prompt"]
+score_textual_answer_prompt = prompts["score_textual_answer_prompt"]
+
 
 @pytest.mark.parametrize("question,expected,response_type,variation", benchmark_list)
 @pytest.mark.asyncio
@@ -125,7 +132,9 @@ async def test_agent_question(question, expected, response_type, variation):
 def evaluate_numerical_answer(
     trace_id: str, question: str, expected: int, answer: str, variation: str
 ) -> bool:
-    numerical_value = extract_number_from_response(question, answer)
+    numerical_value = extract_number_from_response(
+        question, answer, extract_number_prompt
+    )
     if numerical_value is None:
         is_correct = False
     else:
@@ -154,7 +163,9 @@ def evaluate_numerical_answer(
 def evaluate_textual_answer(
     trace_id: str, question: str, expected: str, answer: str, variation: str
 ) -> bool:
-    result = score_textual_answer(question, expected, answer)
+    result = score_textual_answer(
+        question, expected, answer, score_textual_answer_prompt
+    )
 
     with open(TEXTUAL_RESULTS_FILE, "a+") as fh:
         fh.write(
