@@ -3,13 +3,13 @@ import os
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
-from geospatial.io import save_ee_object
 from logging_config import get_logger
 from utils.constants import (
     ADMIN_LEVEL_1_BOUNDRIES_DATASET,
     COUNTRY_BOUNDRIES_DATASET,
     FEATURE_COLLECTION_FILENAME,
 )
+from utils.io import save_ee_object
 from utils.types import AREA_TYPES
 
 logger = get_logger(__name__)

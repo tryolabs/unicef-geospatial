@@ -68,6 +68,7 @@ async def respond(
         temperature=temperature,
         tools=get_tools(temp_dir),
     )
+
     is_final_answer = False
     async for chunk in run_agent(
         agent,
@@ -78,38 +79,20 @@ async def respond(
     ):
         match chunk:
             case ToolCallResult():
-                try:
-                    return_chunk = handle_tool_call(chunk, thinking_trace_id, temp_dir)
-                except Exception as e:
-                    logger.error(f"Error handling tool call: {e}")
-                    logger.error(f"Tool call: {chunk}")
-
-            case AgentStream():
-                response = str(chunk.delta)
-
-                # Send the actual response chunk
-                return_chunk = ReturnChunk(
-                    response=response, trace_id=thinking_trace_id
+                return_chunk = _process_tool_call_chunk(
+                    chunk, thinking_trace_id, temp_dir
                 )
 
-                if response.endswith("}"):
-                    # Insert a line break after action input
-                    return_chunk = ReturnChunk(
-                        response=f"{response}\n",
-                        trace_id=thinking_trace_id,
-                    )
+            case AgentStream():
+                return_chunk = _process_agent_stream_chunk(chunk, thinking_trace_id)
 
             case StopEvent():
                 # Signal that the thought is complete and the next chunk will be the response
                 is_final_answer = True
-                return_chunk = ReturnChunk(trace_id=thinking_trace_id, is_finished=True)
+                return_chunk = _process_stop_event(thinking_trace_id)
 
             case _ if is_final_answer:
-                if not isinstance(chunk, AgentOutput):
-                    logger.error(f"Unexpected chunk type: {type(chunk)}")
-                return_chunk = ReturnChunk(
-                    response=chunk.response.content, trace_id=response_trace_id
-                )
+                return_chunk = _process_final_answer(chunk, response_trace_id)
 
             case _:
                 continue
@@ -123,33 +106,69 @@ async def respond(
     yield "\n"
 
 
-def handle_tool_call(
-    tool_message: ToolCallResult, trace_id: str, temp_dir: str = ""
+def _process_tool_call_chunk(
+    chunk: ToolCallResult, thinking_trace_id: str, temp_dir: str
 ) -> ReturnChunk:
-    """Handle a tool call and return the appropriate ReturnChunk."""
-    is_html = False
-    html_content = ""
-    content = ast.literal_eval(tool_message.tool_output.content)
+    """Process a tool call chunk and return the appropriate ReturnChunk."""
+    try:
+        is_html = False
+        html_content = ""
+        content = ast.literal_eval(chunk.tool_output.content)
 
-    input_arguments = content.get("input_arguments", {})
-    tool_name = tool_message.tool_name
-    logger.info(f"Handling tool call: {tool_name}")
+        input_arguments = content.get("input_arguments", {})
+        tool_name = chunk.tool_name
+        logger.info(f"Handling tool call: {tool_name}")
 
-    if tool_name == "build_map":
-        is_html = True
-        with open(os.path.join(temp_dir, MAP_FILENAME), "r") as f:
-            html_content = f.read()
+        if tool_name == "build_map":
+            is_html = True
+            with open(os.path.join(temp_dir, MAP_FILENAME), "r") as f:
+                html_content = f.read()
 
-    tool_call_message = f"Calling {tool_name}"
-    if input_arguments:
-        tool_call_message += " with arguments:\n" + "".join(
-            [f"   {key}: {value}\n" for key, value in input_arguments.items()]
+        tool_call_message = f"Calling {tool_name}"
+        if input_arguments:
+            tool_call_message += " with arguments:\n" + "".join(
+                [f"   {key}: {value}\n" for key, value in input_arguments.items()]
+            )
+
+        return ReturnChunk(
+            tool_call=tool_call_message,
+            trace_id=thinking_trace_id,
+            is_html=is_html,
+            html_content=html_content,
+            thinking_chunk=True,
+        )
+    except Exception as e:
+        logger.error(f"Error handling tool call: {e}")
+        logger.error(f"Tool call: {chunk}")
+        raise
+
+
+def _process_agent_stream_chunk(
+    chunk: AgentStream, thinking_trace_id: str
+) -> ReturnChunk:
+    """Process an agent stream chunk and return the appropriate ReturnChunk."""
+    response = str(chunk.delta)
+
+    # Send the actual response chunk
+    return_chunk = ReturnChunk(response=response, trace_id=thinking_trace_id)
+
+    if response.endswith("}"):
+        # Insert a line break after action input
+        return_chunk = ReturnChunk(
+            response=f"{response}\n",
+            trace_id=thinking_trace_id,
         )
 
-    return ReturnChunk(
-        tool_call=tool_call_message,
-        trace_id=trace_id,
-        is_html=is_html,
-        html_content=html_content,
-        thinking_chunk=True,
-    )
+    return return_chunk
+
+
+def _process_stop_event(thinking_trace_id: str) -> ReturnChunk:
+    """Process a stop event and return the appropriate ReturnChunk."""
+    return ReturnChunk(trace_id=thinking_trace_id, is_finished=True)
+
+
+def _process_final_answer(chunk, response_trace_id: str) -> ReturnChunk:
+    """Process the final answer chunk and return the appropriate ReturnChunk."""
+    if not isinstance(chunk, AgentOutput):
+        logger.error(f"Unexpected chunk type: {type(chunk)}")
+    return ReturnChunk(response=chunk.response.content, trace_id=response_trace_id)
