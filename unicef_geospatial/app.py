@@ -16,7 +16,7 @@ from utils.auth import (
 )
 from utils.constants import BASE_PATH
 from utils.handlers import format_messages, handle_response
-from utils.output import format_dict
+from utils.io import format_dict
 from utils.types import Chat
 
 app_state = AppState()

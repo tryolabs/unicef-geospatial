@@ -1,5 +1,6 @@
 import json
 import os
+import pprint
 
 import geemap.foliumap as geemap
 from ee.deserializer import fromJSON
@@ -99,3 +100,16 @@ def load_vector_data(feature_collection_filename: str) -> FeatureCollection | Im
     except Exception as e:
         logger.error(f"Error in vector conversion: {str(e)}")
         raise e
+
+
+def format_dict(d: dict) -> str:
+    """Pretty print a dictionary and return its string representation.
+
+    Args:
+        d: Dictionary to pretty print
+
+    Returns:
+        str: Formatted string representation of the dictionary
+    """
+    pp = pprint.PrettyPrinter(indent=2, sort_dicts=False)
+    return f"\n```\n{pp.pformat(d)}\n```"

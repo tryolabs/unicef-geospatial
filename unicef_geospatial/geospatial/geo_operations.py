@@ -7,9 +7,9 @@ from ee.image import Image
 from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
 from geospatial.earth_engine import get_dataset_metadata
-from geospatial.io import image_to_html, load_vector_data, save_ee_object
 from logging_config import get_logger
 from utils.constants import INTERSECTION_FILENAME, UNION_FILENAME
+from utils.io import image_to_html, load_vector_data, save_ee_object
 from utils.types import ALL_DATASETS, REDUCERS
 
 logger = get_logger(__name__)
