@@ -68,10 +68,7 @@ async def respond(
         temperature=temperature,
         tools=get_tools(temp_dir),
     )
-
-    full_response = ""
     is_final_answer = False
-
     async for chunk in run_agent(
         agent,
         messages,
@@ -89,7 +86,6 @@ async def respond(
 
             case AgentStream():
                 response = str(chunk.delta)
-                full_response += response
 
                 # Send the actual response chunk
                 return_chunk = ReturnChunk(
