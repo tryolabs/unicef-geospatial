@@ -102,6 +102,7 @@ async def respond(
     )
 
     is_final_answer = False
+    is_thought_chunk = True
     async for chunk in run_agent(
         agent,
         messages,
@@ -116,6 +117,15 @@ async def respond(
                 )
 
             case AgentStream():
+                if chunk.delta.startswith("Action"):
+                    is_thought_chunk = False
+                elif chunk.delta.startswith("Thought"):
+                    is_thought_chunk = True
+
+                # Skip non-thought chunks
+                if not is_thought_chunk:
+                    continue
+
                 return_chunk = _process_agent_stream_chunk(chunk, thinking_trace_id)
 
             case StopEvent():
