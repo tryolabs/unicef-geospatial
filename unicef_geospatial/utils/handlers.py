@@ -15,7 +15,14 @@ logger = get_logger(__name__)
 
 
 def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
-    """Format chat messages into the expected format for the agent."""
+    """Format chat messages into the expected format for the agent.
+
+    Args:
+        chat_messages: List of Message objects containing role, content and trace_id
+
+    Returns:
+        Dictionary with 'messages' key containing list of formatted message dictionaries
+    """
     messages = []
     for message in chat_messages:
         messages.append(
@@ -32,7 +39,20 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
 async def handle_response(
     messages, trace_id, session_id, temp_dir: str = "", tags: list[str] = []
 ) -> AsyncGenerator[str, None]:
-    """Handle the response by creating a temp directory, running respond, and cleaning up."""
+    """Handle the response by creating a temp directory, running respond, and cleaning up.
+
+    Args:
+        messages: List of messages to process
+        trace_id: Unique identifier for tracing the request
+        session_id: Unique identifier for the session
+        temp_dir: Directory path for temporary files
+        tags: List of tags for the request
+
+    Yields:
+        JSON serialized chunks of the response
+
+    Cleans up the temporary directory after completion, even if an error occurs.
+    """
     # Create the temp directory
     logger.info(f"Creating temp directory: {temp_dir}")
     os.makedirs(temp_dir, exist_ok=True)
@@ -54,7 +74,19 @@ async def handle_response(
 async def respond(
     messages, trace_id, session_id, temp_dir: str = "", tags: list[str] = []
 ):
-    """Process messages and generate a response using the agent."""
+    """Process messages and generate a response using the agent.
+
+    Args:
+        messages: List of messages to process
+        trace_id: Unique identifier for tracing the request
+        session_id: Unique identifier for the session
+        temp_dir: Directory path for temporary files
+        tags: List of tags for the request
+
+    Yields:
+        JSON serialized chunks of the response, including tool calls, agent streams,
+        and the final answer
+    """
     from agent.agent import create_agent, run_agent
 
     thinking_trace_id = f"th_{trace_id}"
@@ -109,7 +141,19 @@ async def respond(
 def _process_tool_call_chunk(
     chunk: ToolCallResult, thinking_trace_id: str, temp_dir: str
 ) -> ReturnChunk:
-    """Process a tool call chunk and return the appropriate ReturnChunk."""
+    """Process a tool call chunk and return the appropriate ReturnChunk.
+
+    Args:
+        chunk: ToolCallResult object containing tool name and output
+        thinking_trace_id: Trace ID for the thinking phase
+        temp_dir: Directory path for temporary files
+
+    Returns:
+        ReturnChunk object with tool call details and any HTML content
+
+    Raises:
+        Exception if there is an error processing the tool call
+    """
     try:
         is_html = False
         html_content = ""
@@ -146,7 +190,16 @@ def _process_tool_call_chunk(
 def _process_agent_stream_chunk(
     chunk: AgentStream, thinking_trace_id: str
 ) -> ReturnChunk:
-    """Process an agent stream chunk and return the appropriate ReturnChunk."""
+    """Process an agent stream chunk and return the appropriate ReturnChunk.
+
+    Args:
+        chunk: AgentStream object containing the delta response
+        thinking_trace_id: Trace ID for the thinking phase
+
+    Returns:
+        ReturnChunk object with the processed response, adding a newline
+        if the response ends with a closing brace
+    """
     response = str(chunk.delta)
 
     # Send the actual response chunk
@@ -163,12 +216,29 @@ def _process_agent_stream_chunk(
 
 
 def _process_stop_event(thinking_trace_id: str) -> ReturnChunk:
-    """Process a stop event and return the appropriate ReturnChunk."""
+    """Process a stop event and return the appropriate ReturnChunk.
+
+    Args:
+        thinking_trace_id: Trace ID for the thinking phase
+
+    Returns:
+        ReturnChunk object indicating the thinking phase is finished
+    """
     return ReturnChunk(trace_id=thinking_trace_id, is_finished=True)
 
 
 def _process_final_answer(chunk, response_trace_id: str) -> ReturnChunk:
-    """Process the final answer chunk and return the appropriate ReturnChunk."""
+    """Process the final answer chunk and return the appropriate ReturnChunk.
+
+    Args:
+        chunk: Expected to be an AgentOutput object containing the final response
+        response_trace_id: Trace ID for the response phase
+
+    Returns:
+        ReturnChunk object containing the final response content
+
+    Logs an error if the chunk is not of type AgentOutput
+    """
     if not isinstance(chunk, AgentOutput):
         logger.error(f"Unexpected chunk type: {type(chunk)}")
     return ReturnChunk(response=chunk.response.content, trace_id=response_trace_id)
