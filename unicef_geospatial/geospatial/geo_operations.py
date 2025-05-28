@@ -424,24 +424,25 @@ def build_map(
     image_filenames: list[str],
     feature_collection_filename: str,
     color_palettes: list[list[str]],
-    temp_dir: str = "",
     names: list[str] = [],
+    temp_dir: str = "",
 ) -> dict:
-    """Build a map from an image and vector data and save it to an HTML file.
+    """Build a map from images and vector data and save it to an HTML file.
 
-    Creates an interactive map by overlaying an Earth Engine image on top of vector data
+    Creates an interactive map by overlaying Earth Engine images on top of vector data
     (e.g. administrative boundaries). The map is saved as an HTML file that can be viewed
     in a web browser.
 
-    Each image will be a different layer in the map.
+    Each image will be a different layer in the map, with its own color palette and name.
 
     Args:
-        image_filenames: Path to the Earth Engine image files to display on the map
+        image_filenames: List of paths to the Earth Engine image files to display on the map
         feature_collection_filename: Path to the vector data file (e.g. GeoJSON) defining the
-            boundaries to overlay the image on
-        color_palettes: The color palettes to use for the layers
-        names: The names of the layers in the map
-        center: Whether to center the map on the vector data
+            boundaries to overlay the images on
+        color_palettes: List of color palettes to use for each image layer. Each palette should
+            be a list of color strings (e.g. ["#ff0000", "#00ff00"])
+        names: Optional list of names for each image layer. Must match length of image_filenames.
+        temp_dir: Optional temporary directory for file operations. Leave empty to use default.
 
     Returns:
         dict: A dictionary containing the name of the saved HTML map file under the key
