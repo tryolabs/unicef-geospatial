@@ -134,12 +134,16 @@ function App() {
           if (!line.trim()) continue; // Skip empty lines
 
           try {
-            let data = JSON.parse(line);
+            const data = JSON.parse(line);
 
             traceId = data.trace_id || traceId;
 
             if (data.response !== undefined) {
               // Handle thinking chunks differently from the final response
+              data.response = data.response
+                .replace("Thought", "**Thought**")
+                .replace("Answer", "**Answer**");
+
               const isThinkingChunk = data.trace_id.startsWith("th_");
               if (isThinkingChunk) {
                 // Handle thinking response chunks

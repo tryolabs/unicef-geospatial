@@ -94,7 +94,7 @@ h1 {
 .message-container {
   position: relative;
   margin-bottom: 2px;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
 }
 
 .user-message-container {
@@ -471,7 +471,7 @@ pre {
 
 /* Add these styles to your CSS file */
 .thinking-message-container {
-  margin: 8px;
+  margin: 4px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -574,4 +574,91 @@ pre {
 
 .login-info li {
   margin-bottom: 0.25rem;
+}
+
+/* Markdown styles within messages */
+.message p {
+  margin: 0 0 6px 0;
+}
+
+.message p:last-child {
+  margin-bottom: 0;
+}
+
+.message p:only-child {
+  margin: 0;
+}
+
+.message h1,
+.message h2,
+.message h3,
+.message h4,
+.message h5,
+.message h6 {
+  margin: 12px 0 6px 0;
+  font-weight: 600;
+}
+
+.message h1:first-child,
+.message h2:first-child,
+.message h3:first-child,
+.message h4:first-child,
+.message h5:first-child,
+.message h6:first-child {
+  margin-top: 0;
+}
+
+.message ul,
+.message ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.message li {
+  margin: 2px 0;
+}
+
+.message code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+
+.message pre {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.message pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.message blockquote {
+  border-left: 4px solid var(--unicef-blue);
+  margin: 6px 0;
+  padding: 6px 12px;
+  background-color: rgba(29, 155, 240, 0.05);
+}
+
+.message strong,
+.message b {
+  font-weight: 600;
+}
+
+.message em,
+.message i {
+  font-style: italic;
+}
+
+.message hr {
+  border: none;
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 12px 0;
 }

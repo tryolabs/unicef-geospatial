@@ -1,6 +1,7 @@
 import { Message } from "../types/Message.tsx";
 import { LangfuseWeb } from "langfuse";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 function ChatMessages({
   messageHistory,
@@ -93,7 +94,7 @@ function ChatMessages({
                     : "assistant-message"
                 }`}
               >
-                {msg.content}
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
               </div>
               {!isUserMessage && !isThinkingMessage && msg.is_finished && (
                 <div className="feedback-buttons">
