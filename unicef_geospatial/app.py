@@ -64,6 +64,13 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
 async def ask(
     chat: Chat, current_user: Annotated[User, Depends(get_current_user)]
 ) -> StreamingResponse:
+
+    if chat.chat_messages == [] or chat.chat_messages[-1].content == "":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Chat messages cannot be empty",
+        )
+
     trace_id = str(uuid.uuid4())
     session_id = chat.session_id
     temp_dir = os.path.join(BASE_PATH, f"{session_id}")

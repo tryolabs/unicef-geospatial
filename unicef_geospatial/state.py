@@ -58,6 +58,8 @@ class AppState:
 
             if "localhost" not in allowed_hostnames_ips:
                 allowed_hostnames_ips.append("localhost")
+            if "testclient" not in allowed_hostnames_ips:
+                allowed_hostnames_ips.append("testclient")
 
             client_ip = request.client.host if request.client else None
 
