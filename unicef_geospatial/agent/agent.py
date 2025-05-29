@@ -90,6 +90,8 @@ async def run_agent(
     Args:
         agent: The compiled LangGraph agent to run
         inputs: Dictionary of inputs to provide to the agent
+        trace_id: The trace ID for tracking in Langfuse
+        session_id: The session ID to associate with this model
         tags: List of tags to associate with the Langfuse trace
 
     Yields:
@@ -104,6 +106,6 @@ async def run_agent(
 
         response = await handler
 
-    instrumentor.flush()
+        yield response
 
-    yield response
+    instrumentor.flush()
