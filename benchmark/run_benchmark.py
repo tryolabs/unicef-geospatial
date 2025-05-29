@@ -19,7 +19,7 @@ from utils.handlers import format_messages, handle_response
 from utils.initialize import initialize_earth_engine
 from utils.types import Message
 
-from tests.test_data import (
+from benchmark.test_data import (
     benchmark_list,
     extract_number_from_response,
     score_textual_answer,

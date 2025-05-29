@@ -4,10 +4,12 @@ from llama_index.core.program import LLMTextCompletionProgram
 from llama_index.llms.litellm import LiteLLM
 from pydantic import BaseModel
 
-from tests.questions_datawarehouse import benchmark_questions as warehouse_questions
-from tests.questions_gee import benchmark_questions as gee_questions
-from tests.questions_techincal_doc import benchmark_questions as technical_doc_questions
-from tests.types import BechmarkQuestion, Benchmark
+from benchmark.questions_datawarehouse import benchmark_questions as warehouse_questions
+from benchmark.questions_gee import benchmark_questions as gee_questions
+from benchmark.questions_techincal_doc import (
+    benchmark_questions as technical_doc_questions,
+)
+from benchmark.types import BechmarkQuestion, Benchmark
 
 
 class NumericalAnswer(BaseModel):

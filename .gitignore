@@ -6,6 +6,7 @@ unicef_geospatial/data/
 research/output/
 tests/results/
 .secrets/
+benchmark/results/
 
 # Frontend
 # Logs

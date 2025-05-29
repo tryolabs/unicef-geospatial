@@ -1,4 +1,4 @@
-from tests.types import BechmarkQuestion
+from benchmark.types import BechmarkQuestion
 
 benchmark_questions = []
 
