@@ -72,6 +72,57 @@ def rectangle_test_data():
     }
 
 
+@pytest.fixture
+def binary_image_test_data():
+    SCALE = 47000
+    horizontal_rectangle = ee.FeatureCollection(
+        [ee.Feature(ee.Geometry.Rectangle([-103, 39, -102, 38.5]))]
+    )
+    vertical_rectangle = ee.FeatureCollection(
+        [ee.Feature(ee.Geometry.Rectangle([-103, 39, -102.5, 38]))]
+    )
+
+    # Create tests/data directory if it doesn't exist
+    path_to_fcs = "tests/data"
+    if not os.path.exists(path_to_fcs):
+        os.makedirs(path_to_fcs)
+
+    # Create binary image that is 0 everywhere except 1 in small rectangle
+    binary_image_horizontal = (
+        ee.Image(0)
+        .paint(horizontal_rectangle, 1)
+        .reproject(crs="EPSG:4326", scale=SCALE)
+    )
+    binary_image_vertical = (
+        ee.Image(0).paint(vertical_rectangle, 1).reproject(crs="EPSG:4326", scale=SCALE)
+    )
+
+    path_to_horizontal_rectangle = os.path.join(
+        path_to_fcs, "horizontal_rectangle.json"
+    )
+    path_to_vertical_rectangle = os.path.join(path_to_fcs, "vertical_rectangle.json")
+    path_to_binary_image_horizontal = os.path.join(
+        path_to_fcs, "binary_image_horizontal.json"
+    )
+    path_to_binary_image_vertical = os.path.join(
+        path_to_fcs, "binary_image_vertical.json"
+    )
+
+    save_ee_object(path_to_horizontal_rectangle, horizontal_rectangle)
+    save_ee_object(path_to_vertical_rectangle, vertical_rectangle)
+    save_ee_object(path_to_binary_image_horizontal, binary_image_horizontal)
+    save_ee_object(path_to_binary_image_vertical, binary_image_vertical)
+
+    return {
+        "path_to_fcs": path_to_fcs,
+        "horizontal_rectangle_filename": "horizontal_rectangle.json",
+        "vertical_rectangle_filename": "vertical_rectangle.json",
+        "binary_image_horizontal_filename": "binary_image_horizontal.json",
+        "binary_image_vertical_filename": "binary_image_vertical.json",
+        "scale": SCALE,
+    }
+
+
 def check_coordinates_match(actual_feature_collection, expected_coords, tolerance=1e-6):
     """Helper function to check if actual coordinates match expected coordinates
     with a tolerance.
@@ -494,6 +545,29 @@ class TestReduceAndMap:
         result = reduce_image("image.json", "fc.json", "sum", "/tmp", 100)
 
         assert result["total_sum"] == 100
+        assert result["input_arguments"]["reducer"] == "sum"
+
+    def test_reduce_image_result(self, binary_image_test_data):
+        result = reduce_image(
+            binary_image_test_data["binary_image_horizontal_filename"],
+            binary_image_test_data["horizontal_rectangle_filename"],
+            "sum",
+            temp_dir=binary_image_test_data["path_to_fcs"],
+            scale=binary_image_test_data["scale"],
+        )
+
+        assert abs(result["total_sum"] - 2) < 0.5
+        assert result["input_arguments"]["reducer"] == "sum"
+
+        result = reduce_image(
+            binary_image_test_data["binary_image_horizontal_filename"],
+            binary_image_test_data["vertical_rectangle_filename"],
+            "sum",
+            temp_dir=binary_image_test_data["path_to_fcs"],
+            scale=binary_image_test_data["scale"],
+        )
+
+        assert abs(result["total_sum"] - 1) < 0.5
         assert result["input_arguments"]["reducer"] == "sum"
 
     @patch("geospatial.geo_operations.load_vector_data")
