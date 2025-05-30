@@ -1,7 +1,10 @@
 """Test cases for geospatial operations."""
 
+import os
 from unittest.mock import Mock, patch
 
+import ee
+import numpy as np
 import pytest
 from ee.feature import Feature
 from ee.featurecollection import FeatureCollection
@@ -33,7 +36,81 @@ from geospatial.geo_operations import (
     union_binary_images,
 )
 from geospatial.hazards_metadata import get_ccri_metadata
+from utils.io import load_vector_data, save_ee_object
 from utils.types import ALL_DATASETS
+
+ee.Initialize()
+
+
+@pytest.fixture
+def rectangle_test_data():
+    """Create two overlapping rectangles and save them to tests/data directory."""
+    # Create two overlapping rectangles
+    rectangle_1 = ee.FeatureCollection(
+        [ee.Feature(ee.Geometry.Rectangle([-103, 39, -102, 38]))]
+    )
+    rectangle_2 = ee.FeatureCollection(
+        [ee.Feature(ee.Geometry.Rectangle([-103, 38.5, -102, 37.5]))]
+    )
+
+    # Create tests/data directory if it doesn't exist
+    path_to_fcs = "tests/data"
+    if not os.path.exists(path_to_fcs):
+        os.makedirs(path_to_fcs)
+
+    # Save the rectangles
+    path_to_rectangle_1 = os.path.join(path_to_fcs, "rectangle_1.json")
+    path_to_rectangle_2 = os.path.join(path_to_fcs, "rectangle_2.json")
+
+    save_ee_object(path_to_rectangle_1, rectangle_1)
+    save_ee_object(path_to_rectangle_2, rectangle_2)
+
+    return {
+        "path_to_fcs": path_to_fcs,
+        "rectange_1_filename": "rectangle_1.json",
+        "rectange_2_filename": "rectangle_2.json",
+    }
+
+
+def check_coordinates_match(actual_feature_collection, expected_coords, tolerance=1e-6):
+    """Helper function to check if actual coordinates match expected coordinates
+    with a tolerance.
+
+    Args:
+        actual_feature_collection: Earth Engine FeatureCollection representing the actual coordinates
+        expected_coords: List of expected coordinate pairs [[x1, y1], [x2, y2], ...]
+        tolerance: Numerical tolerance for coordinate comparison
+
+    Returns:
+        bool: True if coordinates match within tolerance
+    """
+    coords = actual_feature_collection.getInfo()["features"][0]["geometry"][
+        "coordinates"
+    ][0]
+
+    # Extract the min/max coordinates
+    x_coords = [coord[0] for coord in coords]
+    y_coords = [coord[1] for coord in coords]
+    min_x = min(x_coords)
+    max_x = max(x_coords)
+    min_y = min(y_coords)
+    max_y = max(y_coords)
+
+    # Create actual coords in clockwise order starting from northwest
+    actual_coords = [
+        [min_x, max_y],  # Northwest
+        [max_x, max_y],  # Northeast
+        [max_x, min_y],  # Southeast
+        [min_x, min_y],  # Southwest
+    ]
+
+    # Check if coordinates match within tolerance
+    coords_match = all(
+        np.allclose(np.array(actual), np.array(expected), rtol=tolerance)
+        for actual, expected in zip(actual_coords, expected_coords)
+    )
+
+    return coords_match, actual_coords
 
 
 class TestGetMetadata:
@@ -280,6 +357,59 @@ class TestFeatureCollectionOperations:
         mock_fc1.map.assert_called_once()
         assert result["feature_collection_filename"] == "intersection.json"
 
+    def test_intersect_feature_collection_result(self, rectangle_test_data):
+        """Test that intersecting two rectangles produces the expected coordinates."""
+        intersection_feature_data = intersect_feature_collections(
+            [
+                rectangle_test_data["rectange_1_filename"],
+                rectangle_test_data["rectange_2_filename"],
+            ],
+            temp_dir=rectangle_test_data["path_to_fcs"],
+        )
+        intersection_fc = load_vector_data(
+            os.path.join(
+                rectangle_test_data["path_to_fcs"],
+                intersection_feature_data["feature_collection_filename"],
+            )
+        )
+
+        expected_coords = [[-103, 38.5], [-102, 38.5], [-102, 38], [-103, 38]]
+        coords_match, actual_coords = check_coordinates_match(
+            intersection_fc, expected_coords
+        )
+
+        assert (
+            coords_match
+        ), f"Intersection coordinates {actual_coords} do not match expected {expected_coords}"
+
+    def test_intersect_feature_collection_result_not_matching(
+        self, rectangle_test_data
+    ):
+        """Test that intersecting two rectangles fails with incorrect expected coordinates."""
+        intersection_feature_data = intersect_feature_collections(
+            [
+                rectangle_test_data["rectange_1_filename"],
+                rectangle_test_data["rectange_2_filename"],
+            ],
+            temp_dir=rectangle_test_data["path_to_fcs"],
+        )
+        intersection_fc = load_vector_data(
+            os.path.join(
+                rectangle_test_data["path_to_fcs"],
+                intersection_feature_data["feature_collection_filename"],
+            )
+        )
+
+        incorrect_coords = [[-104, 39.5], [-103, 39.5], [-103, 39], [-104, 39]]
+        coords_match, actual_coords = check_coordinates_match(
+            intersection_fc, incorrect_coords
+        )
+
+        assert not coords_match, (
+            f"Intersection coordinates {actual_coords} should not match incorrect expected "
+            f"coordinates {incorrect_coords}"
+        )
+
     @patch("geospatial.geo_operations.load_vector_data")
     @patch("geospatial.geo_operations.save_ee_object")
     def test_merge_feature_collections(self, mock_save, mock_load):
@@ -292,6 +422,55 @@ class TestFeatureCollectionOperations:
 
         mock_fc1.merge.assert_called_once_with(mock_fc2)
         assert result["feature_collection_filename"] == "union.json"
+
+    def test_merge_feature_collection_result(self, rectangle_test_data):
+        """Test that merging two rectangles produces the expected coordinates."""
+        merge_feature_data = merge_feature_collections(
+            [
+                rectangle_test_data["rectange_1_filename"],
+                rectangle_test_data["rectange_2_filename"],
+            ],
+            temp_dir=rectangle_test_data["path_to_fcs"],
+        )
+        merge_fc = load_vector_data(
+            os.path.join(
+                rectangle_test_data["path_to_fcs"],
+                merge_feature_data["feature_collection_filename"],
+            )
+        )
+
+        expected_coords = [[-103, 39], [-102, 39], [-102, 37.5], [-103, 37.5]]
+        coords_match, actual_coords = check_coordinates_match(merge_fc, expected_coords)
+
+        assert (
+            coords_match
+        ), f"Intersection coordinates {actual_coords} do not match expected {expected_coords}"
+
+    def test_merge_feature_collection_result_not_matching(self, rectangle_test_data):
+        """Test that merging two rectangles fails with incorrect expected coordinates."""
+        merge_feature_data = merge_feature_collections(
+            [
+                rectangle_test_data["rectange_1_filename"],
+                rectangle_test_data["rectange_2_filename"],
+            ],
+            temp_dir=rectangle_test_data["path_to_fcs"],
+        )
+        merge_fc = load_vector_data(
+            os.path.join(
+                rectangle_test_data["path_to_fcs"],
+                merge_feature_data["feature_collection_filename"],
+            )
+        )
+
+        incorrect_coords = [[-103, 39], [-102, 39], [-102, 38], [-103, 38]]
+        coords_match, actual_coords = check_coordinates_match(
+            merge_fc, incorrect_coords
+        )
+
+        assert not coords_match, (
+            f"Intersection coordinates {actual_coords} should not match incorrect expected "
+            f"coordinates {incorrect_coords}"
+        )
 
     def test_empty_fc_list_errors(self):
         with pytest.raises(ValueError, match="No feature collections provided"):

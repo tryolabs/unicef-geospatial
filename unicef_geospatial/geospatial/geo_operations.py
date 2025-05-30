@@ -355,7 +355,7 @@ def merge_feature_collections(
         new_data = load_vector_data(os.path.join(temp_dir, path))
         if isinstance(new_data, Image):
             raise ValueError("Image cannot be unioned")
-        union = union.merge(new_data)
+        union = union.merge(new_data).union()
 
     save_ee_object(os.path.join(temp_dir, UNION_FILENAME), union)
     return {

@@ -44,6 +44,7 @@ def get_zone_of_area(
         >>> zone_path = get_zone_of_area("California", "admin1")
     """
     logger.info("Getting zone of area")
+    input_area_name = area_name
     if area_type == "country":
         area_name = get_country_code(area_name)
         countries_boundries = FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
@@ -70,7 +71,7 @@ def get_zone_of_area(
 
     return {
         "value": filename,
-        "input_arguments": {"area_name": area_name, "area_type": area_type},
+        "input_arguments": {"area_name": input_area_name, "area_type": area_type},
     }
 
 
