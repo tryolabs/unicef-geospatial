@@ -37,7 +37,7 @@ from geospatial.geo_operations import (
 )
 from geospatial.hazards_metadata import get_ccri_metadata
 from utils.io import load_vector_data, save_ee_object
-from utils.types import ALL_DATASETS
+from utils.schemas import ALL_DATASETS
 
 
 @pytest.fixture

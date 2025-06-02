@@ -15,9 +15,9 @@ from datetime import datetime
 from langfuse import Langfuse
 from logging_config import get_logger
 from utils.constants import BASE_PATH
-from utils.handlers import format_messages, handle_response
+from utils.handlers import handle_response
 from utils.initialize import initialize_earth_engine
-from utils.types import Message
+from utils.schemas import Message
 
 from benchmark.test_data import (
     benchmark_list,
@@ -106,12 +106,12 @@ async def test_agent_question(question, expected, response_type, variation):
     """Test agent with a specific question."""
     trace_id = str(uuid.uuid4())
     message = Message(role="user", content=question, trace_id=trace_id)
-    formatted_message = format_messages([message])
+
     temp_dir = os.path.join(BASE_PATH, f"{trace_id}")
 
     final_answer = ""
     async for chunk in handle_response(
-        formatted_message, trace_id, session_id, temp_dir, tags=["benchmark"]
+        [message], trace_id, session_id, temp_dir, tags=["benchmark"]
     ):
         try:
             chunk = json.loads(chunk)

@@ -4,7 +4,7 @@ from utils.constants import (
     BASE_ASSETS_PATH,
     CCRI_METADATA_PERSIST_DIR,
 )
-from utils.types import ALL_DATASETS, DatasetMetadata
+from utils.schemas import ALL_DATASETS, DatasetMetadata
 
 
 def get_ccri_metadata(query: str, temp_dir: str = "") -> str:

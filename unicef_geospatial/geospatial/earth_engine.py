@@ -6,7 +6,7 @@ from geospatial.hazards_metadata import DATASETS_METADATA
 from google.cloud import storage
 from google.cloud.storage.bucket import Bucket
 from logging_config import get_logger
-from utils.types import ALL_DATASETS, DatasetMetadata
+from utils.schemas import ALL_DATASETS, DatasetMetadata
 
 logger = get_logger(__name__)
 

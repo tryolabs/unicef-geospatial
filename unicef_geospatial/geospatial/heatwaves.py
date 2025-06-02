@@ -4,7 +4,7 @@ import ee
 from geospatial.geo_operations import save_ee_object
 from logging_config import get_logger
 from utils.constants import HEATWAVE_DATASET, HEATWAVE_FILENAME
-from utils.types import DECADES, METRICS
+from utils.schemas import DECADES, METRICS
 
 logger = get_logger(__name__)
 

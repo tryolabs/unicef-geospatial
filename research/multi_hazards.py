@@ -27,7 +27,7 @@ ee.Initialize(auth)
 from geospatial.demographic import get_zone_of_area
 from geospatial.earth_engine import get_dataset_metadata
 from geospatial.io import load_vector_data
-from utils.types import ALL_DATASETS
+from utils.schemas import ALL_DATASETS
 
 
 def calculate_multi_hazard_exposure(

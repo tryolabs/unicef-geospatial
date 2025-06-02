@@ -11,7 +11,7 @@ from utils.constants import (
     FEATURE_COLLECTION_FILENAME,
 )
 from utils.io import save_ee_object
-from utils.types import AREA_TYPES
+from utils.schemas import AREA_TYPES
 
 logger = get_logger(__name__)
 

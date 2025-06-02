@@ -9,12 +9,13 @@ from llama_index.core.workflow import StopEvent
 from logging_config import get_logger
 from utils.constants import MAP_FILENAME
 from utils.initialize import get_tools
-from utils.types import Message, ReturnChunk
+from utils.io import format_dict
+from utils.schemas import Message, ReturnChunk
 
 logger = get_logger(__name__)
 
 
-def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
+def _format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
     """Format chat messages into the expected format for the agent.
 
     Args:
@@ -37,7 +38,11 @@ def format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
 
 
 async def handle_response(
-    messages, trace_id, session_id, temp_dir: str = "", tags: list[str] = []
+    messages: list[Message],
+    trace_id: str,
+    session_id: str,
+    temp_dir: str = "",
+    tags: list[str] = [],
 ) -> AsyncGenerator[str, None]:
     """Handle the response by creating a temp directory, running respond, and cleaning up.
 
@@ -56,6 +61,10 @@ async def handle_response(
     # Create the temp directory
     logger.info(f"Creating temp directory: {temp_dir}")
     os.makedirs(temp_dir, exist_ok=True)
+
+    messages = _format_messages(messages)
+
+    logger.info(f"Running agent with inputs {format_dict(messages)}")
 
     try:
         async for chunk in respond(messages, trace_id, session_id, temp_dir, tags):
@@ -187,6 +196,9 @@ def _process_tool_call_chunk(
             tool_call_message += " with arguments:\n" + "".join(
                 [f"   {key}: {value}\n" for key, value in input_arguments.items()]
             )
+        print(
+            f"Type of ReturnChunk: {type(ReturnChunk(tool_call=tool_call_message, trace_id=thinking_trace_id, is_html=is_html, html_content=html_content, thinking_chunk=True))}"
+        )
 
         return ReturnChunk(
             tool_call=tool_call_message,

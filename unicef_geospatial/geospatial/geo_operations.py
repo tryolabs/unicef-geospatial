@@ -10,7 +10,7 @@ from geospatial.earth_engine import get_dataset_metadata
 from logging_config import get_logger
 from utils.constants import INTERSECTION_FILENAME, UNION_FILENAME
 from utils.io import image_to_html, load_vector_data, save_ee_object
-from utils.types import ALL_DATASETS, REDUCERS
+from utils.schemas import ALL_DATASETS, REDUCERS
 
 logger = get_logger(__name__)
 
