@@ -39,8 +39,6 @@ from geospatial.hazards_metadata import get_ccri_metadata
 from utils.io import load_vector_data, save_ee_object
 from utils.types import ALL_DATASETS
 
-ee.Initialize()
-
 
 @pytest.fixture
 def rectangle_test_data():
