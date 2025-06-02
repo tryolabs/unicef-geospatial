@@ -2,14 +2,9 @@
 Test configuration and fixtures for unicef-geospatial API tests.
 """
 
-import hashlib
-import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 from typing import Generator
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
