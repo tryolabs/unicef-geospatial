@@ -196,9 +196,6 @@ def _process_tool_call_chunk(
             tool_call_message += " with arguments:\n" + "".join(
                 [f"   {key}: {value}\n" for key, value in input_arguments.items()]
             )
-        print(
-            f"Type of ReturnChunk: {type(ReturnChunk(tool_call=tool_call_message, trace_id=thinking_trace_id, is_html=is_html, html_content=html_content, thinking_chunk=True))}"
-        )
 
         return ReturnChunk(
             tool_call=tool_call_message,
