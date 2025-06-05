@@ -104,45 +104,45 @@ data_single_hazard = {
 data_multi_hazard = {
     # and river and coastal floods
     "river and coastal floods": {
-        "Colombia": 12368,
-        "Angola": 1293,
-        "Nicaragua": 2039,
-        "Uruguay": 807,
+        "Colombia": 14053,
+        "Angola": 1211,
+        "Nicaragua": 2430,
+        "Uruguay": 780,
     },
     # or river or coastal floods
     "river or coastal floods": {
-        "Colombia": 808254,
-        "Angola": 719773,
-        "Nicaragua": 40642,
-        "Uruguay": 47943,
+        "Colombia": 812510,
+        "Angola": 570423,
+        "Nicaragua": 43721,
+        "Uruguay": 42023,
     },
     # and malaria
     "both kinds of malaria": {
-        "Colombia": 366034,
+        "Colombia": 377754,
         "Angola": 0,
-        "Nicaragua": 44914,
+        "Nicaragua": 44952,
         "Uruguay": 0,
     },
     # or malaria
     "any kind of malaria": {
-        "Colombia": 6174806,
-        "Angola": 15984153,
-        "Nicaragua": 474711,
+        "Colombia": 6149920,
+        "Angola": 15785353,
+        "Nicaragua": 491725,
         "Uruguay": 0,
     },
     # and floods
     "all kinds of floods": {
-        "Colombia": 12035,
-        "Angola": 367,
-        "Nicaragua": 1693,
-        "Uruguay": 724,
+        "Colombia": 14053,
+        "Angola": 1211,
+        "Nicaragua": 2430,
+        "Uruguay": 780,
     },
     # or floods
     "some kind of flood": {
-        "Colombia": 8191207,
-        "Angola": 8974501,
-        "Nicaragua": 1190525,
-        "Uruguay": 620872,
+        "Colombia": 812510,
+        "Angola": 570423,
+        "Nicaragua": 43721,
+        "Uruguay": 42023,
     },
 }
 
