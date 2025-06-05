@@ -1,5 +1,6 @@
 import os
 
+import ee
 import pycountry
 from ee.featurecollection import FeatureCollection
 from ee.filter import Filter
@@ -13,6 +14,8 @@ from utils.io import save_ee_object
 from utils.types import AREA_TYPES
 
 logger = get_logger(__name__)
+
+TH_SHAPE_AREA = 33
 
 
 def get_zone_of_area(
@@ -44,7 +47,19 @@ def get_zone_of_area(
     if area_type == "country":
         area_name = get_country_code(area_name)
         countries_boundries = FeatureCollection(COUNTRY_BOUNDRIES_DATASET)
-        area_boundry = countries_boundries.filter(Filter.eq("ISO3", area_name))
+
+        area_boundry = countries_boundries.filter(Filter.eq("iso3", area_name))
+
+        shape_area = area_boundry.first().getNumber("Shape_Area")
+
+        simplification_tolerance = ee.Algorithms.If(
+            shape_area.gt(ee.Number(TH_SHAPE_AREA)), 10000, 100
+        )
+
+        area_boundry = FeatureCollection(
+            area_boundry.geometry().simplify(simplification_tolerance)
+        )
+
     else:
         admin_level_1_boundries = FeatureCollection(ADMIN_LEVEL_1_BOUNDRIES_DATASET)
         area_boundry = admin_level_1_boundries.filter(Filter.eq("shapeName", area_name))

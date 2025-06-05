@@ -371,7 +371,7 @@ def reduce_image(
     feature_collection_filename: str,
     reducer: REDUCERS,
     temp_dir: str = "",
-    scale: int = 100,
+    scale: float = 92.76624195666344,  # scale of child population data
 ) -> dict:
     """Reduce an image by applying a reducer to its pixels.
 
