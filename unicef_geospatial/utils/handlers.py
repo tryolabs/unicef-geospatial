@@ -167,9 +167,13 @@ def _process_tool_call_chunk(
     try:
         is_html = False
         html_content = ""
-        content = ast.literal_eval(chunk.tool_output.content)
+        try:
+            content = ast.literal_eval(chunk.tool_output.content)
 
-        input_arguments = content.get("input_arguments", {})
+            input_arguments = content.get("input_arguments", {})
+        except Exception:
+            content = chunk.tool_output.content
+            input_arguments = {}
         tool_name = chunk.tool_name
         logger.info(f"Handling tool call: {tool_name}")
 

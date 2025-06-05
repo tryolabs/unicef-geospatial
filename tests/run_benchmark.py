@@ -15,7 +15,7 @@ from datetime import datetime
 from langfuse import Langfuse
 from logging_config import get_logger
 from utils.constants import BASE_PATH
-from utils.handlers import format_messages, respond
+from utils.handlers import format_messages, handle_response
 from utils.initialize import initialize_earth_engine
 from utils.types import Message
 
@@ -110,7 +110,7 @@ async def test_agent_question(question, expected, response_type, variation):
     temp_dir = os.path.join(BASE_PATH, f"{trace_id}")
 
     final_answer = ""
-    async for chunk in respond(
+    async for chunk in handle_response(
         formatted_message, trace_id, session_id, temp_dir, tags=["benchmark"]
     ):
         try:
