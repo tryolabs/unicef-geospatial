@@ -20,7 +20,19 @@ def image_to_html(
     color_palettes: list[list[str]] = [],
     center: bool = True,
 ) -> str:
-    """Converts an Earth Engine image to an HTML string."""
+    """Converts an Earth Engine image to an HTML string.
+
+    Args:
+        images: List of Earth Engine images to add to the map
+        vector_data: Vector data to use as the base map
+        temp_dir: Directory to save the HTML file
+        names: List of names for the layers
+        color_palettes: List of color palettes for the layers
+        center: Whether to center the map on the vector data
+
+    Returns:
+        String containing the HTML code for the map
+    """
     demographic_map = geemap.Map(basemap="UN.ClearMap")
 
     default_color_palette = ["#F4E7E1", "#FF9B45", "#D5451B", "#521C0D"]
@@ -58,7 +70,12 @@ def image_to_html(
 
 
 def save_ee_object(path: str, vector_data: FeatureCollection | Image) -> None:
-    """Save a vector data to a file."""
+    """Save a vector data to a file
+
+    Args:
+        path: Path to save the vector data
+        vector_data: Vector data to save
+    """
     logger = get_logger(__name__)
     logger.info("Saving vector data to %s", path)
     serialized_vector_data = vector_data.serialize()

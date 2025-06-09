@@ -20,7 +20,7 @@ TH_SHAPE_AREA = 33
 
 def get_zone_of_area(
     area_name: str, area_type: AREA_TYPES, temp_dir: str = ""
-) -> dict[str, str]:
+) -> dict[str, str | dict[str, str]]:
     """Get the zone boundary for a specified area and save it as a vector file.
 
     Retrieves the boundary geometry for either a country or admin level 1 area from
@@ -31,11 +31,12 @@ def get_zone_of_area(
                 If it is a country, it should be the ISO 3166-1 alpha-3 code.
         area_type: Type of area - either 'country' or 'admin1'. Determines which
             dataset to query.
+        temp_dir: Directory to save the GeoJSON file.
 
     Returns:
         dict[str, str]: A dictionary containing:
             - value: Path to the saved GeoJSON vector file
-
+            - input_arguments: Dictionary containing the input arguments used to generate the output.
     Example:
         To get boundary data for France:
         >>> zone_path = get_zone_of_area("France", "country")

@@ -17,13 +17,13 @@ def get_data(
     """Get data for a specific dataflow ID in JSON format.
 
     Args:
-        dataflow_id (str): ID of the dataflow to retrieve
-        ref_areas (list[str]): List of reference areas to retrieve
-        indicators (list[str]): List of indicators to retrieve
-        output_format (OUTPUT_FORMATS): Format of the output data
+        dataflow_id: ID of the dataflow to retrieve
+        ref_areas: List of reference areas to retrieve
+        indicators: List of indicators to retrieve
+        output_format: Format of the output data
 
     Returns:
-        Dict[str, Any]: Dictionary containing the requested data
+        DataFrame containing the requested data
 
     Raises:
         Exception: If the API returns an error response
@@ -51,11 +51,14 @@ def get_data(
     return build_df_from_json(data["data"])
 
 
-def get_indicators_information(dataflow_id: str) -> dict[str, Any]:
+def get_indicators_information(dataflow_id: str) -> dict[str, str]:
     """Get information on indicators for a specific dataflow.
 
     Args:
         dataflow_id: Dataflow ID to get indicators information for
+
+    Returns:
+        Dictionary mapping indicator IDs to their names
     """
     url = urllib.parse.urljoin(BASE_URL, f"data/{dataflow_id}/All?format=sdmx-json")
     data = requests.get(url, timeout=200).json()
@@ -73,20 +76,31 @@ def get_values(
     ids: list[int],
     structure_type: str,
     dimension_type: str,
-    value_lookups: dict[tuple[str, str], dict[tuple[int, int], int]],
-) -> list:
+    value_lookups: dict[tuple[str, str], dict[tuple[int, int], str]],
+) -> list[str | None]:
+    """Get values from lookup dictionary based on IDs and structure type.
+
+    Args:
+        ids: List of integer IDs to look up
+        structure_type: Type of structure ('dimensions' or 'attributes')
+        dimension_type: Type of dimension ('observation' or 'series')
+        value_lookups: Dictionary containing lookup mappings
+
+    Returns:
+        List of values corresponding to the provided IDs
+    """
     lookup = value_lookups[(structure_type, dimension_type)]
     return [lookup.get((i, id_val)) for i, id_val in enumerate(ids)]
 
 
-def build_df_from_json(json_data: dict) -> pd.DataFrame:
+def build_df_from_json(json_data: dict[str, Any]) -> pd.DataFrame:
     """Build a CSV DataFrame from SDMX-JSON data.
 
     Args:
-        json_data (dict): JSON data from API response
+        json_data: JSON data from API response
 
     Returns:
-        pd.DataFrame: DataFrame containing the requested data
+        DataFrame containing the requested data
     """
     data_structure = json_data["structure"]
 
@@ -172,6 +186,11 @@ def build_df_from_json(json_data: dict) -> pd.DataFrame:
 
 
 def get_available_dataflows() -> str:
+    """Get information about available dataflows.
+
+    Returns:
+        String containing descriptions of available dataflows and their purposes
+    """
     info_on_dataflows = """
     - CCRI: Climate Risk Index - Hazards, health risks, vulnerability factors
     - CHLD_PVTY: Child Poverty - Measures poverty levels, deprivation rates, income ratios, etc.
