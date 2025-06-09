@@ -3,6 +3,7 @@ import os
 import ee
 from ee.errormargin import ErrorMargin
 from ee.feature import Feature
+from ee.featurecollection import FeatureCollection
 from ee.image import Image
 from ee.imagecollection import ImageCollection
 from ee.reducer import Reducer
@@ -123,7 +124,7 @@ def mask_image(
 def filter_image_by_threshold(
     image_filename: str, threshold: float, temp_dir: str = ""
 ) -> dict[str, str | dict]:
-    """Mask an Earth Engine image based on a threshold value.
+    """Filter an Earth Engine image based on a threshold value.
 
     This function applies a threshold filter to an image.
     The result is a binary image where the values are either 0 or 1.
@@ -134,7 +135,7 @@ def filter_image_by_threshold(
 
     Returns:
         dict: A dictionary containing:
-            - image_filename: Path to the saved masked image file
+            - image_filename: Path to the saved filtered image file
             - input_arguments: The original input arguments used for the operation
 
     Raises:
@@ -170,8 +171,10 @@ def filter_image_by_threshold(
     }
 
 
-def union_binary_images(paths_to_binary_images: list[str], temp_dir: str = "") -> dict:
-    """Union two binary images.
+def union_binary_images(
+    paths_to_binary_images: list[str], temp_dir: str = ""
+) -> dict[str, str | dict]:
+    """Union multiple binary images.
 
     This function loads binary images from the provided paths and performs
     a union operation, returning a new binary image where any of the input images
@@ -214,8 +217,8 @@ def union_binary_images(paths_to_binary_images: list[str], temp_dir: str = "") -
 
 def intersect_binary_images(
     paths_to_binary_images: list[str], temp_dir: str = ""
-) -> dict:
-    """Intersect two binary images.
+) -> dict[str, str | dict]:
+    """Intersect multiple binary images.
 
     This function loads binary images from the provided paths and performs
     an intersection operation, returning a new binary image where all the input images
@@ -255,7 +258,7 @@ def intersect_binary_images(
 
 def intersect_feature_collections(
     paths_to_feature_collections: list[str], temp_dir: str = ""
-) -> dict:
+) -> dict[str, str | dict]:
     """Perform a geometric intersection of multiple feature collections.
 
     This function loads feature collections from the provided paths and performs
@@ -279,7 +282,7 @@ def intersect_feature_collections(
 
     Use case:
         Find areas that are both flood-prone and densely populated by intersecting flood hazard zones with population density data:
-        intersect_feature_collection(["flood_zones.json", "high_population_areas.json"])
+        intersect_feature_collections(["flood_zones.json", "high_population_areas.json"])
 
     Note:
         Do not provide a value for temp_dir, it will be handled automatically.
@@ -314,7 +317,7 @@ def intersect_feature_collections(
 
 def merge_feature_collections(
     paths_to_feature_collections: list[str], temp_dir: str = ""
-) -> dict:
+) -> dict[str, str | dict]:
     """Merge multiple feature collections into a single combined collection.
 
     This function loads feature collections from the provided paths and merges them
@@ -372,8 +375,8 @@ def reduce_image(
     reducer: REDUCERS,
     temp_dir: str = "",
     scale: float = 92.76624195666344,  # scale of child population data
-) -> dict:
-    """Reduce an image by applying a reducer to its pixels.
+) -> dict[str, float | dict]:
+    """Reduce an image by applying a reducer to its pixels within specified regions.
 
     Args:
         image_filename: The path to the image to reduce
@@ -426,7 +429,7 @@ def build_map(
     color_palettes: list[list[str]],
     names: list[str] = [],
     temp_dir: str = "",
-) -> dict:
+) -> dict[str, str | dict]:
     """Build a map from images and vector data and save it to an HTML file.
 
     Creates an interactive map by overlaying Earth Engine images on top of vector data
@@ -451,7 +454,8 @@ def build_map(
     Use case:
         Create an interactive map showing drought severity and population density in a region:
         build_map(["drought_data.json", "population_density.json"], "country_boundaries.json",
-                 ["Drought Severity", "Population Density"])
+                 [["#ff0000", "#00ff00"], ["#0000ff", "#ffff00"]],
+                ["Drought Severity", "Population Density"])
 
     Note:
         Do not provide a value for temp_dir, it will be handled automatically.
@@ -483,7 +487,9 @@ def build_map(
     }
 
 
-def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
+def intersect_feature(
+    feature: Feature, feature_collection: FeatureCollection
+) -> Feature:
     """Intersect a feature with a feature collection.
 
     Computes the geometric intersection between a feature and a feature collection,
@@ -497,7 +503,7 @@ def intersect_feature(feature_1: Feature, feature_2: Feature) -> Feature:
         Feature: A new feature representing the intersection, with properties copied from
                 the input feature
     """
-    intersected = feature_1.geometry().intersection(
-        feature_2.geometry(), ErrorMargin(100)
+    intersected = feature.geometry().intersection(
+        feature_collection.geometry(), ErrorMargin(100)
     )
-    return Feature(intersected).copyProperties(feature_1)
+    return Feature(intersected).copyProperties(feature)

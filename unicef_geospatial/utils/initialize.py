@@ -22,7 +22,6 @@ from geospatial.geo_operations import (
     union_binary_images,
 )
 from geospatial.hazards_metadata import get_ccri_metadata
-from geospatial.heatwaves import get_heatwave_image
 from llama_index.core.tools import FunctionTool
 
 
@@ -53,7 +52,6 @@ def get_tools(temp_dir: str = "") -> list[Callable]:
         intersect_binary_images,
         union_binary_images,
         # geospatial querying tools
-        get_heatwave_image,
         get_zone_of_area,
         get_dataset_image_and_metadata,
         get_ccri_metadata,
