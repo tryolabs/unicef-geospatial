@@ -17,6 +17,8 @@ This project is run using Docker and Docker Compose. Ensure you have Docker inst
 
 You will also need to set up the required secrets as detailed in the "Secrets" section below.
 
+To install the dependencies for running specifically the api for the benchmark or tests, installing [uv](https://docs.astral.sh/uv/guides/install-python/) and [Google CLI](https://cloud.google.com/sdk/docs/install) is necessary
+
 ### Running the project
 
 To build and run the entire project (API and frontend):
@@ -162,15 +164,20 @@ To run the benchmark, after installing the dependencies, run the following comma
 
 This will log the results in langfuse cloud and create a local file named [`results.tsv`](results.tsv)
 
-### Project structure
+### Running the tests
 
-TODO: change this
+To run the tests:
+
+```
+uv run python tests/test_runner.py all
+```
+
+### Project structure
 
 - `unicef_geospatial/`: The main project for working with geospatial data.
 
   - `agent/`: Functions for creating and running langchain agents.
   - `data_warehouse/`: Tools and functions for interacting with the unicef data warehouse.
-  - `earth_engine/`: Functions for interacting with google earth engine.
   - `geospatial/`: Tools and functions for interacting with geospatial data.
   - `utils/`: Utility functions for the project.
   - `app.py`: The main entry point for the API.
@@ -179,20 +186,3 @@ TODO: change this
 
 - `notebooks/`: Notebooks with interactive visualizations and demonstrations.
 - `research/`: Research scripts for exploring geospatial data, unicef api, etc.
-
-#### Notebooks
-
-TODO: change this
-
-- `interactive_map.ipynb`: Ask questions in natural language about heatwave data.
-
-#### Research
-
-TODO: change this
-
-- `api_research.py`: Research on the unicef api, transform the sdmx-json to pandas dataframe.
-- `ee_upload_images.py`: Upload heatwave data to google earth engine.
-- `initial_research.py`: Research on how to use langchain agents to interact with a dataframe.
-- `interact_geospatial.py`: Research on how to use langchain agents to interact with a geospatial data.
-- `pandas_ai.py`: Research on how to use pandas-ai to interact with a unicef dataframe.
-- `unicef_geospatial_ee.py`: Research on how to use google earth engine to interact with a geospatial data, creating an interactive map.
