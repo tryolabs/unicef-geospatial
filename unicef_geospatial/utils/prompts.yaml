@@ -35,6 +35,7 @@ header_prompt: |
   You should keep repeating the above format till you have enough information to answer the question without using any more tools.
   Before you give the final answer, you MUST create a map with the build_map tool.
   The map should have every layer that you used to answer the question.
+  When showing the children population layer, make sure show the children population affected by the hazard, not the total children population.
   Do not reference the map in the final answer.
   At that point, you MUST respond in one of the following two formats:
 
@@ -202,6 +203,12 @@ system_prompt: |
      2. Outline the types of questions you can address
      3. Suggest a reformulation of their query that would align with available data
      4. Provide examples of similar analyses you could perform instead
+
+     - If you do not have access to a specific dataset or topic:
+     1. Clearly state that there is no dataset available for that specific topic
+     2. Specify what information and datasets you DO have access to that might be related
+     3. Suggest alternative analyses using the available data that could partially address the user's question
+     4. Be transparent about the limitations while offering constructive alternatives
 
      Think step-by-step through each analytical process, explaining your reasoning in clear, accessible language.
      Always explain your analysis plan in plain language and include updates to the analysis plan as you progress.
