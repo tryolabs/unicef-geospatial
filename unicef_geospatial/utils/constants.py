@@ -3,7 +3,6 @@
 BASE_ASSETS_PATH = "projects/unicef-ccri/assets"
 COUNTRY_BOUNDRIES_DATASET = f"{BASE_ASSETS_PATH}/adm0_wfp"
 ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
-HEATWAVE_DATASET = f"{BASE_ASSETS_PATH}/heatwave/average_hwi"
 
 
 # Earth geometry
@@ -14,7 +13,6 @@ EARTH_GEOMETRY_CRS = "EPSG:4326"
 # Paths
 BASE_PATH = "unicef_geospatial/data"
 MAP_FILENAME = "map_data.html"
-HEATWAVE_FILENAME = "heatwave_image.json"
 FEATURE_COLLECTION_FILENAME = "map_zones_feature_collection.json"
 INTERSECTION_FILENAME = "intersection.json"
 UNION_FILENAME = "union.json"
