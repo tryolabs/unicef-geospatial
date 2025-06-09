@@ -32,7 +32,7 @@ function ChatMessages({
   };
 
   const exampleQuestions = [
-    "What was the frequency of heatwaves in Uruguay in the 1990s?",
+    "How many children are exposed to wildfires in Uruguay?",
     "How many children were born in Ethiopia in 2020?",
     "How many children are exposed to coastal floods in Colombia?",
   ];
