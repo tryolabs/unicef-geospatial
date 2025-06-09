@@ -21,8 +21,8 @@ from geospatial.geo_operations import (
     reduce_image,
     union_binary_images,
 )
-from geospatial.hazards_metadata import get_ccri_metadata
 from llama_index.core.tools import FunctionTool
+from technical_doc import get_ccri_metadata
 
 
 def initialize_earth_engine(path_to_ee_auth: str) -> None:

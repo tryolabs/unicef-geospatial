@@ -35,7 +35,7 @@ from geospatial.geo_operations import (
     reduce_image,
     union_binary_images,
 )
-from geospatial.hazards_metadata import get_ccri_metadata
+from technical_doc import get_ccri_metadata
 from utils.io import load_vector_data, save_ee_object
 from utils.schemas import ALL_DATASETS
 
