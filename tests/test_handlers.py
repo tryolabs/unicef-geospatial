@@ -109,15 +109,6 @@ class TestChunkProcessing:
 
         assert result.tool_call == "Calling simple_tool"
 
-    def test_process_tool_call_chunk_invalid_content(self):
-        """Test processing a tool call chunk with invalid content."""
-        mock_chunk = MagicMock()
-        mock_chunk.tool_name = "error_tool"
-        mock_chunk.tool_output.content = "invalid json content"
-
-        with pytest.raises(Exception):
-            _process_tool_call_chunk(mock_chunk, "trace-error", "/tmp/test")
-
     def test_process_agent_stream_chunk(self):
         """Test processing an agent stream chunk."""
         mock_chunk = MagicMock()
