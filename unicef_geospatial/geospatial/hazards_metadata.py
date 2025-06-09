@@ -7,7 +7,7 @@ from utils.constants import (
 from utils.schemas import ALL_DATASETS, DatasetMetadata
 
 
-def get_ccri_metadata(query: str, temp_dir: str = "") -> str:
+def get_ccri_metadata(query: str) -> str:
     """Get the metadata for the CCRI dataset.
 
     The documentation contains detailed information about the CCRI methodology,
@@ -18,8 +18,6 @@ def get_ccri_metadata(query: str, temp_dir: str = "") -> str:
 
     Args:
         query: The query to search the CCRI technical documentation.
-        temp_dir: Temporary directory path. This parameter is not used but is required
-                 for compatibility with the tool framework.
 
     Returns:
         The most relevant chunks from the CCRI technical documentation as a string.
