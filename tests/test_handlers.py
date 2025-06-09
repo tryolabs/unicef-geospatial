@@ -2,10 +2,7 @@
 Unit tests for the handlers module.
 """
 
-import json
-import os
-import tempfile
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from utils.schemas import Message, ReturnChunk
