@@ -30,7 +30,15 @@ async def home() -> HTMLResponse:
 @app.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-):
+) -> Token:
+    """Authenticate user and return access token.
+
+    Args:
+        form_data: OAuth2 password request form containing username and password.
+
+    Returns:
+        Token: Access token with bearer type and username.
+    """
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -55,7 +63,17 @@ async def login_for_access_token(
 
 
 @app.get("/users/me", response_model=User)
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+async def read_users_me(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    """Get current authenticated user information.
+
+    Args:
+        current_user (Annotated[User, Depends): Current authenticated user from dependency injection.
+
+    Returns:
+        User: Current authenticated user.
+    """
     return current_user
 
 
@@ -63,6 +81,15 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
 async def ask(
     chat: Chat, current_user: Annotated[User, Depends(get_current_user)]
 ) -> StreamingResponse:
+    """Process user question and return streaming response.
+
+    Args:
+        chat: Chat object containing chat messages.
+        current_user: Current authenticated user from dependency injection.
+
+    Returns:
+        StreamingResponse: Streaming response containing the response from the agent.
+    """
 
     if chat.chat_messages == [] or chat.chat_messages[-1].content == "":
         raise HTTPException(
