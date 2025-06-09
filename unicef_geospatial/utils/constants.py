@@ -3,6 +3,7 @@
 BASE_ASSETS_PATH = "projects/unicef-ccri/assets"
 COUNTRY_BOUNDRIES_DATASET = f"{BASE_ASSETS_PATH}/adm0_wfp"
 ADMIN_LEVEL_1_BOUNDRIES_DATASET = "WM/geoLab/geoBoundaries/600/ADM1"
+PATH_TO_HAZARDS_METADATA = "unicef_geospatial/geospatial/hazards_metadata.yaml"
 
 
 # Earth geometry

@@ -2,10 +2,11 @@ import os
 from typing import List
 
 import ee
-from geospatial.hazards_metadata import DATASETS_METADATA
+import yaml
 from google.cloud import storage
 from google.cloud.storage.bucket import Bucket
 from logging_config import get_logger
+from utils.constants import BASE_ASSETS_PATH, PATH_TO_HAZARDS_METADATA
 from utils.schemas import ALL_DATASETS, DatasetMetadata
 
 logger = get_logger(__name__)
@@ -21,9 +22,38 @@ def get_dataset_metadata(dataset: ALL_DATASETS) -> DatasetMetadata:
         DatasetMetadata: The metadata for the specified dataset
     """
     logger.info(f"Getting metadata for dataset: {dataset}")
-    metadata = DATASETS_METADATA[dataset]
-    metadata.input_arguments = {"dataset": dataset}
+    metadata = load_datasets_metadata()[dataset]
     return metadata
+
+
+def load_datasets_metadata():
+    """Load dataset metadata from YAML file and convert to the expected format"""
+    try:
+        with open(PATH_TO_HAZARDS_METADATA, "r") as file:
+            data = yaml.safe_load(file)
+
+        if not data or "datasets" not in data:
+            raise ValueError("Invalid YAML structure: missing 'datasets' key")
+
+        metadata = {}
+        for dataset_name, dataset_config in data["datasets"].items():
+            # Convert the dataset name to the corresponding enum value
+            enum_name = dataset_name.upper()
+            if hasattr(ALL_DATASETS, enum_name):
+                enum_value = getattr(ALL_DATASETS, enum_name)
+
+                if "asset_id" in dataset_config:
+                    dataset_config["asset_id"] = (
+                        f"{BASE_ASSETS_PATH}/{dataset_config['asset_id']}"
+                    )
+
+                metadata[enum_value] = DatasetMetadata(**dataset_config)
+
+        return metadata
+
+    except (FileNotFoundError, yaml.YAMLError, ValueError) as e:
+        print(f"Error loading datasets metadata: {e}")
+        raise e
 
 
 def create_bucket(bucket_name: str, project_id: str) -> Bucket:
