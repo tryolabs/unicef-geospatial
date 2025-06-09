@@ -15,28 +15,6 @@ from utils.schemas import Message, ReturnChunk
 logger = get_logger(__name__)
 
 
-def _format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
-    """Format chat messages into the expected format for the agent.
-
-    Args:
-        chat_messages: List of Message objects containing role, content and trace_id
-
-    Returns:
-        Dictionary with 'messages' key containing list of formatted message dictionaries
-    """
-    messages = []
-    for message in chat_messages:
-        messages.append(
-            {
-                "role": message.role,
-                "content": message.content,
-                "trace_id": message.trace_id,
-            }
-        )
-
-    return {"messages": messages}
-
-
 async def handle_response(
     messages: list[Message],
     trace_id: str,
@@ -81,8 +59,12 @@ async def handle_response(
 
 
 async def respond(
-    messages, trace_id, session_id, temp_dir: str = "", tags: list[str] = []
-):
+    messages: dict[str, list[dict]],
+    trace_id: str,
+    session_id: str,
+    temp_dir: str = "",
+    tags: list[str] = [],
+) -> AsyncGenerator[str, None]:
     """Process messages and generate a response using the agent.
 
     Args:
@@ -155,6 +137,28 @@ async def respond(
     return_chunk = ReturnChunk(trace_id=response_trace_id, is_finished=True)
     yield json.dumps(return_chunk.model_dump())
     yield "\n"
+
+
+def _format_messages(chat_messages: list[Message]) -> dict[str, list[dict]]:
+    """Format chat messages into the expected format for the agent.
+
+    Args:
+        chat_messages: List of Message objects containing role, content and trace_id
+
+    Returns:
+        Dictionary with 'messages' key containing list of formatted message dictionaries
+    """
+    messages = []
+    for message in chat_messages:
+        messages.append(
+            {
+                "role": message.role,
+                "content": message.content,
+                "trace_id": message.trace_id,
+            }
+        )
+
+    return {"messages": messages}
 
 
 def _process_tool_call_chunk(
