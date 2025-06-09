@@ -7,12 +7,12 @@ from google.cloud import storage
 from google.cloud.storage.bucket import Bucket
 from logging_config import get_logger
 from utils.constants import BASE_ASSETS_PATH, PATH_TO_HAZARDS_METADATA
-from utils.schemas import ALL_DATASETS, DatasetMetadata
+from utils.schemas import DatasetMetadata, load_all_datasets_enum
 
 logger = get_logger(__name__)
 
 
-def get_dataset_metadata(dataset: ALL_DATASETS) -> DatasetMetadata:
+def get_dataset_metadata(dataset: load_all_datasets_enum()) -> DatasetMetadata:
     """Get metadata for a dataset.
 
     Args:
@@ -39,8 +39,8 @@ def load_datasets_metadata():
         for dataset_name, dataset_config in data["datasets"].items():
             # Convert the dataset name to the corresponding enum value
             enum_name = dataset_name.upper()
-            if hasattr(ALL_DATASETS, enum_name):
-                enum_value = getattr(ALL_DATASETS, enum_name)
+            if hasattr(load_all_datasets_enum(), enum_name):
+                enum_value = getattr(load_all_datasets_enum(), enum_name)
 
                 if "asset_id" in dataset_config:
                     dataset_config["asset_id"] = (

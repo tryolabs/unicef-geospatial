@@ -37,7 +37,7 @@ from geospatial.geo_operations import (
 )
 from technical_doc import get_ccri_metadata
 from utils.io import load_vector_data, save_ee_object
-from utils.schemas import ALL_DATASETS
+from utils.schemas import load_all_datasets_enum
 
 
 @pytest.fixture
@@ -188,9 +188,11 @@ class TestGetMetadata:
         mock_collection.mosaic.return_value = mock_mosaic
         mock_image_collection.return_value = mock_collection
 
-        result = get_dataset_image_and_metadata(ALL_DATASETS.RIVER_FLOOD, "/tmp")
+        result = get_dataset_image_and_metadata(
+            load_all_datasets_enum().RIVER_FLOOD, "/tmp"
+        )
 
-        mock_get_metadata.assert_called_once_with(ALL_DATASETS.RIVER_FLOOD)
+        mock_get_metadata.assert_called_once_with(load_all_datasets_enum().RIVER_FLOOD)
         mock_image_collection.assert_called_once_with("test/asset")
         mock_collection.mosaic.assert_called_once()
         mock_save.assert_called_once()
@@ -199,7 +201,9 @@ class TestGetMetadata:
         assert "image_filename" in result
         assert "description" in result
         assert "input_arguments" in result
-        assert result["input_arguments"]["dataset"] == ALL_DATASETS.RIVER_FLOOD
+        assert (
+            result["input_arguments"]["dataset"] == load_all_datasets_enum().RIVER_FLOOD
+        )
 
     @patch("geospatial.geo_operations.get_dataset_metadata")
     @patch("geospatial.geo_operations.save_ee_object")
@@ -220,9 +224,9 @@ class TestGetMetadata:
         mock_ee_image = Mock()
         mock_image.return_value = mock_ee_image
 
-        result = get_dataset_image_and_metadata(ALL_DATASETS.FIRE, "/tmp")
+        result = get_dataset_image_and_metadata(load_all_datasets_enum().FIRE, "/tmp")
 
-        mock_get_metadata.assert_called_once_with(ALL_DATASETS.FIRE)
+        mock_get_metadata.assert_called_once_with(load_all_datasets_enum().FIRE)
         mock_image.assert_called_once_with("test/asset")
         mock_save.assert_called_once()
         assert "input_arguments" in result
@@ -252,7 +256,7 @@ class TestGetMetadata:
         mock_image.return_value = mock_ee_image
 
         result = get_dataset_image_and_metadata(
-            ALL_DATASETS.AGRICULTURAL_DROUGHT, "/tmp"
+            load_all_datasets_enum().AGRICULTURAL_DROUGHT, "/tmp"
         )
 
         mock_ee_image.lte.assert_called_once_with(100)
@@ -260,9 +264,9 @@ class TestGetMetadata:
         mock_save.assert_called_once()
         assert "input_arguments" in result
 
-    @patch("geospatial.hazards_metadata.load_index_from_storage")
-    @patch("geospatial.hazards_metadata.StorageContext")
-    @patch("geospatial.hazards_metadata.VectorIndexRetriever")
+    @patch("technical_doc.load_index_from_storage")
+    @patch("technical_doc.StorageContext")
+    @patch("technical_doc.VectorIndexRetriever")
     def test_get_ccri_metadata(
         self, mock_retriever_class, mock_storage_context, mock_load_index
     ):
@@ -715,15 +719,18 @@ class TestDemographicFunctions:
 
 
 class TestEarthEngineFunctions:
-    @patch("geospatial.earth_engine.DATASETS_METADATA")
-    def test_get_dataset_metadata(self, mock_datasets_metadata):
-        mock_metadata = Mock()
-        mock_metadata.input_arguments = None
-        mock_datasets_metadata.__getitem__.return_value = mock_metadata
+    def test_get_dataset_metadata(self):
+        result = get_dataset_metadata(load_all_datasets_enum().RIVER_FLOOD)
 
-        result = get_dataset_metadata(ALL_DATASETS.RIVER_FLOOD)
-
-        assert result.input_arguments == {"dataset": ALL_DATASETS.RIVER_FLOOD}
+        assert hasattr(result, "image_filename")
+        assert hasattr(result, "asset_id")
+        assert hasattr(result, "description")
+        assert hasattr(result, "source_name")
+        assert hasattr(result, "source_url")
+        assert hasattr(result, "mosaic")
+        assert hasattr(result, "threshold")
+        assert hasattr(result, "input_arguments")
+        assert hasattr(result, "color_palette")
 
     @patch("geospatial.earth_engine.storage.Client")
     def test_create_bucket(self, mock_storage_client_class):
@@ -1126,13 +1133,13 @@ class TestGetDatasetUnhappyPaths:
         mock_image_collection.side_effect = Exception("Asset not found")
 
         with pytest.raises(Exception, match="Asset not found"):
-            get_dataset_image_and_metadata(ALL_DATASETS.RIVER_FLOOD, "/tmp")
+            get_dataset_image_and_metadata(load_all_datasets_enum().RIVER_FLOOD, "/tmp")
 
 
 class TestHazardsMetadataUnhappyPaths:
-    @patch("geospatial.hazards_metadata.load_index_from_storage")
-    @patch("geospatial.hazards_metadata.StorageContext")
-    @patch("geospatial.hazards_metadata.VectorIndexRetriever")
+    @patch("technical_doc.load_index_from_storage")
+    @patch("technical_doc.StorageContext")
+    @patch("technical_doc.VectorIndexRetriever")
     def test_get_ccri_metadata_storage_error(
         self, mock_retriever_class, mock_storage_context, mock_load_index
     ):
@@ -1142,9 +1149,9 @@ class TestHazardsMetadataUnhappyPaths:
         with pytest.raises(Exception, match="Storage not found"):
             get_ccri_metadata("test query")
 
-    @patch("geospatial.hazards_metadata.load_index_from_storage")
-    @patch("geospatial.hazards_metadata.StorageContext")
-    @patch("geospatial.hazards_metadata.VectorIndexRetriever")
+    @patch("technical_doc.load_index_from_storage")
+    @patch("technical_doc.StorageContext")
+    @patch("technical_doc.VectorIndexRetriever")
     def test_get_ccri_metadata_retrieval_error(
         self, mock_retriever_class, mock_storage_context, mock_load_index
     ):
@@ -1158,9 +1165,9 @@ class TestHazardsMetadataUnhappyPaths:
         with pytest.raises(Exception, match="Retrieval failed"):
             get_ccri_metadata("test query")
 
-    @patch("geospatial.hazards_metadata.load_index_from_storage")
-    @patch("geospatial.hazards_metadata.StorageContext")
-    @patch("geospatial.hazards_metadata.VectorIndexRetriever")
+    @patch("technical_doc.load_index_from_storage")
+    @patch("technical_doc.StorageContext")
+    @patch("technical_doc.VectorIndexRetriever")
     def test_get_ccri_metadata_empty_results(
         self, mock_retriever_class, mock_storage_context, mock_load_index
     ):

@@ -11,13 +11,13 @@ from geospatial.earth_engine import get_dataset_metadata
 from logging_config import get_logger
 from utils.constants import INTERSECTION_FILENAME, UNION_FILENAME
 from utils.io import image_to_html, load_vector_data, save_ee_object
-from utils.schemas import ALL_DATASETS, REDUCERS
+from utils.schemas import REDUCERS, load_all_datasets_enum
 
 logger = get_logger(__name__)
 
 
 def get_dataset_image_and_metadata(
-    dataset: ALL_DATASETS,
+    dataset: load_all_datasets_enum(),
     temp_dir: str = "",
 ) -> dict[str, str]:
     """Get an image from Earth Engine and save it as a vector data.
@@ -45,7 +45,7 @@ def get_dataset_image_and_metadata(
         image = ImageCollection(metadata.asset_id).mosaic()
     else:
         image = Image(metadata.asset_id)
-        if dataset == ALL_DATASETS.AGRICULTURAL_DROUGHT:
+        if dataset == load_all_datasets_enum().AGRICULTURAL_DROUGHT:
             # TODO: maybe this image should be preprocessed
             logger.info("Updating mask for agricultural drought")
             image = image.updateMask(image.lte(100))

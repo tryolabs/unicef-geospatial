@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any, Literal
 
+import yaml
 from pydantic import BaseModel
 
 
@@ -36,24 +37,24 @@ class DatasetMetadata(BaseModel):
     color_palette: list[str] = []
 
 
-class ALL_DATASETS(str, Enum):
-    RIVER_FLOOD = "river_flood"
-    COASTAL_FLOOD = "coastal_flood"
-    CHILDREN_POPULATION = "children_population"
-    TROPICAL_STORM = "tropical_storm"
-    AGRICULTURAL_DROUGHT = "agricultural_drought"
-    DROUGHT_SPEI = "drought_spei"
-    DROUGHT_SPI = "drought_spi"
-    HEATWAVE_FREQUENCY = "heatwave_frequency"
-    HEATWAVE_DURATION = "heatwave_duration"
-    HEATWAVE_SEVERITY = "heatwave_severity"
-    EXTREME_HEAT = "extreme_heat"
-    FIRE = "fire"
-    FIRE_FRP = "fire_frp"
-    SAND_DUST_STORM = "sand_dust_storm"
-    AIR_POLLUTION = "air_pollution"
-    PLASMODIUM_VIVAX = "plasmodium_vivax"
-    PLASMODIUM_FALCIPARUM = "plasmodium_falciparum"
+def load_all_datasets_enum() -> Enum:
+    """Load dataset names from the YAML metadata file and create enum values"""
+    from utils.constants import PATH_TO_HAZARDS_METADATA
+
+    try:
+        with open(PATH_TO_HAZARDS_METADATA, "r") as file:
+            data = yaml.safe_load(file)
+            if data and "datasets" in data:
+                dataset_names = list(data["datasets"].keys())
+                ALL_DATASETS = Enum(
+                    "ALL_DATASETS",
+                    {name.upper(): name for name in dataset_names},
+                    type=str,
+                )
+
+                return ALL_DATASETS
+    except (FileNotFoundError, yaml.YAMLError):
+        raise ValueError("Failed to load dataset metadata")
 
 
 REDUCERS = Literal["mean", "max", "min", "sum", "median", "std"]
