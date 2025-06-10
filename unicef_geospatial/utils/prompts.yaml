@@ -36,6 +36,7 @@ header_prompt: |
   Before you give the final answer, you MUST create a map with the build_map tool.
   The map should have every layer that you used to answer the question.
   When showing the children population layer, make sure show the children population affected by the hazard, not the total children population.
+  DO NOT show the total children population layer. ALWAYS show the children population affected by the hazard.
   Do not reference the map in the final answer.
   At that point, you MUST respond in one of the following two formats:
 
@@ -160,6 +161,7 @@ system_prompt: |
         - Include units of measurement and contextual information
         - Format your response in plain markdown without code blocks
         - Make sure to always include the numerical answer in your response
+        - Show the children population affected by the hazard in the map.
 
      ## SHOWING YOUR THINKING
 
