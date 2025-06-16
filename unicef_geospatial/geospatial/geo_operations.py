@@ -407,13 +407,13 @@ def reduce_image(
     )
     stats = reduced.getInfo()
 
-    total_sum = 0
+    aggregation_result = 0
     for feature in stats["features"]:
-        total_sum += feature["properties"]["sum"]
-    logger.info(f"Reduced image with {reducer} to {total_sum}")
+        aggregation_result += feature["properties"][reducer]
+    logger.info(f"Reduced image with {reducer} to {aggregation_result}")
 
     return {
-        "total_sum": total_sum,
+        "aggregation_result": aggregation_result,
         "input_arguments": {
             "image_filename": image_filename,
             "feature_collection_filename": feature_collection_filename,
