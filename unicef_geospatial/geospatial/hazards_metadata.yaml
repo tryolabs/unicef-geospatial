@@ -167,3 +167,13 @@ datasets:
     source_name: "Malaria Atlas Project"
     source_url: "https://apps.who.int/malaria/maps/threats/#/download"
     color_palette: ["#cec0b8", "#b2a59b", "#9a9381", "#7a745d", "#6f634b"]
+
+  risk_index:
+    asset_id: "risk_index_test/p1_avg_pixel"
+    image_filename: "risk_index_image.json"
+    description: "Each pixel has the value of the children risk index for that area, from 0 to 10."
+    mosaic: false
+    threshold: 6
+    source_name: "CCRI"
+    source_url: "https://unicef.org/"
+    color_palette: ["#00ff00", "#ffff00", "#ff8000", "#ff0000", "#800000"]
