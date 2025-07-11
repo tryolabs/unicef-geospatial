@@ -1,0 +1,107 @@
+services:
+  # ------------------ Frontend ------------------
+  frontend:
+    build:
+      context: ./unicef-frontend
+    container_name: frontend
+    ports:
+      - "3000:3000" # frontend HTTP server
+    volumes:
+      - ./unicef-frontend/src:/app/src
+      - ./unicef-frontend/public:/app/public
+    depends_on:
+      - agent
+    networks:
+      - net_frontend_agent
+
+  # ------------------ Agent ------------------
+  agent:
+    build:
+      context: ./unicef-agent
+    container_name: agent
+    ports:
+      - "8000:8000" # agent HTTP API
+    volumes:
+      - ./unicef-agent/agent:/app/agent
+    secrets:
+      - langfuse_host
+      - langfuse_public_key
+      - langfuse_secret_key
+      - openai_api_key
+      - jwt_secret_key
+      - users
+    depends_on:
+      - datawarehouse_mcp
+      - rag_mcp
+      - geospatial_mcp
+    networks:
+      - net_frontend_agent
+      - net_agent_datawarehouse
+      - net_agent_rag
+      - net_agent_geospatial
+
+  # ------------------ Data-Warehouse MCP ------------------
+  datawarehouse_mcp:
+    build:
+      context: ./unicef-datawarehouse-mcp
+    container_name: datawarehouse_mcp
+    ports:
+      - "6000:6000"
+    volumes:
+      - ./unicef-datawarehouse-mcp/datawarehouse_mcp:/app/datawarehouse_mcp
+    networks:
+      - net_agent_datawarehouse
+
+  # ------------------ RAG MCP ------------------
+  rag_mcp:
+    build:
+      context: ./unicef-rag-mcp
+    container_name: rag_mcp
+    ports:
+      - "6001:6001"
+    volumes:
+      - ./unicef-rag-mcp/rag:/app/rag
+    networks:
+      - net_agent_rag
+
+  # ------------------ Geospatial (GEE) MCP ------------------
+  geospatial_mcp:
+    build:
+      context: ./unicef-gee-mcp
+    container_name: geospatial_mcp
+    ports:
+      - "6002:6002"
+    volumes:
+      - ./unicef-gee-mcp/ee_mcp:/app/ee_mcp
+    secrets:
+      - ee_auth.json
+    networks:
+      - net_agent_geospatial
+
+# ------------------ Networks ------------------
+networks:
+  net_frontend_agent:
+    driver: bridge
+  net_agent_datawarehouse:
+    driver: bridge
+  net_agent_rag:
+    driver: bridge
+  net_agent_geospatial:
+    driver: bridge
+
+# ------------------ Secrets ------------------
+secrets:
+  langfuse_host:
+    file: ./.secrets/langfuse_host.txt
+  langfuse_public_key:
+    file: ./.secrets/langfuse_public_key.txt
+  langfuse_secret_key:
+    file: ./.secrets/langfuse_secret_key.txt
+  openai_api_key:
+    file: ./.secrets/openai_api_key.txt
+  jwt_secret_key:
+    file: ./.secrets/jwt_secret_key.txt
+  ee_auth.json:
+    file: ./.secrets/ee_auth.json
+  users:
+    file: ./.secrets/users.json
