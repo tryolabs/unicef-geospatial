@@ -5,7 +5,7 @@ services:
       context: ./unicef-frontend
     container_name: frontend
     ports:
-      - "3000:3000" # frontend HTTP server
+      - "0.0.0.0:3000:3000" # frontend HTTP server - accessible from internet
     volumes:
       - ./unicef-frontend/src:/app/src
       - ./unicef-frontend/public:/app/public
@@ -19,8 +19,6 @@ services:
     build:
       context: ./unicef-agent
     container_name: agent
-    ports:
-      - "8000:8000" # agent HTTP API
     volumes:
       - ./unicef-agent/agent:/app/agent
     secrets:
@@ -45,8 +43,6 @@ services:
     build:
       context: ./unicef-datawarehouse-mcp
     container_name: datawarehouse_mcp
-    ports:
-      - "6000:6000"
     volumes:
       - ./unicef-datawarehouse-mcp/datawarehouse_mcp:/app/datawarehouse_mcp
     networks:
@@ -57,8 +53,6 @@ services:
     build:
       context: ./unicef-rag-mcp
     container_name: rag_mcp
-    ports:
-      - "6001:6001"
     volumes:
       - ./unicef-rag-mcp/rag:/app/rag
     networks:
@@ -69,8 +63,6 @@ services:
     build:
       context: ./unicef-gee-mcp
     container_name: geospatial_mcp
-    ports:
-      - "6002:6002"
     volumes:
       - ./unicef-gee-mcp/ee_mcp:/app/ee_mcp
     secrets:
