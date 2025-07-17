@@ -28,6 +28,7 @@ services:
       - openai_api_key
       - jwt_secret_key
       - users
+      - vertex_auth.json
     depends_on:
       - datawarehouse_mcp
       - rag_mcp
@@ -97,3 +98,5 @@ secrets:
     file: ./.secrets/ee_auth.json
   users:
     file: ./.secrets/users.json
+  vertex_auth.json:
+    file: ./.secrets/vertex_auth.json
