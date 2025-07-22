@@ -38,6 +38,8 @@ services:
       - net_agent_datawarehouse
       - net_agent_rag
       - net_agent_geospatial
+    environment:
+      - ENVIRONMENT=prod
 
   # ------------------ Data-Warehouse MCP ------------------
   datawarehouse_mcp:
