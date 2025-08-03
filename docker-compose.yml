@@ -29,10 +29,7 @@ services:
       - jwt_secret_key
       - users
       - vertex_auth.json
-      - aws_access_key_id
-      - aws_secret_access_key
-      - aws_region_name
-      - aws_session_token
+      - aws_bearer_token_bedrock
     depends_on:
       - datawarehouse_mcp
       - rag_mcp
@@ -106,11 +103,5 @@ secrets:
     file: ./.secrets/users.json
   vertex_auth.json:
     file: ./.secrets/vertex_auth.json
-  aws_access_key_id:
-    file: ./.secrets/aws_access_key_id.txt
-  aws_secret_access_key:
-    file: ./.secrets/aws_secret_access_key.txt
-  aws_region_name:
-    file: ./.secrets/aws_region_name.txt
-  aws_session_token:
-    file: ./.secrets/aws_session_token.txt
+  aws_bearer_token_bedrock:
+    file: ./.secrets/aws_bearer_token_bedrock.txt
