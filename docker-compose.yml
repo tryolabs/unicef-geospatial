@@ -1,14 +1,11 @@
 services:
   # ------------------ Frontend ------------------
   frontend:
-    build:
-      context: ./unicef-frontend
+    image: 505646497781.dkr.ecr.us-east-1.amazonaws.com/geosphere/frontend:latest
     container_name: frontend
+    restart: always
     ports:
-      - "0.0.0.0:3000:3000" # frontend HTTP server - accessible from internet
-    volumes:
-      - ./unicef-frontend/src:/app/src
-      - ./unicef-frontend/public:/app/public
+      - "0.0.0.0:3000:3000"
     depends_on:
       - agent
     networks:
@@ -16,11 +13,9 @@ services:
 
   # ------------------ Agent ------------------
   agent:
-    build:
-      context: ./unicef-agent
+    image: 505646497781.dkr.ecr.us-east-1.amazonaws.com/geosphere/agent:latest
     container_name: agent
-    volumes:
-      - ./unicef-agent/agent:/app/agent
+    restart: always
     secrets:
       - langfuse_host
       - langfuse_public_key
@@ -44,35 +39,42 @@ services:
 
   # ------------------ Data-Warehouse MCP ------------------
   datawarehouse_mcp:
-    build:
-      context: ./unicef-datawarehouse-mcp
+    image: 505646497781.dkr.ecr.us-east-1.amazonaws.com/geosphere/datawarehouse:latest
     container_name: datawarehouse_mcp
-    volumes:
-      - ./unicef-datawarehouse-mcp/datawarehouse_mcp:/app/datawarehouse_mcp
+    restart: always
     networks:
       - net_agent_datawarehouse
 
   # ------------------ RAG MCP ------------------
   rag_mcp:
-    build:
-      context: ./unicef-rag-mcp
+    image: 505646497781.dkr.ecr.us-east-1.amazonaws.com/geosphere/rag:latest
     container_name: rag_mcp
-    volumes:
-      - ./unicef-rag-mcp/rag:/app/rag
+    restart: always
     networks:
       - net_agent_rag
 
   # ------------------ Geospatial (GEE) MCP ------------------
   geospatial_mcp:
-    build:
-      context: ./unicef-gee-mcp
+    image: 505646497781.dkr.ecr.us-east-1.amazonaws.com/geosphere/gee:latest
     container_name: geospatial_mcp
-    volumes:
-      - ./unicef-gee-mcp/ee_mcp:/app/ee_mcp
+    restart: always
     secrets:
       - ee_auth.json
     networks:
       - net_agent_geospatial
+
+  # ------------------ Watchtower ------------------
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - AWS_REGION=us-east-1
+      - WATCHTOWER_AWS_AUTOSCAN=true
+      - WATCHTOWER_POLL_INTERVAL=300
+    command: --cleanup frontend agent datawarehouse_mcp rag_mcp geospatial_mcp
 
 # ------------------ Networks ------------------
 networks:
