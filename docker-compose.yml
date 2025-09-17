@@ -65,15 +65,24 @@ services:
 
   # ------------------ Watchtower ------------------
   watchtower:
-    image: containrrr/watchtower:latest
+    image: containrrr/watchtower
     container_name: watchtower
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.docker/config.json:/config.json:ro
+      - ${HOME}/.aws:/.aws:ro
+      - helper:/go/bin
     environment:
       - AWS_REGION=us-east-1
       - WATCHTOWER_AWS_AUTOSCAN=true
       - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_ROLLING_RESTART=true
+      - WATCHTOWER_REMOVE_VOLUMES=true
+      - PATH=$PATH:/go/bin
+    networks:
+      - watchtower-network
     command: --cleanup frontend agent datawarehouse_mcp rag_mcp geospatial_mcp
 
 # ------------------ Networks ------------------
@@ -85,6 +94,9 @@ networks:
   net_agent_rag:
     driver: bridge
   net_agent_geospatial:
+    driver: bridge
+  watchtower-network:
+    name: watchtower-network
     driver: bridge
 
 # ------------------ Secrets ------------------
@@ -107,3 +119,8 @@ secrets:
     file: ./.secrets/vertex_auth.json
   aws_bearer_token_bedrock:
     file: ./.secrets/aws_bearer_token_bedrock.txt
+
+# ------------------ Volumes ------------------
+volumes:
+  helper:
+    external: true
