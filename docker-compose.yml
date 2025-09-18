@@ -50,6 +50,8 @@ services:
     image: 505646497781.dkr.ecr.us-east-1.amazonaws.com/geosphere/rag:latest
     container_name: rag_mcp
     restart: always
+    secrets:
+      - aws_bearer_token_bedrock
     networks:
       - net_agent_rag
 
