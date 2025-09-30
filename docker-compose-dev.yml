@@ -1,0 +1,156 @@
+# This Docker Compose file is intended for local development.
+# It builds services from local source code instead of pulling from a remote registry.
+
+services:
+  # ------------------ Frontend ------------------
+  frontend:
+    # Builds the frontend image from the local directory.
+    build:
+      context: ../unicef-frontend
+    # Assigns a name to the built image for local reference.
+    image: geosphere-dev/frontend:latest
+
+    container_name: frontend
+    restart: always
+
+    ports:
+      - "0.0.0.0:3000:3000"
+
+    depends_on:
+      - agent
+
+    networks:
+      - net_frontend_agent
+
+  # ------------------ Agent ------------------
+  agent:
+    # Builds the agent image from the local directory.
+    build:
+      context: ../unicef-agent
+
+    # Assigns a name to the built image for local reference.
+    image: geosphere-dev/agent:latest
+
+    container_name: agent
+    restart: always
+
+    secrets:
+      - langfuse_host
+      - langfuse_public_key
+      - langfuse_secret_key
+      - openai_api_key
+      - jwt_secret_key
+      - users
+      - vertex_auth.json
+      - aws_bearer_token_bedrock
+
+    depends_on:
+      - datawarehouse_mcp
+      - rag_mcp
+      - geospatial_mcp
+
+    networks:
+      - net_frontend_agent
+      - net_agent_datawarehouse
+      - net_agent_rag
+      - net_agent_geospatial
+
+    environment:
+      # Set environment to 'dev' for local development.
+      - ENVIRONMENT=dev
+
+  # ------------------ Data-Warehouse MCP ------------------
+  datawarehouse_mcp:
+    # Builds the datawarehouse_mcp image from the local directory.
+    build:
+      context: ../unicef-datawarehouse-mcp
+
+    # Assigns a name to the built image for local reference.
+    image: geosphere-dev/datawarehouse:latest
+
+    container_name: datawarehouse_mcp
+    restart: always
+
+    networks:
+      - net_agent_datawarehouse
+
+  # ------------------ RAG MCP ------------------
+  rag_mcp:
+    # Builds the rag_mcp image from the local directory.
+    build:
+      context: ../unicef-rag-mcp
+
+    # Assigns a name to the built image for local reference.
+    image: geosphere-dev/rag:latest
+
+    container_name: rag_mcp
+    restart: always
+
+    secrets:
+      - aws_bearer_token_bedrock
+
+    networks:
+      - net_agent_rag
+
+  # ------------------ Geospatial (GEE) MCP ------------------
+  geospatial_mcp:
+    # Builds the geospatial_mcp image from the local directory.
+    build:
+      context: ../unicef-gee-mcp
+
+    # Assigns a name to the built image for local reference.
+    image: geosphere-dev/gee:latest
+
+    container_name: geospatial_mcp
+    restart: always
+
+    secrets:
+      - ee_auth.json
+
+    networks:
+      - net_agent_geospatial
+
+# ------------------ Networks ------------------
+# Defines the bridge networks for communication between services.
+networks:
+  net_frontend_agent:
+    driver: bridge
+
+  net_agent_datawarehouse:
+    driver: bridge
+
+  net_agent_rag:
+    driver: bridge
+
+  net_agent_geospatial:
+    driver: bridge
+
+# ------------------ Secrets ------------------
+# Defines the secrets to be mounted into the services from local files.
+secrets:
+  langfuse_host:
+    file: ./.secrets/langfuse_host.txt
+
+  langfuse_public_key:
+    file: ./.secrets/langfuse_public_key.txt
+
+  langfuse_secret_key:
+    file: ./.secrets/langfuse_secret_key.txt
+
+  openai_api_key:
+    file: ./.secrets/openai_api_key.txt
+
+  jwt_secret_key:
+    file: ./.secrets/jwt_secret_key.txt
+
+  ee_auth.json:
+    file: ./.secrets/ee_auth.json
+
+  users:
+    file: ./.secrets/users.json
+
+  vertex_auth.json:
+    file: ./.secrets/vertex_auth.json
+
+  aws_bearer_token_bedrock:
+    file: ./.secrets/aws_bearer_token_bedrock.txt

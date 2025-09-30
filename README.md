@@ -105,8 +105,9 @@ docker-compose up -d
 3. **Access the application:**
 
 - Frontend: http://localhost:3000
-- Agent API: http://localhost:8000
-- MCP Servers: Various ports as configured
+- API: proxied at `http://localhost:3000/api/*` (forwarded to the Agent)
+  - Example: `POST http://localhost:3000/api/ask`
+  - Direct container ports are not exposed when using Compose
 
 ### Development Setup
 
@@ -139,20 +140,43 @@ uv run [mcp-server]/server.py
 
 ## Configuration
 
-### Docker Compose Services
+### Docker Compose services
 
-The `docker-compose.yml` file orchestrates the following services:
+The `docker-compose.yml` and `docker-compose-dev.yml` files orchestrate the following services:
 
-- **frontend**: React application (port 3000)
-- **agent**: LLM agent service (port 8000)
-- **datawarehouse-mcp**: Data warehouse MCP server (port 8001)
-- **rag-mcp**: RAG MCP server (port 8002)
-- **gee-mcp**: Google Earth Engine MCP server (port 8003)
-- **nginx**: Reverse proxy for routing (port 80)
+- **frontend**: React application (exposed on host port 3000)
+- **agent**: FastAPI service (internal port 8000; reachable via frontend `/api/*`)
+- **datawarehouse-mcp**: MCP server (internal port 6000)
+- **rag-mcp**: MCP server (internal port 6001)
+- **gee-mcp**: MCP server (internal port 6002)
+
+Notes:
+
+- MCP servers are only reachable on internal bridge networks. The agent connects to them via service DNS names (`datawarehouse_mcp:6000`, `rag_mcp:6001`, `geospatial_mcp:6002`).
+- The frontend proxies `/api/*` to the agent using Nginx (see `unicef-frontend/nginx.conf`).
 
 ## API Documentation
 
 TODO
+
+## Secrets and configuration
+
+This project uses Docker secrets for sensitive values. When using the provided Compose files, place the following files under `unicef-geospatial/.secrets/`:
+
+- `langfuse_host.txt`: Langfuse host URL
+- `langfuse_public_key.txt`: Langfuse public key
+- `langfuse_secret_key.txt`: Langfuse secret key
+- `openai_api_key.txt`: OpenAI API key (if using provider `openai`)
+- `jwt_secret_key.txt`: JWT signing secret for the agent
+- `users.json`: Users list for the agent authentication
+- `vertex_auth.json`: Google/Vertex credentials (if using provider `vertexai`)
+- `aws_bearer_token_bedrock.txt`: AWS Bedrock bearer token (if using provider `bedrock`)
+- `ee_auth.json`: Google Earth Engine service account key (for GEE MCP)
+
+Runtime behavior:
+
+- The agent reads secrets from `/run/secrets/<name>` and falls back to environment variables for local dev (see `unicef-agent/agent/initialize.py`).
+- MCP servers read their `config.yaml` and use internal ports 6000/6001/6002.
 
 ## Contributing
 
